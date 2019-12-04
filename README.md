@@ -11,7 +11,7 @@ Usage:
 local classy = require ('classy')
 ```
 
-## Example Module constants
+## An Example Module - 'constants'
 
 The directory contains a sample object called Constants.lua and a main.lua with a test rig based on LuaUnit to test that classy and the constants.lua module are operating correctly.
 
