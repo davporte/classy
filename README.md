@@ -3,6 +3,10 @@ a LUA implementation of Object Orientated Programming
 
 The module classy.lua emulates object orientated programming for LUA. This includes object and method inheretance, the concept of public and private and immutable and mutable objects. Classsy also perfroms strict type casting on objects.
 
+[Full Documentation](http://htmlpreview.github.com/?https://github.com/davporte/classy/blob/master/doc/index.html)
+
+## Example Module constants
+
 The directory contains a sample object called Constants.lua and a main.lua with a test rig based on LuaUnit to test that classy and the Constants.lu module are operating correctly.
 
 Constants is designed to manage an imutable set of objects. Example use in  code would be:
@@ -44,8 +48,6 @@ objects of class Constants have the following attributes controlled via these me
       constants:fortify () -- locks permanantly, can never unlock
 
       constants uses the class constructor, so this must also be avaialble
-
-[Documentation](http://htmlpreview.github.com/?https://github.com/davporte/classy/blob/master/doc/index.html)
 
 ## Special Thanks To 
 [LuaUnit - a great unit testing tool](https://github.com/bluebird75/luaunit/tree/LUAUNIT_V3_2_1)
