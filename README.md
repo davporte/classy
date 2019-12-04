@@ -23,6 +23,7 @@ local object = Constants ( { attributestable = { constantA = valueA, constantB =
 ```
 objects of class Constants have the following attributes:
 
+| Attribute | Description |
 |----------|----------------------------------------------------------------------------------------------------------|
 |lock      | If true the attributes table is locked, you can change this value using object:lock (), object:unlock () |
 |fortress  | If true then the table is permanatly locked, regadless of the value of lock, this cannot be undone. This can be set using the object:fortify () methos |
