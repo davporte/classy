@@ -29,7 +29,6 @@ objects of class Constants have the following attributes controlled via these me
 |fortress  | If true then the table is permanatly locked regadless of the value of lock, this cannot be undone| This can be set using the object:fortify () method |
 |attributeStore | where the atributes are stored | can be accesed directly
 |test           | a raw table for testing | can be accesed directly                                                                            |
-|----------|----------------------------------------------------------------------------------------------------------|
 
       set. When you add an item to constants it CAN NOT be altered. 
 
