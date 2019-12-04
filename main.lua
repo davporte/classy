@@ -19,7 +19,7 @@ classy._LOGGING = false
 
 -- for testing we use luaunit: https://github.com/bluebird75/luaunit/tree/LUAUNIT_V3_2_1
 -- a copy has been downloaded to this project for your convienence, but please refer to the orgional project link
-lu = require ('luaunit.luaunit')
+lu = require ('LuaUnit.LuaUnit')
 
 -- for inspecting we use luaunit: https://github.com/kikito/inspect.lua
 -- a copy has been downloaded to this project for your convienence, but please refer to the orgional project link
