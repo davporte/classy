@@ -7,7 +7,7 @@ The module classy.lua emulates object orientated programming for LUA. This inclu
 
 Usage:
 
-```
+``` Lua
 local classy = require ('classy')
 ```
 
