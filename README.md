@@ -7,11 +7,11 @@ The directory contains a sample object called Constants.lua and a main.lua with 
 
 Constants is designed to manage an imutable set of objects. Example use in  code would be
 
-'''''
+``` Lua
 local object = Constants ()
 object.attributestable.constantA = valueA
 object.attributestable.constantB = valueB
-'''''
+```
 
       set. When you add an item to constants it CAN NOT be altered. 
 
