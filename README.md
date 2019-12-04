@@ -5,6 +5,12 @@ The module classy.lua emulates object orientated programming for LUA. This inclu
 
 [Full Documentation](http://htmlpreview.github.com/?https://github.com/davporte/classy/blob/master/doc/index.html) can be found here.
 
+Usage:
+
+```
+local classy = require ('classy')
+```
+
 ## Example Module constants
 
 The directory contains a sample object called Constants.lua and a main.lua with a test rig based on LuaUnit to test that classy and the constants.lua module are operating correctly.
