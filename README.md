@@ -88,6 +88,13 @@ This code uses the following classy methods:
 |class:addMethod        | adds a public facing method. This method has a paramter called obj, that is the object   |
 |class:addNotes         | adds some notes for the class that can be displayed, see [Full Documentation](http://htmlpreview.github.com/?https://github.com/davporte/classy/blob/master/doc/index.html). This method has a paramter called obj, that is the object |
 
+Constants does not use the overload classy method:
+
+|       Module     | Purpose |
+|------------------|---------|
+| class:overload   | overloads an operator for a class. Note, except uniray minus, this method has two paramters called objA and objB that are the objects being acted upon |
+
+Classy also adds protection to the _G global table to prevent the user from changing specific functions and constants used by classy. Classy will not load if _G already has a metatable.
 
 
 ## Special Thanks To 
