@@ -109,6 +109,20 @@ Constants does not use the overload classy method:
 |------------------|---------|
 | class:overload   | overloads an operator for a class. Note, except uniray minus, this method has two paramters called objA and objB that are the objects being acted upon |
 
+Supported operators are:
+
+* **+** add
+* **-** subtract
+* ***** multiply
+* **/** divide
+* **%** mod
+* **:-** unary minus, note colon on front of -
+* **=** equals
+* **<** less than
+* **<=** less than or equals to
+
+Note:  > and >= supported using not > and not >=
+
 Classy also adds protection to the _G global table to prevent the user from changing specific functions and constants used by classy. Classy will not load if _G already has a metatable.
 
 
