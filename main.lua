@@ -21,7 +21,7 @@ classy._LOGGING = false
 -- a copy has been downloaded to this project for your convienence, but please refer to the orgional project link
 lu = require ('LuaUnit.LuaUnit')
 
--- for inspecting we use luaunit: https://github.com/kikito/inspect.lua
+-- for inspecting we use inspect: https://github.com/kikito/inspect.lua
 -- a copy has been downloaded to this project for your convienence, but please refer to the orgional project link
 inspect = require ('inspect')
 
