@@ -23,7 +23,7 @@ lu = require ('LuaUnit.LuaUnit')
 
 -- for inspecting we use inspect: https://github.com/kikito/inspect.lua
 -- a copy has been downloaded to this project for your convienence, but please refer to the orgional project link
-inspect = require ('inspect')
+inspect = require ('inspect.inspect')
 
 -- string a number of attributes together as a string
 local function stringTogether ( ... )
