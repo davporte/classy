@@ -82,7 +82,7 @@ This code uses the following classy methods:
 |       Module     | Purpose |
 |------------------|---------|
 |classy:newClass | the class constructor. All classy constructor methods go inside this class constructor |
-|class:attributes| defines the individual attributes this class has. Attributes can be mutable/immutable public/private. Immutable attributes cannot be changed one set, including to nil. Private attributes can only be addressed from within a class constructor function |
+|class:attributes| defines the individual attributes this class has. Attributes can be mutable/immutable public/private. Immutable attributes cannot be changed one set, including to nil. Private attributes can only be addressed from within a class constructor function 
 
 The valid class describers for class:attributes are:
 
@@ -92,7 +92,7 @@ The valid class describers for class:attributes are:
 * **PublicImmutable** Immutable, Public same as Immutable
 * **Private Mutable** Private same as PrivateMutable
 * **PrivateMutable** Mutable, Private same as Private
-* **PrivateImmutable** Immutable, Private
+* **PrivateImmutable** Immutable, Private  |
 
 |       Module     | Purpose |
 |------------------|---------|
