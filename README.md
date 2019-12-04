@@ -84,14 +84,18 @@ This code uses the following classy methods:
 |classy:newClass | the class constructor. All classy constructor methods go inside this class constructor |
 |class:attributes| defines the individual attributes this class has. Attributes can be mutable/immutable public/private. Immutable attributes cannot be changed one set, including to nil. Private attributes can only be addressed from within a class constructor function |
 
-Immutable Immutable, Public same as PublicImmutable
-Public Mutable, Public same as PublicMutable
-PublicMutable Mutable, Public same as Public
-PublicImmutable Immutable, Public same as Immutable
-Private Mutable, Private same as PrivateMutable
-PrivateMutable Mutable, Private same as Private
-PrivateImmutable Immutable, Private
+The valid class describers for class:attributes are:
 
+* **Immutable** Immutable, Public same as PublicImmutable
+* **Public** Mutable Public same as PublicMutable
+* **PublicMutable** Mutable, Public same as Public
+* **PublicImmutable** Immutable, Public same as Immutable
+* **Private Mutable** Private same as PrivateMutable
+* **PrivateMutable** Mutable, Private same as Private
+* **PrivateImmutable** Immutable, Private
+
+|       Module     | Purpose |
+|------------------|---------|
 |class:initMethod | this is the init method that runs when you create an object. This method has a paramter called obj, that is the object under construction |
 |class:addPrivateMethod | adds a method only avaialble internally to the class constructors. This method has a paramter called obj, that is the object |
 |class:addMethod        | adds a public facing method. This method has a paramter called obj, that is the object   |
