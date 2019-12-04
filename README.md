@@ -24,7 +24,7 @@ local object = Constants ( { attributestable = { constantA = valueA, constantB =
 objects of class Constants have the following attributes controlled via these methods:
 
 | Attribute | Description | Methods |
-|----------|----------------------------------------------------------------------------------------------------------|
+|----------|--------------|---------|
 |lock      | If true the attributes table is locked| you can change this value using object:lock (), object:unlock () |
 |fortress  | If true then the table is permanatly locked regadless of the value of lock, this cannot be undone| This can be set using the object:fortify () method |
 |attributeStore | where the atributes are stored | can be accesed directly
