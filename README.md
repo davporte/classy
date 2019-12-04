@@ -82,17 +82,19 @@ This code uses the following classy methods:
 |       Module     | Purpose |
 |------------------|---------|
 |classy:newClass | the class constructor. All classy constructor methods go inside this class constructor |
-|class:attributes| defines the individual attributes this class has. Attributes can be mutable/immutable public/private. Immutable attributes cannot be changed one set, including to nil. Private attributes can only be addressed from within a class constructor function 
+|class:attributes| defines the individual attributes this class has. Attributes can be mutable/immutable public/private. Immutable attributes cannot be changed one set, including to nil. Private attributes can only be addressed from within a class constructor function | 
 
 The valid class describers for class:attributes are:
 
 * **Immutable** Immutable, Public same as PublicImmutable
-* **Public** Mutable Public same as PublicMutable
+* **Public** Mutable Public same as PublicMutable - DEFAULT
 * **PublicMutable** Mutable, Public same as Public
 * **PublicImmutable** Immutable, Public same as Immutable
 * **Private Mutable** Private same as PrivateMutable
 * **PrivateMutable** Mutable, Private same as Private
-* **PrivateImmutable** Immutable, Private  |
+* **PrivateImmutable** Immutable, Private  
+
+Note: ALL custom classes must have a class describer! Base classes e.g. Bool, String, Table, Function, Number are assumed to be Public unless otherwise stated.
 
 |       Module     | Purpose |
 |------------------|---------|
