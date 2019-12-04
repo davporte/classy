@@ -113,7 +113,7 @@ Supported operators are:
 
 * **+** add
 * **-** subtract
-* ***** multiply
+* **\*** multiply
 * **/** divide
 * **%** mod
 * **:-** unary minus, note colon on front of -
