@@ -3,11 +3,11 @@ a LUA implementation of Object Orientated Programming
 
 The module classy.lua emulates object orientated programming for LUA. This includes object and method inheretance, the concept of public and private and immutable and mutable objects. Classsy also perfroms strict type casting on objects.
 
-[Full Documentation](http://htmlpreview.github.com/?https://github.com/davporte/classy/blob/master/doc/index.html) can be found here
+[Full Documentation](http://htmlpreview.github.com/?https://github.com/davporte/classy/blob/master/doc/index.html) can be found here.
 
 ## Example Module constants
 
-The directory contains a sample object called Constants.lua and a main.lua with a test rig based on LuaUnit to test that classy and the Constants.lu module are operating correctly.
+The directory contains a sample object called Constants.lua and a main.lua with a test rig based on LuaUnit to test that classy and the constants.lua module are operating correctly.
 
 Constants is designed to manage an imutable set of objects. Example use in  code would be:
 
@@ -32,22 +32,50 @@ objects of class Constants have the following attributes controlled via these me
 |lock      | If true the attributes table is locked| you can change this value using object:lock (), object:unlock () |
 |fortress  | If true then the table is permanatly locked regadless of the value of lock, this cannot be undone| This can be set using the object:fortify () method |
 |attributeStore | where the atributes are stored | can be accesed directly
-|test           | a raw table for testing | can be accesed directly                                                                            |
+|test           | a raw table for testing | can be accesed directly                                                                         
 
-      set. When you add an item to constants it CAN NOT be altered. 
+constants is build using the following code:
 
-      usage constants.attribute = VALUE -- this makes the value imutable
-      If VALUE is a table then that table can have values set. Any values in that
-      table also become imutable and so on.
+```
+classy:newClass (  
+			classy:attributes ( { attributeStore = Table ( Immutable ), locked = Bool ( Private ), fortress = Bool ( PrivateImmutable ), test = Table () } ),
+			classy:initMethod (
+					function (obj)
+						-- set the attribute store up if not already there, user may have sent a constructor table
+						if not obj.attributeStore then
+							obj.attributeStore = {}
+						end
+						-- create a secret place to store the objects, we don't want to access directly
+						rawset (obj, _SECRETSTORE_NAME, {})
 
-      You can also completly lock/unlock constants from taking any more new
-      attributes using the calls
+						-- the user may have called attributes store in the constructor with objects in that constructor so move them into the secret store
+						local next = next
+						local k, v
 
-      constants:lock () -- locks
-      constants:unlock () -- unlocks
-      constants:fortify () -- locks permanantly, can never unlock
+						for k, v in next, obj.attributeStore, nil do
+							obj [ _SECRETSTORE_NAME ] [ k ] = v
+							rawset ( obj.attributeStore, k, nil )
+						end
 
-      constants uses the class constructor, so this must also be avaialble
+						-- mark the class initially unlocked, we do not set fortress
+						if not obj.locked then
+							obj.locked = false
+						end
+
+						obj.attributeStore.__index = function (t, k) return getAttributeFromStore (k, obj) end
+						obj.attributeStore.__newindex = function (t, k, v) obj.setValue (obj, t, k, v) end 
+						setmetatable (obj.attributeStore, obj.attributeStore)
+					end
+				),
+			-- this private method is required to enusre locked and fortress are addresable, they would not be inside __newindex
+			classy:addPrivateMethod ('setValue', function (obj, t, k, v) if not (obj.locked or obj.fortress) then setAttributeInStore (k, v, obj) else error ('store is locked', 5 ) end end),
+			-- note the above error is 5 because the source code is calling inside __newindex->setValue (class itself has 3 methods binding these calls)
+			classy:addMethod ('lock', function (obj) obj.locked = true end),
+			classy:addMethod ('unlock', function (obj) obj.locked = false end),
+			classy:addMethod ('fortify', function (obj) obj.fortress = true end),
+			classy:addNotes (constants._VERSION .. '\n\n' .. constants._DESCRIPTION .. '\n' .. constants._LICENSE)
+			)
+```
 
 ## Special Thanks To 
 [LuaUnit - a great unit testing tool](https://github.com/bluebird75/luaunit/tree/LUAUNIT_V3_2_1)
