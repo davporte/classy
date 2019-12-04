@@ -80,12 +80,12 @@ classy:newClass (
 This code uses the following classy methods:
 
 |       Module     | Purpose |
-classy:newClass | the class constructor. All classy constructor methods go inside this class constructor |
-class:attributes| defines the individual attributes this class has. Attributes can be mutable/immutable public/private. Immutable attributes cannot be changed one set, including to nil. Private attributes can only be addressed from within a class constructor function |
-class:initMethod | this is the init method that runs when you create an object. Note that this method has a paramter called obj, that is the object under construction |
-class:addPrivateMethod | adds a method only avaialble internally to the class constructors |
-class:addMethod        | adds a public facing method   |
-class:addNotes         | adds some notes for the class that can be displayed, see [Full Documentation](http://htmlpreview.github.com/?https://github.com/davporte/classy/blob/master/doc/index.html) |
+|classy:newClass | the class constructor. All classy constructor methods go inside this class constructor |
+|class:attributes| defines the individual attributes this class has. Attributes can be mutable/immutable public/private. Immutable attributes cannot be changed one set, including to nil. Private attributes can only be addressed from within a class constructor function |
+|class:initMethod | this is the init method that runs when you create an object. Note that this method has a paramter called obj, that is the object under construction |
+|class:addPrivateMethod | adds a method only avaialble internally to the class constructors |
+|class:addMethod        | adds a public facing method   |
+|class:addNotes         | adds some notes for the class that can be displayed, see [Full Documentation](http://htmlpreview.github.com/?https://github.com/davporte/classy/blob/master/doc/index.html) |
 
 
 
