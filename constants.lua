@@ -1,6 +1,6 @@
 local constants = {
 	 _VERSION = ... .. '.lua 1.0.0',
-     _URL = '',
+     _URL = 'https://github.com/davporte/classy/blob/master/constants.lua',
      _DESCRIPTION = [[
       ============================================================================
       constants manages all constants class and makes them imutable once 
