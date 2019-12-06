@@ -24,7 +24,7 @@ local object = Constants ()
 object.attributestable.constantA = valueA
 object.attributestable.constantB = valueB
 ```
-valueA and valueB are both immutable, as is the table object.attributes. Alternatively you could declare as follows:
+valueA and valueB are both immutable, as is the table object.attributestable. Alternatively you could declare as follows:
 
 ``` Lua
 local Constants = require ('constants')
