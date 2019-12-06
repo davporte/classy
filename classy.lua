@@ -12,7 +12,7 @@ local classy = {
 
    --- version details
    _VERSION = ... .. '.lua 1.0.0',
-   _URL = '',
+   _URL = 'https://github.com/davporte/classy',
    --- the current module description
    _DESCRIPTION = [[
       ============================================================================
