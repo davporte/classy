@@ -11,7 +11,7 @@
 local classy = {
 
    --- version details
-   _VERSION = ... .. '.lua 1.0.0',
+   _VERSION = ... .. '.lua 1.0.1',
    _URL = '',
    --- the current module description
    _DESCRIPTION = [[

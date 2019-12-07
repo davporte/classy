@@ -5,6 +5,10 @@
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
+-- for inspecting we use inspect: https://github.com/kikito/inspect.lua
+-- a copy has been downloaded to this project for your convienence, but please refer to the orgional project link
+inspect = require ('inspect.inspect')
+
 -- load the classy module
 classy = require ('classy')
 
@@ -20,10 +24,6 @@ classy._LOGGING = false
 -- for testing we use luaunit: https://github.com/bluebird75/luaunit/tree/LUAUNIT_V3_2_1
 -- a copy has been downloaded to this project for your convienence, but please refer to the orgional project link
 lu = require ('LuaUnit.LuaUnit')
-
--- for inspecting we use inspect: https://github.com/kikito/inspect.lua
--- a copy has been downloaded to this project for your convienence, but please refer to the orgional project link
-inspect = require ('inspect.inspect')
 
 -- string a number of attributes together as a string
 local function stringTogether ( ... )
