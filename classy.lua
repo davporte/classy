@@ -12,7 +12,7 @@ local classy = {
 
    --- version details
    _VERSION = ... .. '.lua 1.0.0',
-   _URL = 'https://github.com/davporte/classy',
+   _URL = '',
    --- the current module description
    _DESCRIPTION = [[
       ============================================================================
@@ -272,6 +272,51 @@ local function subclassLogger ( logType, ... )
    end
 end
 
+-- @local track the state of currentRunningClass(s), we may have nested action e.g. obj = obj or ( classType () ), this would be nested x  2: one for ClassType () one for obj =
+-- @param classThatMadeCall is the class identifier
+-- @param stateChange is true for +1 or flase/nil for -1
+local function classRunTracker ( classThatMadeCall, stateChange )
+   currentRunningClass = currentRunningClass or { }
+   local classThatCalledAsString = tostring ( classThatMadeCall )
+   local thisClassInstanceRunState = currentRunningClass [ classThatCalledAsString ] or { }
+   subclassLogger ( subLogging._RUNNING, 'testing class ', classThatMadeCall )
+   local classCount = thisClassInstanceRunState.count or 0
+   stateChange = stateChange or false
+
+   if stateChange then
+      subclassLogger ( subLogging._RUNNING, 'class run state of + 1' )
+      thisClassInstanceRunState.count = classCount + 1
+      currentRunningClass [ classThatCalledAsString ] = thisClassInstanceRunState
+   else
+      subclassLogger ( subLogging._RUNNING, 'class run state of - 1' )
+      if classCount == 0 then
+         myError ('this class has returned an unexpected run result')
+      end
+      classCount = classCount - 1
+      if classCount == 0 then
+         subclassLogger ( subLogging._RUNNING, 'class run state released for class ', classThatMadeCall )
+         currentRunningClass [ classThatCalledAsString ] = nil
+         if tableIsEmpty ( currentRunningClass ) then
+            subclassLogger ( subLogging._RUNNING, 'class run state empty so released' )
+            currentRunningClass = nil
+         end
+      else
+         thisClassInstanceRunState.count = classCount 
+         currentRunningClass [ classThatCalledAsString ] = thisClassInstanceRunState
+      end
+   end
+end
+
+-- @local test to see if the curent running class is inside a currentRunningclass state or not, true if ok, false if not
+-- @param classThatWantsToKnow is the classthat is wanting to know if it is inside a class method
+local function amIInsideaClassMethod ( classThatWantsToKnow )
+   if currentRunningClass and currentRunningClass [ tostring ( classThatWantsToKnow ) ] then
+      return true
+   else
+      return false
+   end
+end
+
 -- @local the bitwise operator as LUA does not support natively. We limit to 2 bits 2^MAXBITSSUPPORTED as this is all we care about for now
 -- @param vala a number
 -- @param valb a number
@@ -521,10 +566,10 @@ local function executeMethodBound (method_name, methodClassIDOwner, obj,  method
       subclassLogger ( subLogging._RUNNING, 'excuting method: ', method_name, ' on class ', obj, ' of class', INTERNALIDSTR, methodClassIDOwner ) 
    end
    -- set the current running class
-   currentRunningClass = c
+   classRunTracker ( c, true )
    local returnValue = method ( ... )
    -- clear the current running class
-   currentRunningClass = nil
+   classRunTracker ( c, false )
    return returnValue
 end
 
@@ -666,7 +711,7 @@ local function getAttribute (t, k, c)
                                  v = rawget (v, tostring ( t ))
                                  if v then
                                     --if private it can only be accessed from withing a class
-                                    if c._attributes and c._attributes [k] and c._attributes [k].private and not currentRunningClass then
+                                    if c._attributes and c._attributes [k] and c._attributes [k].private and not amIInsideaClassMethod ( c ) then
                                        myError ( 'attribute ' .. k .. ' is private and can only be read from within its class' )
                                     end
                                     v = rawget (v, k)
@@ -745,7 +790,7 @@ local function newAttributeSet (t, k, c, v)
 
       subclassLogger (subLogging._ATTRIBUTESSET, 'attribute: ', k, ' private state is ', c._attributes [k].private )
       --if private it can only be accessed from withing a class
-      if c._attributes [k].private and not currentRunningClass then
+      if c._attributes [k].private and not amIInsideaClassMethod ( c ) then
          myError ( 'attribute ' .. k .. ' is private and can only be set from within its class' )
       end
 
@@ -956,7 +1001,7 @@ local function getNewObject (class_tbl, argValue, ...)
    local obj = {}
 
    -- set the current running class
-   currentRunningClass = class_tbl
+   classRunTracker ( class_tbl, true )
 
    -- set the objects metatable to the class table, wher methods will be found
    setmetatable (obj, class_tbl)
@@ -1052,7 +1097,7 @@ local function getNewObject (class_tbl, argValue, ...)
    end
 
    -- clear the current running class
-   currentRunningClass = nil
+   classRunTracker ( class_tbl, false )
 
    subclassLogger (subLogging._ATTRIBUTESGET, 'get new object success')
 
@@ -1074,6 +1119,17 @@ end
 --
 -- @local External Facing Calls Protected
 --
+
+--- adds key in ... to the protected _G table
+-- @within External Call (Protected)
+-- @param ... a list of key value pairs that will be protected
+function classy:addProtectionTo ( ... )
+   local count
+   for count = 1, arg.n do
+      local nextItem = tostring ( arg [ count ] )
+   end
+end
+
 
 --- change logging, changes a logging value, if vlaue no existant it ignores it
 -- @within  External Calls (Protected)
