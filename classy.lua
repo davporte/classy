@@ -4,7 +4,7 @@
 -- such as Corona SDK
 -- @author David Porter
 -- @module classy
--- @release 1.0.0
+-- @release 1.0.1
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
