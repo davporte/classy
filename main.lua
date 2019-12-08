@@ -91,7 +91,6 @@ local b = Constants ()
 local bMeta = getmetatable ( b )
 
 -- run tests 
-
 callTest ( 'objects have the same metatable', assertEquals, aMeta, bMeta )
 
 callTest ( 'objects have the same attributes', assertEquals, aMeta._attributeStore, bMeta._attributeStore )
@@ -160,3 +159,27 @@ callTest ( 'exception raised unknow attribute', exceptionForLockedAttribute, a, 
 
 
 print ( 'Tests run = ' .. tests, 'Tests Passed = ' .. tests - failed, 'Tests Failed = ' .. failed)
+
+-- running a basic example of inhertance for a type called Enum
+
+local Enum = require ('enum')
+-- change to true to turn on logging
+classy._LOGGING = true
+
+local animal = Enum ( 'dog', 'cat', 'bird' )
+
+-- returns 1 as dog first in list
+print (animal.attributeStore.dog)
+
+-- returns nil as enum 7 does not exist
+print (animal.attributeStore [7])
+
+-- returns cat as enum 2 exists
+print (animal.attributeStore [2])
+
+-- returns nil as enum fish does not exist
+print (animal.attributeStore.fish )
+
+-- remember to remove class objects specifically before nilling
+animal:removeSelf ()
+animal = nil

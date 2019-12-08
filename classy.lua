@@ -4,14 +4,14 @@
 -- such as Corona SDK
 -- @author David Porter
 -- @module classy
--- @release 1.0.1
+-- @release 1.1.0
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local classy = {
 
    --- version details
-   _VERSION = ... .. '.lua 1.0.1',
+   _VERSION = ... .. '.lua 1.1.0',
    _URL = '',
    --- the current module description
    _DESCRIPTION = [[
@@ -53,11 +53,11 @@ local classy = {
       -- @usage classy:changeLoggingState ( { argTable } )
       -- @see describeLogging
       -- @see changeLoggingState
-      _SUBLOGGING = {   _ATTRIBUTESERASE = true, -- the erasing of attributes
-                        _ATTRIBUTESSET = true,  -- the setting of attributes
-                        _ATTRIBUTESGET = true, -- the getting of attributes
-                        _BUILDING = true, -- the building of a class
-                        _RUNNING = true  -- the running of class methods
+      _SUBLOGGING = {   _ATTRIBUTESERASE = false, -- the erasing of attributes
+                        _ATTRIBUTESSET = false,  -- the setting of attributes
+                        _ATTRIBUTESGET = false, -- the getting of attributes
+                        _BUILDING = false, -- the building of a class
+                        _RUNNING = false  -- the running of class methods
                      },
       --- a function you can set to do something with logs,
       -- if not set then the default logger is called.
@@ -87,11 +87,14 @@ local k, v
 -- @local values we create for _G need to be protected
 local protectedValuesin_G = {}
 
+-- @local we also can store user protected values
+local userProtectedValuesin_G
+
 -- @local Name of the super attribute, internalID String, the logging flag name, and the text that starts a classy log message
 local SUPERNAME, INTERNALIDSTR, LOGGINGNAME, CLASSYDESCRIBER = 'super', ' Internal ID: ', '_LOGGING', ... .. ': '
 
 -- @local errorLayer is used to track how deep we are in functions inside classy.lua so we through errors back to correct place in the users code
-local errorLayer = 2
+local errorLayer = 0
 
 -- @local local store of _SUBLOGGING so user can't change, we want to ensure sublogging table always exits
 local subLogging = { _MODULEDESCRIBER = ... .. ':' }
@@ -160,7 +163,7 @@ overloadOperators = newOverloadOperators
 -- @param  layer how many layers up
 local function myError ( errorMsg,  layer )
    currentRunningClass = nil -- this is needed in case classy is called with pcall, when exception occurs we need to clear curretRunningClass
-   error ( errorMsg,  errorLayer )
+   error ( errorMsg,  errorLayer + 2 )
 end
 
 -- @local adds a protected meta table to table tbl. testTbl contains where (protected) objects will be tested
@@ -551,6 +554,7 @@ local reservedClassFunctions = {
 
 -- @local A function that calls a method bound with the currentRunningClass
 -- This is used to detect access to private attributes outside of a class 
+-- @param privateState if set the method can only be run from within a classy: constructor so check
 -- @param method_name the method name running
 -- @param methodClassIDOwner the method name running
 -- @param obj the calling object
@@ -558,19 +562,32 @@ local reservedClassFunctions = {
 -- @param obj the calling objects class
 -- @param ... the paramters passed for the method
 -- @return the execution of the method
-local function executeMethodBound (method_name, methodClassIDOwner, obj,  method, c, ...)
-   -- doing it this way to avoid wasting time if logging is off
-   if obj == c then
-      subclassLogger ( subLogging._RUNNING, 'excuting method: ', method_name, ' on object ', obj, ' of class', INTERNALIDSTR, methodClassIDOwner ) 
+local function executeMethodBound (privateState, method_name, methodClassIDOwner, obj,  method, c, ...)
+
+   errorLayer = errorLayer + 1
+
+   if privateState and not amIInsideaClassMethod ( c ) then
+      -- if we are private we need to be inside a class method to run
+      myError ('attempt to access a private method ' .. method_name .. ', outside of classy: constructor call on object, ' .. tostring ( obj ) .. ' of class' .. INTERNALIDSTR .. methodClassIDOwner )
    else
-      subclassLogger ( subLogging._RUNNING, 'excuting method: ', method_name, ' on class ', obj, ' of class', INTERNALIDSTR, methodClassIDOwner ) 
+      -- doing it this way to avoid wasting time if logging is off
+      if obj == c then
+         subclassLogger ( subLogging._RUNNING, 'excuting method: ', method_name, ' on object ', obj, ' of class', INTERNALIDSTR, methodClassIDOwner ) 
+      else
+         subclassLogger ( subLogging._RUNNING, 'excuting method: ', method_name, ' on class ', obj, ' of class', INTERNALIDSTR, methodClassIDOwner ) 
+      end
+      -- set the current running class
+
+      classRunTracker ( c, true )
+      local returnValue = method ( ... )
+      -- clear the current running class
+      classRunTracker ( c, false )
+
+      errorLayer = errorLayer - 1
+
+      return returnValue
+
    end
-   -- set the current running class
-   classRunTracker ( c, true )
-   local returnValue = method ( ... )
-   -- clear the current running class
-   classRunTracker ( c, false )
-   return returnValue
 end
 
 -- @local A function that checks if you already have used global values and generates a comma separated string
@@ -839,7 +856,7 @@ end
 -- @raise duplicate method, invalid method name, additional init method, this method is reserved, this is not a function, empty method
 local function buildingBlockBuilder (where, func, name, private)
 
-   errorLayer = errorLayer + 1
+   errorLayer = errorLayer + 2 -- as called via another calling method
 
    private = private or false
    -- base error messages
@@ -886,7 +903,7 @@ local function buildingBlockBuilder (where, func, name, private)
       myError ( baseError ..  'empty ' .. where ..' method' )
    end
 
-   errorLayer = errorLayer - 1
+   errorLayer = errorLayer - 2 -- as called via another calling method
 
 end
 
@@ -1011,20 +1028,25 @@ local function getNewObject (class_tbl, argValue, ...)
 
    -- construct methods
    local methodBuilder = function (klass, class_tbl, privateCheck)
-                  
+   
                            errorLayer = errorLayer + 1
 
-                           -- if privateCheck is set then only non private methods will be added
                            privateCheck = privateCheck or false
                            if klass._methods then
                               local next = next
                               local k, v
                               for k, v in next, klass._methods, nil do
                                  if not obj [k] then -- if method does not exist
-                                    if not (privateCheck and v.private) then -- and sublass has it and its not private
-                                       rawset (obj, k, function ( ... ) return executeMethodBound (k, internalID [ GETINTERNALID_VALUE ], obj, v.method, class_tbl, ...) end)
-                                       --obj [k] = v.method -- it is my valid method
-                                    end
+                                    rawset (obj, k,   function ( ... ) 
+
+                                                         errorLayer = errorLayer + 1
+                                                         subclassLogger ( subLogging._RUNNING, 'object calling method ', k ) 
+                                                         local result = executeMethodBound (privateCheck, k, internalID [ GETINTERNALID_VALUE ], obj, v.method, class_tbl, ...)
+                                                         subclassLogger ( subLogging._RUNNING, 'object finished method ', k ) 
+                                                         errorLayer = errorLayer - 1
+                                                         return result
+                                                      end
+                                             )
                                  elseif not v.private and obj._methods [k].private then -- it already exists and a subclass already had it public, you can't now make it private
                                     myError ( 'attempt make method ' .. k .. ' private, when in a parent class this method is public' )
                                  end
@@ -1036,6 +1058,7 @@ local function getNewObject (class_tbl, argValue, ...)
                         end
 
    -- 
+
 
    -- get your own methods first, they may be overloading other methods
    methodBuilder (class_tbl, class_tbl)
@@ -1072,11 +1095,11 @@ local function getNewObject (class_tbl, argValue, ...)
          local k, v
          for k, v in next, argValue, nil do
 
-            errorLayer = errorLayer + 2
+            --errorLayer = errorLayer + 2
 
             obj [k] = v
 
-            errorLayer = errorLayer - 2
+            --errorLayer = errorLayer - 2
          end
          -- only send ... to init method
          if class_tbl.init then
@@ -1120,16 +1143,83 @@ end
 -- @local External Facing Calls Protected
 --
 
---- adds key in ... to the protected _G table
+--- allows an object inside a classy constructure to call their supers init, or any other method.
+-- this CAN NOT be called from outside a classy: constructor method.
 -- @within External Call (Protected)
--- @param ... a list of key value pairs that will be protected
-function classy:addProtectionTo ( ... )
-   local count
-   for count = 1, arg.n do
-      local nextItem = tostring ( arg [ count ] )
+-- @param obj the object wishing to call there supers method
+-- @param method the method name you wish to call
+-- @return what ever the super init method returned
+function classy:callSuperMethod ( obj, method )
+
+   errorLayer = errorLayer + 1
+
+   local result
+   if obj and amIInsideaClassMethod ( getmetatable ( obj ) ) then 
+      if obj.super then
+         if type ( method ) == types.func then
+            -- set the current running class super + 1
+            classRunTracker ( obj.super, true )
+            result = method ( obj )
+            -- set the current running class super - 1
+            classRunTracker ( obj.super, false )
+         else
+            myError ('attempt to call a super method, when method does not exist')
+         end
+      else
+         myError ('attempt to call a super method, when super does not exist')
+      end
+   else
+      myError ('attempt to call a super method when not in a classy constructor function')
    end
+
+   errorLayer = errorLayer - 1
+
+   return result
 end
 
+--- adds key in key with a value to the protected _G table
+-- also adds this key into the user protected table, this ensures that removeFromProtectionIn_G can only affect user defined values
+-- @within External Call (Protected)
+-- @param key the name of the key in _G
+-- @param value the value that key will have in _G
+function classy:addToProtectionIn_G ( key, value )
+
+   errorLayer = errorLayer + 1
+
+   if protectedValuesin_G [ key ] then
+      myError ( 'key ' .. key .. ', already in use in _G' )
+   else
+      protectedValuesin_G [ key ] = value
+      userProtectedValuesin_G = userProtectedValuesin_G or {}
+      -- mark this attribute as user protected, in a separate table
+      userProtectedValuesin_G [ key ] = true
+   end
+
+   errorLayer = errorLayer - 1
+end
+
+--- removes key in key with a value from the protected _G table
+-- this only happens with user defined values. You can't do this with system protecteed values
+-- @within External Call (Protected)
+-- @param key the name of the key in _G
+function classy:removeFromProtectionIn_G ( key )
+
+   errorLayer = errorLayer + 1
+
+   if userProtectedValuesin_G and userProtectedValuesin_G [ key ] then
+      userProtectedValuesin_G [ key ] = nil
+      if tableIsEmpty ( userProtectedValuesin_G ) then
+         userProtectedValuesin_G = nil
+      end
+      protectedValuesin_G [ key ] = nil
+   elseif protectedValuesin_G [ key ] then
+      myError ( 'key ' .. key .. ', is system protected' )
+   else
+      myError ( 'key ' .. key .. ', is unknown' )
+   end
+
+   errorLayer = errorLayer - 1
+end
 
 --- change logging, changes a logging value, if vlaue no existant it ignores it
 -- @within  External Calls (Protected)
@@ -1303,7 +1393,7 @@ end
 -- @return No return value
 -- @see newClass
 function classy:addPrivateMethod (name, func)
-   classLogger ('attempt to add private method ', name)
+   subclassLogger (subLogging._BUILDING, 'attempt to add private method ', name)
    buildingBlockBuilder (types.methods, func, name, true)
 end
 
@@ -1370,6 +1460,9 @@ end
 -- [ classy:overload (operator, func) ... [ classy:overload (operator, func) ]  ], 
 -- [ classy:addNotes ( notes ) ] )
 function classy:newClass ( base )
+
+   errorLayer = errorLayer + 1
+
    subclassLogger (subLogging._BUILDING, 'attempt to create new class - begin')
 
    local c = {}
@@ -1391,7 +1484,7 @@ function classy:newClass ( base )
 
    -- get the inheretence structure for the class
    local inheritanceStructure
-   local parent = classy:getParentClass (c)
+   local parent = c._base
 
    while parent do
       inheritanceStructure = inheritanceStructure or {}
@@ -1413,6 +1506,7 @@ function classy:newClass ( base )
 
       parent = classy:getParentClass ( parent )
    end
+
    -- store any inheritance structure for the class
    c._inheritanceStructure = inheritanceStructure
 
@@ -1451,7 +1545,12 @@ function classy:newClass ( base )
          c._methods = {}
          for k, v in next, classBuildingBlocks [types.methods], nil do
             c._methods [k] = v
-            c [k] = function ( ... ) return  executeMethodBound (k, classIDToAllocate, c, v.method, c, ...) end --c._methods [k].method
+            c [k] = function ( ... ) 
+                           subclassLogger ( subLogging._RUNNING, 'class calling method ', k ) 
+                           local result = executeMethodBound (false, k, classIDToAllocate, c, v.method, c, ...) 
+                           subclassLogger ( subLogging._RUNNING, 'class ended method ', k ) 
+                           return result
+                        end
          end
       end
       if classBuildingBlocks [types.special] then
@@ -1489,6 +1588,8 @@ function classy:newClass ( base )
    subclassLogger (subLogging._BUILDING, 'attempt to create new class - success: allocated ID ',  classTypes.nextOrder, ', details are ', c )
 
    classTypes.nextOrder = classTypes.nextOrder + 1
+
+   errorLayer = errorLayer - 1
 
    return c
 
