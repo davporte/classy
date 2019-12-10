@@ -1148,8 +1148,9 @@ end
 -- @within External Call (Protected)
 -- @param obj the object wishing to call there supers method
 -- @param method the method name you wish to call
+-- @param pass the ... up to the method
 -- @return what ever the super init method returned
-function classy:callSuperMethod ( obj, method )
+function classy:callSuperMethod ( obj, method, ... )
 
    errorLayer = errorLayer + 1
 
@@ -1159,7 +1160,7 @@ function classy:callSuperMethod ( obj, method )
          if type ( method ) == types.func then
             -- set the current running class super + 1
             classRunTracker ( obj.super, true )
-            result = method ( obj )
+            result = method ( obj, ... )
             -- set the current running class super - 1
             classRunTracker ( obj.super, false )
          else
