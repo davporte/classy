@@ -104,16 +104,16 @@ Note: ALL custom classes must have a class describer! Base classes e.g. Bool, St
 
 |       Module     | Purpose |
 |------------------|---------|
-|class:initMethod | this is the init method that runs when you create an object. This method has a paramter called obj, that is the object under construction |
-|class:addPrivateMethod | adds a method only avaialble internally to the class constructors. This method has a paramter called obj, that is the object |
-|class:addMethod        | adds a public facing method. This method has a paramter called obj, that is the object   |
-|class:addNotes         | adds some notes for the class that can be displayed, see [Full Documentation](http://htmlpreview.github.com/?https://github.com/davporte/classy/blob/master/doc/index.html). This method has a paramter called obj, that is the object |
+|classy:initMethod | this is the init method that runs when you create an object. This method has a paramter called obj, that is the object under construction |
+|classy:addPrivateMethod | adds a method only avaialble internally to the class constructors. This method has a paramter called obj, that is the object |
+|classy:addMethod        | adds a public facing method. This method has a paramter called obj, that is the object   |
+|classy:addNotes         | adds some notes for the class that can be displayed, see [Full Documentation](http://htmlpreview.github.com/?https://github.com/davporte/classy/blob/master/doc/index.html). This method has a paramter called obj, that is the object |
 
 Constants does not use the overload classy method:
 
 |       Module     | Purpose |
 |------------------|---------|
-| class:overload   | overloads an operator for a class. Note, except uniray minus, this method has two paramters called objA and objB that are the objects being acted upon |
+| classy:overload   | overloads an operator for a class. Note, except uniray minus (which has obj only), this method has two paramters called objA and objB that are the objects being acted upon |
 
 Supported operators are:
 
