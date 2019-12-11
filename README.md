@@ -88,7 +88,7 @@ This code uses the following classy methods:
 |       Module     | Purpose |
 |------------------|---------|
 |classy:newClass | the class constructor. All classy constructor methods go inside this class constructor |
-|class:attributes| defines the individual attributes this class has. Attributes can be mutable/immutable public/private. Immutable attributes cannot be changed one set, including to nil. Private attributes can only be addressed from within a class constructor function ```class:METHOD```| 
+|classy:attributes| defines the individual attributes this class has. Attributes can be mutable/immutable public/private. Immutable attributes cannot be changed one set, including to nil. Private attributes can only be addressed from within a class constructor function ```class:METHOD```| 
 
 The valid class describers for class:attributes are:
 
@@ -131,6 +131,9 @@ Note:  > and >= supported using not > and not >=
 
 Classy also adds protection to the _G global table to prevent the user from changing specific functions and constants used by classy. Classy will not load if _G already has a metatable.
 
+## Samples
+
+The main directory contains sample usage and test rig for classy. The sample directory contains other stand alone examples.
 
 ## Special Thanks To 
 [LuaUnit - a great unit testing tool](https://github.com/bluebird75/luaunit/tree/LUAUNIT_V3_2_1)
