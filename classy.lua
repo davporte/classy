@@ -4,15 +4,15 @@
 -- such as Corona SDK
 -- @author David Porter
 -- @module classy
--- @release 1.1.0
+-- @release 1.2.0
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local classy = {
 
    --- version details
-   _VERSION = ... .. '.lua 1.1.0',
-   _URL = '',
+   _VERSION = ... .. '.lua 1.2.0',
+   _URL = 'https://github.com/davporte/classy',
    --- the current module description
    _DESCRIPTION = [[
       ============================================================================
@@ -940,44 +940,49 @@ local function attributesSetter ( argTable, superState )
             local next = next
             local k, v
             for k, v in next, argTable, nil do
-               errorMessage = 'argument ' .. k .. ' is not a known type: format must be argument = argType()'
-               if type ( v ) == types.table then
-                  if v._isABaseType ~= nil then -- it is a type
-                     errorMessage = nil
-                     validatedAttributes = validatedAttributes or {}
-                     -- if we have an immutable value check it is of a valid type
-                     local checkImmutableValue, whatTypeValue
-                     if v._isABaseType then
-                        checkImmutableValue = v.typeDescriber.value -- it was passed over in a base type function call
-                        whatTypeValue = v.bT -- its a base type
-                        subclassLogger (subLogging._ATTRIBUTESSET, 'adding attribute ', k, ' a ', whatTypeValue)
-                     else
-                        checkImmutableValue = v [types.typeDescriber]  -- it passed passed over in the class contruction
-                        whatTypeValue = getmetatable ( v ) -- its a complex type
-                        subclassLogger (subLogging._ATTRIBUTESSET, 'adding attribute ', k, ' a class with',  getInternalID (whatTypeValue) [GETINTERNALID_TXT] )
-                     end
-                     -- if super then we hard code these values as no paramter was passed
-                     if k == SUPERNAME then
-                        validatedAttributes [k] = { whatType = whatTypeValue, immutable = true, private = true  }     
-                     else
-                        -- it is another key so calculate its immutable and private values
-                        if not checkImmutableValue or (checkImmutableValue and (type ( checkImmutableValue ) ~= types.number or checkImmutableValue > 2^MAXBITSSUPPORTED - 1)) then
-                           errorMessage = 'argument ' .. k .. ' has invalid describer value ' .. tostring ( checkImmutableValue ) .. ', should be a supported value; ' .. describerString
-                           break
+               if k:sub(1, 1) == '_' then -- cant use _ in front of classy attribute names
+                  errorMessage = 'bad attribute ' .. k .. ', attribute names cannot begin with _'
+                  break
+               else
+                  errorMessage = 'argument ' .. k .. ' is not a known type: format must be argument = argType()'
+                  if type ( v ) == types.table then
+                     if v._isABaseType ~= nil then -- it is a type
+                        errorMessage = nil
+                        validatedAttributes = validatedAttributes or {}
+                        -- if we have an immutable value check it is of a valid type
+                        local checkImmutableValue, whatTypeValue
+                        if v._isABaseType then
+                           checkImmutableValue = v.typeDescriber.value -- it was passed over in a base type function call
+                           whatTypeValue = v.bT -- its a base type
+                           subclassLogger (subLogging._ATTRIBUTESSET, 'adding attribute ', k, ' a ', whatTypeValue)
+                        else
+                           checkImmutableValue = v [types.typeDescriber]  -- it passed passed over in the class contruction
+                           whatTypeValue = getmetatable ( v ) -- its a complex type
+                           subclassLogger (subLogging._ATTRIBUTESSET, 'adding attribute ', k, ' a class with',  getInternalID (whatTypeValue) [GETINTERNALID_TXT] )
                         end
-                        validatedAttributes [k] = { whatType = whatTypeValue, immutable = bitOperation (checkImmutableValue, IMMUTABLEBIT, bitOperators.AND) ~= 0, 
-                              private = bitOperation (checkImmutableValue, PRIVATEBIT, bitOperators.AND) ~= 0  }
-                     end 
+                        -- if super then we hard code these values as no paramter was passed
+                        if k == SUPERNAME then
+                           validatedAttributes [k] = { whatType = whatTypeValue, immutable = true, private = true  }     
+                        else
+                           -- it is another key so calculate its immutable and private values
+                           if not checkImmutableValue or (checkImmutableValue and (type ( checkImmutableValue ) ~= types.number or checkImmutableValue > 2^MAXBITSSUPPORTED - 1)) then
+                              errorMessage = 'argument ' .. k .. ' has invalid describer value ' .. tostring ( checkImmutableValue ) .. ', should be a supported value; ' .. describerString
+                              break
+                           end
+                           validatedAttributes [k] = { whatType = whatTypeValue, immutable = bitOperation (checkImmutableValue, IMMUTABLEBIT, bitOperators.AND) ~= 0, 
+                                 private = bitOperation (checkImmutableValue, PRIVATEBIT, bitOperators.AND) ~= 0  }
+                        end 
 
-                     subclassLogger (subLogging._ATTRIBUTESSET, 'setting ', k, ' immutable:', validatedAttributes [k].immutable, ' private:', validatedAttributes [k].private, ' type:', whatTypeValue )    
+                        subclassLogger (subLogging._ATTRIBUTESSET, 'setting ', k, ' immutable:', validatedAttributes [k].immutable, ' private:', validatedAttributes [k].private, ' type:', whatTypeValue )    
 
+                     else
+                        break
+                     end
                   else
                      break
                   end
-               else
-                  break
+                  subclassLogger (subLogging._ATTRIBUTESGET, 'success')
                end
-               subclassLogger (subLogging._ATTRIBUTESGET, 'success')
             end
          end
       else
@@ -1143,9 +1148,58 @@ end
 -- @local External Facing Calls Protected
 --
 
+--- allows an object to have default values set.
+-- If attribute is in passedArguments then that attribute is set to that value.
+-- If attribute is not in passedArguments but is in defaultArguments it is defaulted to that value.
+-- If attribute is in neither it remains nil. You can directly affect that attribute using;
+--
+-- obj.ATTRIBUTE = value
+-- 
+--
+-- However if setDefaultValues is called after this then presidence is passedArguments, defaultArguments then current value.
+--
+-- This CAN NOT be called from outside a classy: constructor method.
+-- @usage classy:setDefaultValues ( { attribute1 = value, ... , attributeN = value } )
+-- @within  External Calls (Protected)
+-- @param obj the object wishing to set its attributes
+-- @param passedArguments the passed arguments
+-- @param defaultArguments the default setting if item is not in passedArguments
+-- @return No return value
+function classy:setDefaultValues ( obj, passedArguments, defaultArguments )
+
+   errorLayer = errorLayer + 1
+
+   if obj and amIInsideaClassMethod ( getmetatable ( obj ) ) then 
+      subclassLogger (subLogging._BUILDING, 'loading initial settings for object ', obj)
+      passedArguments = passedArguments or {}
+      defaultArguments = defaultArguments or {}
+      local next = next
+      local k, v
+      for k, v in next, passedArguments, nil do
+         subclassLogger (subLogging._BUILDING, 'setting attribute ', k, ' = ', v)
+         obj [ k ] = v
+      end
+      for k, v in next, defaultArguments, nil do
+         if not obj [ k ] then
+            subclassLogger (subLogging._BUILDING, 'defaulting attribute ', k, ' = ', v)
+            obj [ k ] = v
+         else
+            subclassLogger (subLogging._BUILDING, 'attribute ', k, ' already has a value, default ignored')
+         end
+      end
+   else
+      myError ('attempt to set defaults when not in a classy constructor function')
+   end
+
+   subclassLogger (subLogging._BUILDING, 'finished initial settings for object ', obj)
+
+   errorLayer = errorLayer - 1
+end
+
 --- allows an object inside a classy constructure to call their supers init, or any other method.
 -- this CAN NOT be called from outside a classy: constructor method.
--- @within External Call (Protected)
+-- @within  External Calls (Protected)
+-- @usage classy:callSuperMethod ( obj, obj,super.METHOD, ... )
 -- @param obj the object wishing to call there supers method
 -- @param method the method name you wish to call
 -- @param pass the ... up to the method
@@ -1180,9 +1234,11 @@ end
 
 --- adds key in key with a value to the protected _G table
 -- also adds this key into the user protected table, this ensures that removeFromProtectionIn_G can only affect user defined values
--- @within External Call (Protected)
+-- @usage classy:addToProtectionIn_G ( key, value )
+-- @within  External Calls (Protected)
 -- @param key the name of the key in _G
 -- @param value the value that key will have in _G
+-- @return No return value
 function classy:addToProtectionIn_G ( key, value )
 
    errorLayer = errorLayer + 1
@@ -1201,8 +1257,10 @@ end
 
 --- removes key in key with a value from the protected _G table
 -- this only happens with user defined values. You can't do this with system protecteed values
--- @within External Call (Protected)
+-- @usage classy:removeFromProtectionIn_G ( key )
+-- @within  External Calls (Protected)
 -- @param key the name of the key in _G
+-- @return No return value
 function classy:removeFromProtectionIn_G ( key )
 
    errorLayer = errorLayer + 1

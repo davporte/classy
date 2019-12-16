@@ -34,7 +34,6 @@
 <li><a href="#Internal_Only">Internal Only </a></li>
 <li><a href="#Global_Attributes__Protected_">Global Attributes (Protected)</a></li>
 <li><a href="#External_Calls__Protected_">External Calls (Protected)</a></li>
-<li><a href="#External_Call__Protected_">External Call (Protected)</a></li>
 </ul>
 
 
@@ -55,7 +54,7 @@
     <h3>Info:</h3>
     <ul>
         <li><strong>Copyright</strong>: (c) 2019 David Porter</li>
-        <li><strong>Release</strong>: 1.1.0</li>
+        <li><strong>Release</strong>: 1.2.0</li>
         <li><strong>License</strong>: MIT</li>
         <li><strong>Author</strong>: David Porter</li>
     </ul>
@@ -163,6 +162,24 @@
  you must explicitly set objects to nil to remove them after</td>
 	</tr>
 	<tr>
+	<td class="name" nowrap><a href="#setDefaultValues">setDefaultValues (obj, passedArguments, defaultArguments)</a></td>
+	<td class="summary">allows an object to have default values set.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#callSuperMethod">callSuperMethod (obj, method, pass)</a></td>
+	<td class="summary">allows an object inside a classy constructure to call their supers init, or any other method.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#addToProtectionIn_G">addToProtectionIn_G (key, value)</a></td>
+	<td class="summary">adds key in key with a value to the protected _G table
+ also adds this key into the user protected table, this ensures that removeFromProtectionIn_G can only affect user defined values</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#removeFromProtectionIn_G">removeFromProtectionIn_G (key)</a></td>
+	<td class="summary">removes key in key with a value from the protected _G table
+ this only happens with user defined values.</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#changeLoggingState">changeLoggingState (argTable)</a></td>
 	<td class="summary">change logging, changes a logging value, if vlaue no existant it ignores it</td>
 	</tr>
@@ -235,23 +252,6 @@
 	<tr>
 	<td class="name" nowrap><a href="#ClassType">ClassType (description)</a></td>
 	<td class="summary">custom class base constructor</td>
-	</tr>
-</table>
-<h2><a href="#External_Call__Protected_">External Call (Protected)</a></h2>
-<table class="function_list">
-	<tr>
-	<td class="name" nowrap><a href="#callSuperMethod">callSuperMethod (obj, method, pass)</a></td>
-	<td class="summary">allows an object inside a classy constructure to call their supers init, or any other method.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#addToProtectionIn_G">addToProtectionIn_G (key, value)</a></td>
-	<td class="summary">adds key in key with a value to the protected _G table
- also adds this key into the user protected table, this ensures that removeFromProtectionIn_G can only affect user defined values</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#removeFromProtectionIn_G">removeFromProtectionIn_G (key)</a></td>
-	<td class="summary">removes key in key with a value from the protected _G table
- this only happens with user defined values.</td>
 	</tr>
 </table>
 
@@ -892,6 +892,147 @@ This does trigger the standard logger to log</pre></li>
 
 </dd>
     <dt>
+    <a name = "setDefaultValues"></a>
+    <strong>setDefaultValues (obj, passedArguments, defaultArguments)</strong>
+    </dt>
+    <dd>
+    allows an object to have default values set.
+ If attribute is in passedArguments then that attribute is set to that value.
+ If attribute is not in passedArguments but is in defaultArguments it is defaulted to that value.
+ If attribute is in neither it remains nil. You can directly affect that attribute using;
+<p> obj.ATTRIBUTE = value
+
+<p> However if setDefaultValues is called after this then presidence is passedArguments, defaultArguments then current value.
+<p> This CAN NOT be called from outside a classy: constructor method.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object wishing to set its attributes
+        </li>
+        <li><span class="parameter">passedArguments</span>
+         the passed arguments
+        </li>
+        <li><span class="parameter">defaultArguments</span>
+         the default setting if item is not in passedArguments
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        No return value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">classy:setDefaultValues ( { attribute1 = value, ... , attributeN = value } )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "callSuperMethod"></a>
+    <strong>callSuperMethod (obj, method, pass)</strong>
+    </dt>
+    <dd>
+    allows an object inside a classy constructure to call their supers init, or any other method.
+ this CAN NOT be called from outside a classy: constructor method.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object wishing to call there supers method
+        </li>
+        <li><span class="parameter">method</span>
+         the method name you wish to call
+        </li>
+        <li><span class="parameter">pass</span>
+         the ... up to the method
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        what ever the super init method returned
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">classy:callSuperMethod ( obj, obj,super.METHOD, ... )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "addToProtectionIn_G"></a>
+    <strong>addToProtectionIn_G (key, value)</strong>
+    </dt>
+    <dd>
+    adds key in key with a value to the protected _G table
+ also adds this key into the user protected table, this ensures that removeFromProtectionIn_G can only affect user defined values
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">key</span>
+         the name of the key in _G
+        </li>
+        <li><span class="parameter">value</span>
+         the value that key will have in _G
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        No return value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">classy:addToProtectionIn_G ( key, value )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "removeFromProtectionIn_G"></a>
+    <strong>removeFromProtectionIn_G (key)</strong>
+    </dt>
+    <dd>
+    removes key in key with a value from the protected _G table
+ this only happens with user defined values.  You can't do this with system protecteed values
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">key</span>
+         the name of the key in _G
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        No return value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">classy:removeFromProtectionIn_G ( key )</pre>
+    </ul>
+
+</dd>
+    <dt>
     <a name = "changeLoggingState"></a>
     <strong>changeLoggingState (argTable)</strong>
     </dt>
@@ -1506,94 +1647,13 @@ This does trigger the standard logger to log</pre></li>
 
 </dd>
 </dl>
-    <h2 class="section-header "><a name="External_Call__Protected_"></a>External Call (Protected)</h2>
-
-    <dl class="function">
-    <dt>
-    <a name = "callSuperMethod"></a>
-    <strong>callSuperMethod (obj, method, pass)</strong>
-    </dt>
-    <dd>
-    allows an object inside a classy constructure to call their supers init, or any other method.
- this CAN NOT be called from outside a classy: constructor method.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">obj</span>
-         the object wishing to call there supers method
-        </li>
-        <li><span class="parameter">method</span>
-         the method name you wish to call
-        </li>
-        <li><span class="parameter">pass</span>
-         the ... up to the method
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        what ever the super init method returned
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "addToProtectionIn_G"></a>
-    <strong>addToProtectionIn_G (key, value)</strong>
-    </dt>
-    <dd>
-    adds key in key with a value to the protected _G table
- also adds this key into the user protected table, this ensures that removeFromProtectionIn_G can only affect user defined values
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">key</span>
-         the name of the key in _G
-        </li>
-        <li><span class="parameter">value</span>
-         the value that key will have in _G
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "removeFromProtectionIn_G"></a>
-    <strong>removeFromProtectionIn_G (key)</strong>
-    </dt>
-    <dd>
-    removes key in key with a value from the protected _G table
- this only happens with user defined values.  You can't do this with system protecteed values
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">key</span>
-         the name of the key in _G
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-</dl>
 
 
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2019-12-10 16:36:27 </i>
+<i style="float:right;">Last updated 2019-12-16 17:47:42 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
