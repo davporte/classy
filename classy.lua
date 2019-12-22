@@ -11,7 +11,7 @@
 local classy = {
 
    --- version details
-   _VERSION = ... .. '.lua 1.2.0',
+   _VERSION = ... .. '.lua 1.2.1',
    _URL = 'https://github.com/davporte/classy',
    --- the current module description
    _DESCRIPTION = [[
@@ -116,7 +116,7 @@ local classTypes
 -- @local stores class building blocks initmethod, methods etc
 local classBuildingBlocks
 -- @local reference to type names
-local types = {func =type (function () end), table = type ({}), init = 'init', methods = 'methods', special = 'special', number = type (9), string = type (''), bool = type (true), attributeStore = '_attributeStore', typeDescriber = '_typeDescriber'}
+local types = {func =type (function () end), table = type ({}), init = 'init', methods = 'methods', special = 'special', number = type (9), string = type (''), bool = type (true), attributeStore = '_attributeStore', typeDescriber = '_typeDescriber', methodsStore = '_methods'}
 
 --- operators that a class can be overload, > and >= supported using not > and not >=
 -- @within Global Attributes (Protected)
@@ -157,6 +157,8 @@ for count = 1, #overloadFunctions do
 end
 
 overloadOperators = newOverloadOperators
+
+versionIsFivePointTwoOrAbove = false
 
 --@local this function is called to throw an exception back to the caller at errorLayer in the stack
 -- @param  errorMsg that will be created
@@ -226,8 +228,12 @@ local PRIVATEBIT, IMMUTABLEBIT, MAXBITSSUPPORTED = 1, 2, 2 -- if we add more the
 -- @return getInternalID array [ a decription string for the class ID or None, true if it existed false if it did not, the class itself or nil]
 local function getInternalID ( c )
    local returnValue = INTERNALIDSTR
-   if c and classTypes and classTypes [ tostring ( c ) ] then
-      return { returnValue .. classTypes [ tostring ( c ) ], true,  classTypes [ tostring ( c ) ]}
+   if c and classTypes and classTypes [ c ] then
+      local className = ''
+      if c._notes and c._notes.moduleName then
+         className = ', ' .. c._notes.moduleName
+      end
+      return { returnValue .. classTypes [  c  ] .. className , true,  classTypes [  c  ]  }
    else
       return { returnValue .. 'None', false, nil }
    end
@@ -279,9 +285,8 @@ end
 -- @param classThatMadeCall is the class identifier
 -- @param stateChange is true for +1 or flase/nil for -1
 local function classRunTracker ( classThatMadeCall, stateChange )
-   currentRunningClass = currentRunningClass or { }
-   local classThatCalledAsString = tostring ( classThatMadeCall )
-   local thisClassInstanceRunState = currentRunningClass [ classThatCalledAsString ] or { }
+   currentRunningClass = currentRunningClass or {}
+   local thisClassInstanceRunState = currentRunningClass [ classThatMadeCall ] or {}
    subclassLogger ( subLogging._RUNNING, 'testing class ', classThatMadeCall )
    local classCount = thisClassInstanceRunState.count or 0
    stateChange = stateChange or false
@@ -289,7 +294,7 @@ local function classRunTracker ( classThatMadeCall, stateChange )
    if stateChange then
       subclassLogger ( subLogging._RUNNING, 'class run state of + 1' )
       thisClassInstanceRunState.count = classCount + 1
-      currentRunningClass [ classThatCalledAsString ] = thisClassInstanceRunState
+      currentRunningClass [ classThatMadeCall ] = thisClassInstanceRunState
    else
       subclassLogger ( subLogging._RUNNING, 'class run state of - 1' )
       if classCount == 0 then
@@ -298,14 +303,14 @@ local function classRunTracker ( classThatMadeCall, stateChange )
       classCount = classCount - 1
       if classCount == 0 then
          subclassLogger ( subLogging._RUNNING, 'class run state released for class ', classThatMadeCall )
-         currentRunningClass [ classThatCalledAsString ] = nil
+         currentRunningClass [ classThatMadeCall ] = nil
          if tableIsEmpty ( currentRunningClass ) then
             subclassLogger ( subLogging._RUNNING, 'class run state empty so released' )
             currentRunningClass = nil
          end
       else
          thisClassInstanceRunState.count = classCount 
-         currentRunningClass [ classThatCalledAsString ] = thisClassInstanceRunState
+         currentRunningClass [ classThatMadeCall ] = thisClassInstanceRunState
       end
    end
 end
@@ -313,7 +318,7 @@ end
 -- @local test to see if the curent running class is inside a currentRunningclass state or not, true if ok, false if not
 -- @param classThatWantsToKnow is the classthat is wanting to know if it is inside a class method
 local function amIInsideaClassMethod ( classThatWantsToKnow )
-   if currentRunningClass and currentRunningClass [ tostring ( classThatWantsToKnow ) ] then
+   if currentRunningClass and currentRunningClass [ classThatWantsToKnow ] then
       return true
    else
       return false
@@ -362,22 +367,25 @@ end
 
 -- @local describes a class c in text
 -- @param c a class
--- @return a text string containing the description
+-- @return a text string containing the description or nil if none
 local function describeClass ( c )
-   local description = CLASSYDESCRIBER
+   local description
    if c then 
+      description = CLASSYDESCRIBER
       local internalID = getInternalID ( c )
       -- if it is an object the class is its meta table
       if not internalID [ GETINTERNALID_RSLT ] then
          internalID = getInternalID ( getmetatable ( c ) )
-         desciption = 'object: '
+         description = 'object: '
       end
-      description = desciption .. tostring ( c ) .. internalID [GETINTERNALID_TXT]  .. '\n'
-      local methods = c._methods
+
+      description = description .. tostring ( c ) .. internalID [GETINTERNALID_TXT]  
+
+      local methods = rawget ( c, types.methodsStore )
       if c.init then
-         description = description .. '\tInit Method Avaialble\n'
+         description = description .. '\n\tInit Method Avaialble\n'
       else
-         description = description .. '\tNo Init Method Avaialble\n'
+         description = description .. '\n\tNo Init Method Avaialble\n'
       end
       if methods then
          description = description .. '\tMethods:\n'
@@ -404,153 +412,16 @@ local function describeClass ( c )
             description = description .. '\t\t' .. k .. ', Private: ' .. tostring ( v.private ) .. ', Immutable: ' .. tostring ( v.immutable )  .. ', Type: ' .. typeDescriber .. '\n'
          end
       end
-      if c._notes then
-         description = description .. '\tNotes:\n' .. c._notes
+      if c._notes and c._notes.notes then
+         description = description .. '\tNotes:\n' .. c._notes.notes
       end
 
-      if c._inheritanceStructure then
-         description = description .. '\nInherets from ' .. describeClass ( c._inheritanceStructure [1] )
-      end
+      description = description .. '\nInherets from ' .. ( describeClass ( c._base ) or 'None' )
    end
 
    return description
 end
 
--- @local these are the reserved functions all classes and object have. You cannot overload them
-local reservedClassFunctions = {
-   --- a protected function to test class or object type, you CANNOT overload this
-   -- @within  External Calls (Protected)
-   -- @param self the object or class you are testing
-   -- @param klass the class you want to test against, can be a class or a class ID
-   -- @return true if self is of type klass, false if not
-   -- @usage obj:is_a ( internalID | ClassType )
-   -- @usage class:is_a ( internalID | ClassType )
-   is_a = function ( self, klass )
-               klass = klassClean ( klass )
-               local m = getmetatable( self )
-               while m do 
-                  if m == klass then return true end
-                  m = m._base
-               end
-               return false
-            end,
-   --- a protected function to dump a class or object type, you CANNOT overload this
-   -- @within  External Calls (Protected)
-   -- @param self the object or class you are testing
-   -- @return a string containing the inspect details
-   -- @usage obj:inspect (  )
-   -- @usage class:inspect(  )
-   inspect = function ( self )
-                  if inspect then 
-                     return (inspect (self))
-                  else
-                     return '>inspect not loaded<' 
-                  end
-               end,
-   --- a protected function to describe a class or object type, you CANNOT overload this
-   -- @within  External Calls (Protected)
-   -- @param self the object or class you are testing
-   -- @return a string containing the describe details
-   -- @usage obj:describeClass (  )
-   -- @usage class:describeClass(  )
-   describeClass = function ( self ) return describeClass ( self ) end,
-   --- a protected function to remove a class or object type, you CANNOT overload this
-   -- if the type is a class then ALL objects of that class will be deleted, this could have some unexpected consequences
-   -- you must explicitly set objects to nil to remove them after
-   -- @within  External Calls (Protected)
-   -- @param caller the object or class you are testing
-   -- @usage obj:removeSelf (  ) obj = nil
-   -- @usage class:removeSelf(  )
-   -- @return No return value
-   removeSelf = function ( caller ) 
-                        local klass = caller
-                        local internalID = getInternalID ( klass )
-                        local iAmAnObject = not internalID [ GETINTERNALID_RSLT ]
-
-                        -- if we are a class we don't need to get the class metatable as class objects are with us already, but for an object we do
-                        if iAmAnObject then
-                           subclassLogger (subLogging._ATTRIBUTESERASE, 'scrubbing: object an object ', caller )
-                           klass = getmetatable ( caller )
-                           internalID = getInternalID ( klass )
-                        else
-                           subclassLogger (subLogging._ATTRIBUTESERASE, 'scrubbing: object of class', internalID [GETINTERNALID_TXT] )
-                        end
-
-                        -- get the class attributes store
-                        local attributeTables = rawget ( klass, types.attributeStore )
-
-                        -- if it has one check for the object in that store
-                        if attributeTables then
-
-                           subclassLogger (subLogging._ATTRIBUTESERASE, 'scrubbing: the attributes table' )
-
-                           -- if it is there then clean it out
-                           local attributes 
-
-                           local selfAsString = tostring ( caller )
-
-                           -- if we are consuming an entire class attributes holds all the attribute details already
-                           if not iAmAnObject then
-                              attributes = attributeTables
-                           else
-                              attributes = rawget ( attributeTables, selfAsString )
-                           end
-
-                           -- clean all known atributes rom the tables
-                           if attributes then
-
-                              subclassLogger (subLogging._ATTRIBUTESERASE, 'scrubbing: the individual attributes' )
-
-                              local next = next
-                              local k, v
-                              for k, v in next, attributes, nil do
-                                 if type ( v ) == types.table then
-                                    local mt = getmetatable ( v )
-                                    if getInternalID ( mt ) [GETINTERNALID_RSLT] then -- its a class object
-                                       v:removeSelf ( )
-                                    else -- its a table, that may contain class variables, we don't want orphans !!!
-                                       local tableScrubber
-                                       tableScrubber =   function ( tbl, keyChain )
-                                                            -- if we have aremoveSelf method then use that to destroy the object, this also helps with displayObjects
-                                                            if tbl.removeSelf then
-                                                               subclassLogger (subLogging._ATTRIBUTESERASE, 'running removeSelf: on ', keyChain)
-                                                               tbl:removeSelf ( )
-                                                            else
-                                                               subclassLogger (subLogging._ATTRIBUTESERASE, 'scrubbing: ', keyChain)
-                                                               local next = next
-                                                               local k, v
-                                                               for k, v in next, tbl, nil do
-                                                                  if type ( v ) == types.table then
-                                                                     tableScrubber ( v, keyChain .. '.' .. k )
-                                                                  end
-                                                               end
-                                                            end
-                                                         end
-
-                                       tableScrubber ( v, k )
-                                    end   
-                                 end
-                                 rawset (attributes, k, nil)
-                                 subclassLogger (subLogging._ATTRIBUTESERASE, 'erased attribute: ', k)
-                              end
-                           end
-                           if tableIsEmpty ( attributes ) then
-                              rawset ( attributeTables, selfAsString, nil)
-                              subclassLogger (subLogging._ATTRIBUTESERASE, 'erased object: ', selfAsString)
-                           else
-                              subclassLogger (subLogging._ATTRIBUTESERASE, 'unable to fully erase object: ', selfAsString)
-                           end
-                        end
-
-                        if tableIsEmpty ( attributeTables ) then
-                           rawset ( klass, types.attributeStore, nil )
-                           subclassLogger (subLogging._ATTRIBUTESERASE, 'erased attributeTables for class: ', internalID [GETINTERNALID_TXT] )
-                        else
-                           subclassLogger (subLogging._ATTRIBUTESERASE, 'erased all objects from class: ', internalID [GETINTERNALID_TXT] )
-                        end
-
-                     end
-}
 
 -- @local A function that calls a method bound with the currentRunningClass
 -- This is used to detect access to private attributes outside of a class 
@@ -720,12 +591,15 @@ local function getAttribute (t, k, c)
    -- @return the attributes stored value
    -- @raise attribute ATTRIBUTENAME is private and can only be read from within its class
    attributeGetter = function (t, k, c)
+
+                              collectgarbage ('collect') -- only in testing, we are testing the weak key associations
+
                               errorLayer = errorLayer + 1
 
                               local v = rawget (c, types.attributeStore)
 
                               if v then
-                                 v = rawget (v, tostring ( t ))
+                                 v = rawget ( v, t )
                                  if v then
                                     --if private it can only be accessed from withing a class
                                     if c._attributes and c._attributes [k] and c._attributes [k].private and not amIInsideaClassMethod ( c ) then
@@ -768,20 +642,23 @@ end
 -- @param c the class the attribute belongs to
 -- @param v the value to set
 -- @return No return value
-local function storeAttribute (t, k, c, v)
-   local attributes = rawget (c, types.attributeStore)
+local function storeAttribute ( t, k, c, v )
+   local attributes = rawget ( c, types.attributeStore )
+
    attributes = attributes or {}
-   local forWhatObj = attributes [ tostring ( t ) ] or {}
+
+   local forWhatObj = attributes [ t ] or {}
+
 
    -- may already have a value, if it does we need to detroy the current class attribute v (no orphans), this also helps remove display objects
-   if v == nil and t [k] and t [k].removeSelf then
+   if v == nil and type ( t [ k ] ) == types.table and t [ k ].removeSelf then
       print (subLogging._ATTRIBUTESSET, ' attribute ' .. k .. ' needs removeSelf( )')
       t [k]:removeSelf ( )
    end
 
-   rawset (forWhatObj, k ,v)
-   rawset (attributes, tostring ( t ), forWhatObj)
-   rawset (c, types.attributeStore, attributes)
+   rawset ( forWhatObj, k ,v )
+   rawset ( attributes, t , forWhatObj )
+   rawset ( c, types.attributeStore, attributes )
 end
 
 --- this function is called when an object attempts to set a new value
@@ -790,22 +667,27 @@ end
 -- @param k the specific key, attribute name
 -- @param c the class the attribute belongs to
 -- @param v the value to set
+-- @param checkOff if true then checks for immutable are turned off, this is used during removeSelf.
 -- @return No return value
 -- @raise attribute ATTRIBUTENAME - is immutable, is private and can only be set from within its class, incorrect base type, incorrect class type, no such attribute for class
-local function newAttributeSet (t, k, c, v)
+local function newAttributeSet ( t, k, c, v, checkOff )
 
    errorLayer = errorLayer + 1
 
    -- first test to see if class c hass _attributees and also the attribute with key name k
-   subclassLogger (subLogging._ATTRIBUTESSET, 'setting new attribute: ', k, ' for object ', t, ' of class ', c, getInternalID ( c ) [GETINTERNALID_TXT])
-   if c._attributes and c._attributes [k] then
-      subclassLogger (subLogging._ATTRIBUTESSET, 'attribute: ', k, ' mutable state is ', c._attributes [k].immutable )
+   subclassLogger (subLogging._ATTRIBUTESSET, 'setting new attribute: ', k, ' for object ', t, ' of class ', c, getInternalID ( c ) [ GETINTERNALID_TXT ])
+   if c._attributes and c._attributes [ k ] then
+      subclassLogger ( subLogging._ATTRIBUTESSET, 'attribute: ', k, ' mutable state is ', c._attributes [ k ].immutable )
       -- fail if the attribute is immutable and already has a value
-      if c._attributes [k].immutable and getAttribute (t, k, c) then
-         myError ( 'attribute ' .. k .. ' is immutable' )
+      if c._attributes [ k ].immutable and getAttribute ( t, k, c ) then
+         if not checkOff then
+            myError ( 'attribute ' .. k .. ' is immutable' )
+         else
+            subclassLogger ( subLogging._ATTRIBUTESERASE, 'attribute ' .. k .. ' is immutable, but checkOff is set, so allowing' )
+         end
       end
 
-      subclassLogger (subLogging._ATTRIBUTESSET, 'attribute: ', k, ' private state is ', c._attributes [k].private )
+      subclassLogger ( subLogging._ATTRIBUTESSET, 'attribute: ', k, ' private state is ', c._attributes [ k ].private )
       --if private it can only be accessed from withing a class
       if c._attributes [k].private and not amIInsideaClassMethod ( c ) then
          myError ( 'attribute ' .. k .. ' is private and can only be set from within its class' )
@@ -828,25 +710,148 @@ local function newAttributeSet (t, k, c, v)
          if v ~= nil and myExpectedTypeDescription ~= getmetatable ( v ) then
             myError ( 'attribute ' .. k .. ' incorrect class type, expect a class with ' .. getInternalID ( myExpectedTypeDescription ) [GETINTERNALID_TXT] )
          end
-         storeAttribute (t, k, c, v)
+         storeAttribute ( t, k, c, v )
       end
 
       subclassLogger (subLogging._ATTRIBUTESSET, 'succesfully added ', k)
    else
-      -- lets go doewn the inheratance of the object to find the attribute, if we get to the end then c._base == nil and we failed to find the object
+      -- lets go down the inheratance of the object to find the attribute, if we get to the end then c._base == nil and we failed to find the object
       if not c._base then
          local listOfValidAttributes = getAllAttributes ( c )
          local errorMsg = 'attempt to set attribute ' .. k .. ', no such attribute for class it has the following: ' .. ( listOfValidAttributes or  'NO ATTRIBUTES' )
          myError ( errorMsg )
       else
-         subclassLogger (subLogging._ATTRIBUTESSET, 'attempting to store in parent')
-         newAttributeSet (t, k, c._base, v)
+         subclassLogger ( subLogging._ATTRIBUTESSET, 'attempting to store in parent' )
+         newAttributeSet ( t, k, c._base, v )
       end
    end
+
+   collectgarbage ('collect') -- only in testing, we are testing the weak key associations
 
    errorLayer = errorLayer - 1
 
 end
+
+-- @local these are the reserved functions all classes and object have. You cannot overload them
+local reservedClassFunctions = {
+   --- a protected function to test class or object type, you CANNOT overload this
+   -- @within  External Calls (Protected)
+   -- @param self the object or class you are testing
+   -- @param klass the class you want to test against, can be a class or a class ID
+   -- @return true if self is of type klass, false if not
+   -- @usage obj:is_a ( internalID | ClassType )
+   -- @usage class:is_a ( internalID | ClassType )
+   is_a = function ( self, klass )
+               klass = klassClean ( klass )
+               local m = getmetatable( self )
+               while m do 
+                  if m == klass then return true end
+                  m = m._base
+               end
+               return false
+            end,
+   --- a protected function to dump a class or object type, you CANNOT overload this
+   -- @within  External Calls (Protected)
+   -- @param self the object or class you are testing
+   -- @return a string containing the inspect details
+   -- @usage obj:inspect (  )
+   -- @usage class:inspect(  )
+   inspect = function ( self )
+                  if inspect then 
+                     return (inspect (self))
+                  else
+                     return '>inspect not loaded<' 
+                  end
+               end,
+   --- a protected function to describe a class or object type, you CANNOT overload this
+   -- @within  External Calls (Protected)
+   -- @param self the object or class you are testing
+   -- @return a string containing the describe details
+   -- @usage obj:describeClass (  )
+   -- @usage class:describeClass(  )
+   describeClass = function ( self ) return describeClass ( self ) end,
+   --- a protected function to remove a class or object type, you CANNOT overload this
+   -- if the type is a class then ALL objects of that class will be deleted, this could have some unexpected consequences
+   -- you must explicitly set objects to nil to remove them after
+   -- @within  External Calls (Protected)
+   -- @param caller the object or class you are testing
+   -- @usage obj:removeSelf (  ) obj = nil
+   -- @usage class:removeSelf(  )
+   -- @return No return value
+   removeSelf = function ( caller )
+                     local internalID = getInternalID ( caller )
+                     local iAmAnObject = not internalID [ GETINTERNALID_RSLT ]
+                     local classOfCaller = caller
+
+                     -- if we are a class we don't need to get the class metatable as class objects are with us already, but for an object we do
+                     if iAmAnObject then
+                        subclassLogger (subLogging._ATTRIBUTESERASE, 'erasing: object ', caller )
+                        classOfCaller = getmetatable ( caller )
+
+                        -- find all the attributes and remove them
+                           local internalID = getInternalID ( classOfCaller )
+
+                           -- get the class attributes store
+                           local attributeTables = classOfCaller [ types.attributeStore ] 
+
+                           -- if we have attributes then try and remove them
+                           if attributeTables then
+                              local callersAttributes = attributeTables [ caller ]
+
+                              -- set the current running class to allow locked attributes to be erased
+                              classRunTracker ( classOfCaller, true )
+
+                              if callersAttributes then
+                                 local next = next
+                                 local k, v
+                                 for k, v in next, callersAttributes, nil do
+                                    if k ~= SUPERNAME then -- we don't want to remove the super class
+                                       subclassLogger (subLogging._ATTRIBUTESERASE, 'erasing: key ', k )
+                                       newAttributeSet ( caller, k, classOfCaller, nil, true ) -- the true stops the immutable checks
+                                    end
+                                 end
+
+                                 subclassLogger (subLogging._ATTRIBUTESERASE, 'erasing: atributes table ' )
+                                 attributeTables [ caller ] = nil
+                              end
+
+                              if tableIsEmpty ( classOfCaller [ types.attributeStore] ) then
+                                 classOfCaller [ types.attributeStore ] = nil
+                                 subclassLogger (subLogging._ATTRIBUTESERASE, 'erasing: class attributes table for ', internalID [ GETINTERNALID_TXT ] )
+                              end
+
+                              -- remove the current running class 
+                              classRunTracker ( classOfCaller, false )
+
+                           end
+
+                           subclassLogger (subLogging._ATTRIBUTESERASE, 'erasing: object ', caller, ' success' )
+
+                     else
+                        subclassLogger (subLogging._ATTRIBUTESERASE, 'erasing: class', internalID [ GETINTERNALID_TXT ] )
+
+                        local attributeTables = classOfCaller [ types.attributeStore ]    
+
+                        if attributeTables then
+
+                           local next = next
+                           local k
+
+                           -- remove all attributes we know about
+                           for k, _ in next, attributeTables, nil do 
+                              k:removeSelf( )
+                           end
+
+                           classOfCaller [ types.attributeStore ] = nil
+
+                        end
+
+                        subclassLogger (subLogging._ATTRIBUTESERASE, 'erasing: class', internalID [ GETINTERNALID_TXT ], ' success' )
+
+                     end
+
+               end
+}
 
 --- tests that a paramter is a method and store it in classBuildingBlocks
 -- @param where what store ( currently init or methods )
@@ -854,7 +859,7 @@ end
 -- @param name the function name
 -- @param private is the function to be private or not
 -- @raise duplicate method, invalid method name, additional init method, this method is reserved, this is not a function, empty method
-local function buildingBlockBuilder (where, func, name, private)
+local function buildingBlockBuilder ( where, func, name, private )
 
    errorLayer = errorLayer + 2 -- as called via another calling method
 
@@ -907,7 +912,6 @@ local function buildingBlockBuilder (where, func, name, private)
 
 end
 
-
 -- @local sets the attributes, 
 -- by default whe add an attribute called super, which is the super of the objects class, it is immutable and private
 -- @param argTable expects a table of this format
@@ -954,18 +958,18 @@ local function attributesSetter ( argTable, superState )
                         if v._isABaseType then
                            checkImmutableValue = v.typeDescriber.value -- it was passed over in a base type function call
                            whatTypeValue = v.bT -- its a base type
-                           subclassLogger (subLogging._ATTRIBUTESSET, 'adding attribute ', k, ' a ', whatTypeValue)
+                           subclassLogger ( subLogging._ATTRIBUTESSET, 'adding attribute ', k, ' a ', whatTypeValue )
                         else
                            checkImmutableValue = v [types.typeDescriber]  -- it passed passed over in the class contruction
                            whatTypeValue = getmetatable ( v ) -- its a complex type
-                           subclassLogger (subLogging._ATTRIBUTESSET, 'adding attribute ', k, ' a class with',  getInternalID (whatTypeValue) [GETINTERNALID_TXT] )
+                           subclassLogger ( subLogging._ATTRIBUTESSET, 'adding attribute ', k, ' a class with',  getInternalID (whatTypeValue) [GETINTERNALID_TXT] )
                         end
                         -- if super then we hard code these values as no paramter was passed
                         if k == SUPERNAME then
                            validatedAttributes [k] = { whatType = whatTypeValue, immutable = true, private = true  }     
                         else
                            -- it is another key so calculate its immutable and private values
-                           if not checkImmutableValue or (checkImmutableValue and (type ( checkImmutableValue ) ~= types.number or checkImmutableValue > 2^MAXBITSSUPPORTED - 1)) then
+                           if not checkImmutableValue or ( checkImmutableValue and (type ( checkImmutableValue ) ~= types.number or checkImmutableValue > 2^MAXBITSSUPPORTED - 1) ) then
                               errorMessage = 'argument ' .. k .. ' has invalid describer value ' .. tostring ( checkImmutableValue ) .. ', should be a supported value; ' .. describerString
                               break
                            end
@@ -973,7 +977,7 @@ local function attributesSetter ( argTable, superState )
                                  private = bitOperation (checkImmutableValue, PRIVATEBIT, bitOperators.AND) ~= 0  }
                         end 
 
-                        subclassLogger (subLogging._ATTRIBUTESSET, 'setting ', k, ' immutable:', validatedAttributes [k].immutable, ' private:', validatedAttributes [k].private, ' type:', whatTypeValue )    
+                        subclassLogger ( subLogging._ATTRIBUTESSET, 'setting ', k, ' immutable:', validatedAttributes [k].immutable, ' private:', validatedAttributes [k].private, ' type:', whatTypeValue )    
 
                      else
                         break
@@ -981,7 +985,7 @@ local function attributesSetter ( argTable, superState )
                   else
                      break
                   end
-                  subclassLogger (subLogging._ATTRIBUTESGET, 'success')
+                  subclassLogger ( subLogging._ATTRIBUTESGET, 'success' )
                end
             end
          end
@@ -999,7 +1003,7 @@ local function attributesSetter ( argTable, superState )
 
    errorLayer = errorLayer - 1
 
-   subclassLogger (subLogging._ATTRIBUTESSET, 'end attempt to add attributes to class')
+   subclassLogger ( subLogging._ATTRIBUTESSET, 'end attempt to add attributes to class' )
 
 end
 
@@ -1015,7 +1019,7 @@ end
 --
 -- @return the object
 -- @see validAttributeDescribers
-local function getNewObject (class_tbl, argValue, ...)
+local function getNewObject ( class_tbl, argValue, ... )
 
    local internalID = getInternalID ( class_tbl )
 
@@ -1032,27 +1036,27 @@ local function getNewObject (class_tbl, argValue, ...)
    local methods
 
    -- construct methods
-   local methodBuilder = function (klass, class_tbl, privateCheck)
+   local methodBuilder = function ( klass, class_tbl, privateCheck )
    
                            errorLayer = errorLayer + 1
 
                            privateCheck = privateCheck or false
-                           if klass._methods then
+                           if rawget ( klass, types.methodsStore ) then
                               local next = next
                               local k, v
-                              for k, v in next, klass._methods, nil do
+                              for k, v in next, rawget ( klass, types.methodsStore ) , nil do
                                  if not obj [k] then -- if method does not exist
                                     rawset (obj, k,   function ( ... ) 
 
                                                          errorLayer = errorLayer + 1
                                                          subclassLogger ( subLogging._RUNNING, 'object calling method ', k ) 
-                                                         local result = executeMethodBound (privateCheck, k, internalID [ GETINTERNALID_VALUE ], obj, v.method, class_tbl, ...)
+                                                         local result = executeMethodBound ( privateCheck, k, internalID [ GETINTERNALID_VALUE ], obj, v.method, class_tbl, ... )
                                                          subclassLogger ( subLogging._RUNNING, 'object finished method ', k ) 
                                                          errorLayer = errorLayer - 1
                                                          return result
                                                       end
                                              )
-                                 elseif not v.private and obj._methods [k].private then -- it already exists and a subclass already had it public, you can't now make it private
+                                 elseif not v.private and obj [ types.methodsStore ] [k].private then -- it already exists and a subclass already had it public, you can't now make it private
                                     myError ( 'attempt make method ' .. k .. ' private, when in a parent class this method is public' )
                                  end
                               end
@@ -1062,20 +1066,19 @@ local function getNewObject (class_tbl, argValue, ...)
 
                         end
 
-   -- 
-
-
    -- get your own methods first, they may be overloading other methods
-   methodBuilder (class_tbl, class_tbl)
+   methodBuilder ( class_tbl, class_tbl )
 
-   -- look for inits, methods in parent classes
-   if class_tbl._inheritanceStructure then
-      local x
-      for x = 1, #class_tbl._inheritanceStructure do
-         -- add the paretn methods next, if the method already exists you keep yours. If private you do not take the method.
-         methodBuilder (class_tbl._inheritanceStructure [x], class_tbl, true)
-      end
-   end
+   -- look for inits, methods in your and parent classes
+   local goBackUpInheretance
+   goBackUpInheretance = function ( klass )
+                           if klass._base then
+                              methodBuilder ( klass._base, class_tbl, true )
+                              goBackUpInheretance ( klass._base )
+                           end
+                        end
+
+   goBackUpInheretance ( class_tbl )
 
    -- object may have a super, note super can only be accessed inside class methods
    if class_tbl._base then 
@@ -1137,7 +1140,7 @@ end
 -- @return the corresponding class, or klass 
 local function klassClean ( klass )
    if type ( klass ) == types.number then
-      klass = classTypes [ tostring ( klass ) ]
+      klass = classTypes [  klass  ]
    end
 
 
@@ -1363,15 +1366,39 @@ end
 -- If internalID is not a valid number or internalID does not exist, 'internalID does not exist ' is returned. 
 -- If internalID it does exist then a description of that class and its inheratance is returned.
 -- @within  External Calls (Protected)
--- @param internalID the internal ID of the class you are after, a number
+-- @param internalID the internal ID of the class you are after, a number, it's name as a string or the class itself.
 -- @return a string description
 -- @usage classy:describerClass ( internalID ) 
+-- @usage classy:describerClass ( 'className' ) 
+-- @usage classy:describerClass ( class ) 
 function classy:describeClass ( internalID )
-   if type ( internalID ) == types.number and classTypes and classTypes.index [ internalID ] then
-      return classTypes.index [ internalID ]:describeClass ()
-   else
-      return tostring ( internalID ) .. ' does not exist'
+   if classTypes then
+      if type ( internalID ) == types.table then
+         if classTypes [ internalID ] then
+            return internalID:describeClass ()
+         end
+      elseif type ( internalID ) == types.string then
+         local next = next
+         local k
+         for k, _ in next, classTypes, nil do
+            -- this avoids us matching with the nextOrder index counter
+            if k._notes and k._notes.moduleName == internalID then
+               return k:describeClass ()
+            end
+         end
+      elseif type ( internalID ) == types.number and classTypes then
+         local next = next
+         local k, v
+         for k, v in next, classTypes, nil do
+            -- this avoids us matching with the nextOrder index counter
+            if v == internalID and type ( k ) == types.table then
+               return k:describeClass ()
+            end
+         end
+      end
    end
+
+   return tostring ( internalID ) .. ' does not exist'
 end
 
 --- adds attributes to a class, must be called inside a class constructor: classy:newClass
@@ -1460,13 +1487,14 @@ end
 -- it can be called multiple times, but the first version of notes will stick
 -- @within  External Calls (Protected)
 -- @param notes the notes you want to add
+-- @param an optional moduleName
 -- @usage classy:addNotes ( notes ) 
 -- @return No return value
 -- @see newClass
-function classy:addNotes ( notes )
+function classy:addNotes ( notes, optionalModuleName )
    subclassLogger (subLogging._BUILDING, 'attempt to add notes to class')
    classBuildingBlocks = classBuildingBlocks or {}
-   classBuildingBlocks.notes = classBuildingBlocks.notes or notes
+   classBuildingBlocks.notes = classBuildingBlocks.notes or { notes = notes, moduleName = optionalModuleName }
 end
 
 --- allows an operator to be overloaded by a class
@@ -1527,7 +1555,7 @@ function classy:newClass ( base )
    local c = {}
    -- test to see if base class exists then note your base class
    if base then
-      if classTypes [ tostring ( base ) ] then
+      if classTypes [  base  ] then
          c._base = base
       else
          errorLayer = errorLayer + 1
@@ -1539,15 +1567,12 @@ function classy:newClass ( base )
    c._isABaseType = false
 
    -- the class will be the metatable for all its objects, it also stores attributes for class objects
-   c.__index = function (t, k) return getAttribute (t, k, c) end
+   c.__index = function ( t, k ) return getAttribute ( t, k, c ) end
 
    -- get the inheretence structure for the class
-   local inheritanceStructure
    local parent = c._base
 
    while parent do
-      inheritanceStructure = inheritanceStructure or {}
-      inheritanceStructure [#inheritanceStructure + 1] = parent
       -- check for attributes i may inheret
       if parent._attributes then
          local next = next
@@ -1556,8 +1581,8 @@ function classy:newClass ( base )
             classBuildingBlocks = classBuildingBlocks or {}
             classBuildingBlocks.attributes = classBuildingBlocks.attributes or {}
             -- if the attribute has been inheretred previously take the child as the parameter
-            if not classBuildingBlocks.attributes [k] then
-               classBuildingBlocks.attributes [k] = v
+            if not classBuildingBlocks.attributes [ k ] then
+               classBuildingBlocks.attributes [ k ] = v
             else
             end
          end
@@ -1566,13 +1591,10 @@ function classy:newClass ( base )
       parent = classy:getParentClass ( parent )
    end
 
-   -- store any inheritance structure for the class
-   c._inheritanceStructure = inheritanceStructure
-
    -- when a new value in a source object t is to be set
-   c.__newindex = function (t, k, v)
+   c.__newindex = function ( t, k, v )
                      errorLayer = errorLayer + 1
-                     newAttributeSet (t, k , c, v)
+                     newAttributeSet ( t, k , c, v )
                      errorLayer = errorLayer - 1
                   end
 
@@ -1583,7 +1605,7 @@ function classy:newClass ( base )
    -- @param class_tbl the objects class
    -- @param ... the paramters passed in the constructor
    mt.__call = function (class_tbl, ...)  return getNewObject (class_tbl, ...)  end
-   
+
    -- set up super
    if base then
       local tblToSet = {}
@@ -1601,9 +1623,9 @@ function classy:newClass ( base )
          if classTypes then
             classIDToAllocate = classTypes.nextOrder
          end
-         c._methods = {}
+         c [ types.methodsStore ] = {} -- don't need to rawset as no mettable yet
          for k, v in next, classBuildingBlocks [types.methods], nil do
-            c._methods [k] = v
+            c [ types.methodsStore ] [k] = v -- don't need to rawset as no mettable yet
             c [k] = function ( ... ) 
                            subclassLogger ( subLogging._RUNNING, 'class calling method ', k ) 
                            local result = executeMethodBound (false, k, classIDToAllocate, c, v.method, c, ...) 
@@ -1634,19 +1656,17 @@ function classy:newClass ( base )
       c [k] = v
    end
 
-   setmetatable(c, mt)
-
    -- se the classBuildingBlocks up for next class
    classBuildingBlocks = nil
 
-   -- mark the class as constructed, and its creation order number
-   classTypes = classTypes or { nextOrder = 1, index = { } }
-   classTypes [ tostring ( c ) ] = classTypes.nextOrder
-   classTypes.index [ classTypes.nextOrder ] = c
+   classTypes = classTypes or { nextOrder = 1 }
+   classTypes [ c ] = classTypes.nextOrder
 
    subclassLogger (subLogging._BUILDING, 'attempt to create new class - success: allocated ID ',  classTypes.nextOrder, ', details are ', c )
 
    classTypes.nextOrder = classTypes.nextOrder + 1
+
+   setmetatable (c, mt)
 
    errorLayer = errorLayer - 1
 
@@ -1762,5 +1782,15 @@ addProtectionTo ( classy, myProtectedFunctions, ... .. ': attempt to alter prote
 
 -- remove locals we will not use from memory
 k, v, addProtectionTo, validAttributeDescribers, validBaseTypeDescribers, valuesInUse, newOverloadOperators, count, overloadFunctions, validBaseTypeFunctions = nil, nil, nil, nil, nil, nil, nil, nil, nil, nil
+
+function classy:Test ()
+   print ('stuff i knwo')
+   local k, v
+   for k,v in next, classTypes, nil do
+      print ( k, v )
+   end
+end
+
+
 
 return classy

@@ -97,7 +97,7 @@ callTest ( 'objects have the same attributes', assertEquals, aMeta._attributeSto
 
 callTest ( 'objects are infact the same table', assertIs, aMeta._attributeStore, bMeta._attributeStore )
 
-callTest ( 'objects have the differnt attributes stores', assertNotEquals, aMeta._attributeStore [ tostring ( a ) ], bMeta._attributeStore  [ tostring ( b ) ] )
+callTest ( 'objects have the differnt attributes stores', assertNotEquals, aMeta._attributeStore [  a  ], bMeta._attributeStore  [  b  ] )
 
 callTest ( 'objects have different attributes tables ', assertStrMatches, tostring ( aMeta._attributeStore ), tostring ( bMeta._attributeStore ) )
 
@@ -129,9 +129,9 @@ a:removeSelf( )
 
 callTest ( 'objects are are identical once removeSelf( ) executed', assertEquals, a, b )
 
-callTest ( 'object a attribute store is nil in the class', assertIsNil, aMeta._attributeStore [ tostring ( a ) ] )
+callTest ( 'object a attribute store is nil in the class', assertIsNil, aMeta._attributeStore [ a  ] )
 
-callTest ( 'object b attribute store is not nil in the class', assertNotIsNil, aMeta._attributeStore [ tostring ( b ) ] )
+callTest ( 'object b attribute store is not nil in the class', assertNotIsNil, aMeta._attributeStore [  b  ] )
 
 callTest ( 'object b attribute store is stillin the class so the _attributeStore should be still exist', assertNotIsNil, bMeta._attributeStore  )
 
@@ -147,7 +147,7 @@ a.attributeStore = {}
 
 callTest ( 'object a is back so the _attributeStore should exist again ', assertNotIsNil, aMeta._attributeStore  )
 
-callTest ( 'object a attribute store is store should be exist', assertNotIsNil, aMeta._attributeStore [ tostring ( a ) ] )
+callTest ( 'object a attribute store is store should be exist', assertNotIsNil, aMeta._attributeStore [  a  ] )
 
 callTest ( 'exception raised for immutble attributes attributeStore', exceptionForLockedAttribute, a, 'attributeStore', {} )
 
