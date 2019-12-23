@@ -4,7 +4,7 @@
 -- such as Corona SDK
 -- @author David Porter
 -- @module classy
--- @release 1.2.0
+-- @release 1.2.1
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
@@ -1538,7 +1538,7 @@ end
 -- it can be called multiple times, but the first version of notes will stick
 -- @within  External Calls (Protected)
 -- @param notes the notes you want to add
--- @param an optional moduleName
+-- @param optionalModuleName an optional moduleName
 -- @usage classy:addNotes ( notes ) 
 -- @return No return value
 -- @see newClass
