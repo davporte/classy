@@ -158,7 +158,29 @@ end
 
 overloadOperators = newOverloadOperators
 
-versionIsFivePointTwoOrAbove = false
+-- @local notes the LUA version as a number id 5.2 or above, thisis due to __gc needing a proxy if it is below 5.2
+local versionIsFivePointTwoOrAbove =    _VERSION:gsub("[^0-9.]", "") 
+versionIsFivePointTwoOrAbove = tonumber ( versionIsFivePointTwoOrAbove ) >= 5.2
+
+-- @local allows a __gc call to detect the removeal of a table prior to LUA 5.2, after 5.2 this is native
+-- @param tbl, the table you want the GC Event attached to
+-- @param event, the code you want the GC Event to run
+local function attachGCEvent ( tbl, event )
+   if tbl and event then
+      if not versionIsFivePointTwoOrAbove then
+         -- proxy value set to true and attach a metatable with __gc
+         local prox = newproxy ( true )
+         -- set the proxy mettable to the __gc defined in your objects metatable
+         getmetatable ( prox ).__gc = event
+         -- put the proxy into the table raw
+         rawset ( tbl, prox, true )
+      else
+         local mt = getmetatable ( tbl ) or {}
+         mt.__gc = event
+         setmetatable ( tbl, mt )
+      end
+   end
+end
 
 --@local this function is called to throw an exception back to the caller at errorLayer in the stack
 -- @param  errorMsg that will be created
@@ -576,7 +598,7 @@ local function getAttribute (t, k, c)
    -- get the attribute or method
    local v = rawget ( c, k )
    -- if it's an internal class store i.e. begins with a _ or a method then return it 
-   if k:sub(1, 1) == '_' then
+   if type ( k ) == types.string and k:sub(1, 1) == '_' then
       subclassLogger (subLogging._ATTRIBUTESGET, 'this is an internal attribute')
       return v
    elseif type ( v ) == types.func then
@@ -628,9 +650,9 @@ local function getAttribute (t, k, c)
    v = attributeGetter (t, k, c)
 
    if v ~= nil then
-      subclassLogger (subLogging._ATTRIBUTESGET, 'value for ' .. k .. ' = ', v)
+      subclassLogger (subLogging._ATTRIBUTESGET, 'value for ', k, ' = ', v)
    else
-      subclassLogger (subLogging._ATTRIBUTESGET, 'value for ' .. k .. ' is nil')
+      subclassLogger (subLogging._ATTRIBUTESGET, 'value for ' , k, ' is nil')
    end
    
    return v
@@ -641,24 +663,46 @@ end
 -- @param k the specific key
 -- @param c the class the attribute belongs to
 -- @param v the value to set
+-- @param checkOff if true then checks for immutable are turned off, this is used during removeSelf. If set we don't call removeSelf for any classes
 -- @return No return value
-local function storeAttribute ( t, k, c, v )
+local function storeAttribute ( t, k, c, v, checkOff )
    local attributes = rawget ( c, types.attributeStore )
 
-   attributes = attributes or {}
+   attributes = attributes or setmetatable ( {}, { __mode = 'k' } )
 
-   local forWhatObj = attributes [ t ] or {}
+   local forWhatObj = attributes [ t ] or setmetatable ( {}, { __mode = 'k' } )
 
 
    -- may already have a value, if it does we need to detroy the current class attribute v (no orphans), this also helps remove display objects
    if v == nil and type ( t [ k ] ) == types.table and t [ k ].removeSelf then
-      print (subLogging._ATTRIBUTESSET, ' attribute ' .. k .. ' needs removeSelf( )')
-      t [k]:removeSelf ( )
+      if not checkOff and not getInternalID ( t ) [ GETINTERNALID_RSLT ] then
+         subclassLogger (subLogging._ATTRIBUTESSET, 'attribute ' .. k .. ' needs removeSelf( )')
+         t [k]:removeSelf ( )
+      else
+         subclassLogger (subLogging._ATTRIBUTESERASE, 'attribute ' .. k .. ' needs removeSelf( ), but checkOff is set, so not allowing')
+      end
    end
 
    rawset ( forWhatObj, k ,v )
-   rawset ( attributes, t , forWhatObj )
-   rawset ( c, types.attributeStore, attributes )
+
+   if v == nil then -- possible tables could be empty
+      if not tableIsEmpty ( forWhatObj ) then
+         rawset ( attributes, t , forWhatObj )
+         rawset ( c, types.attributeStore, attributes )
+      else
+         subclassLogger (subLogging._ATTRIBUTESERASE, 'erasing: attributes table' )
+         rawset ( attributes, t, nil )
+         if not tableIsEmpty ( attributes ) then
+            rawset ( c, types.attributeStore, attributes )
+         else
+            subclassLogger (subLogging._ATTRIBUTESERASE, 'erasing: attributes store for', getInternalID ( c ) [ GETINTERNALID_TXT ] )
+            rawset ( c, types.attributeStore, nil )
+         end
+      end
+   else
+      rawset ( attributes, t , forWhatObj )
+      rawset ( c, types.attributeStore, attributes )
+   end
 end
 
 --- this function is called when an object attempts to set a new value
@@ -702,7 +746,7 @@ local function newAttributeSet ( t, k, c, v, checkOff )
          end
 
          if v == nil or type ( v ) == myExpectedTypeDescription then
-            storeAttribute ( t, k, c, v )
+            storeAttribute ( t, k, c, v, checkOff )
          else
             myError ( 'attribute ' .. k .. ' incorrect base type, expected ' .. myExpectedTypeDescription .. ' not ' .. type ( v ) )
          end
@@ -710,7 +754,7 @@ local function newAttributeSet ( t, k, c, v, checkOff )
          if v ~= nil and myExpectedTypeDescription ~= getmetatable ( v ) then
             myError ( 'attribute ' .. k .. ' incorrect class type, expect a class with ' .. getInternalID ( myExpectedTypeDescription ) [GETINTERNALID_TXT] )
          end
-         storeAttribute ( t, k, c, v )
+         storeAttribute ( t, k, c, v, checkOff )
       end
 
       subclassLogger (subLogging._ATTRIBUTESSET, 'succesfully added ', k)
@@ -801,29 +845,38 @@ local reservedClassFunctions = {
                               -- set the current running class to allow locked attributes to be erased
                               classRunTracker ( classOfCaller, true )
 
+
                               if callersAttributes then
                                  local next = next
                                  local k, v
                                  for k, v in next, callersAttributes, nil do
-                                    if k ~= SUPERNAME then -- we don't want to remove the super class
-                                       subclassLogger (subLogging._ATTRIBUTESERASE, 'erasing: key ', k )
-                                       newAttributeSet ( caller, k, classOfCaller, nil, true ) -- the true stops the immutable checks
-                                    end
+                                    subclassLogger (subLogging._ATTRIBUTESERASE, 'erasing: key ', k )
+                                    newAttributeSet ( caller, k, classOfCaller, nil, true ) 
                                  end
-
-                                 subclassLogger (subLogging._ATTRIBUTESERASE, 'erasing: atributes table ' )
-                                 attributeTables [ caller ] = nil
-                              end
-
-                              if tableIsEmpty ( classOfCaller [ types.attributeStore] ) then
-                                 classOfCaller [ types.attributeStore ] = nil
-                                 subclassLogger (subLogging._ATTRIBUTESERASE, 'erasing: class attributes table for ', internalID [ GETINTERNALID_TXT ] )
                               end
 
                               -- remove the current running class 
                               classRunTracker ( classOfCaller, false )
 
                            end
+
+                           -- now remove functions and any functions or things the user added to the object with their own code
+                           local next = next
+                           local k ,v 
+                           for k, v in next, caller, nil do
+                              if type ( v ) == types.func then
+                                 if classOfCaller [ types.methodsStore ] and classOfCaller [ types.methodsStore ] [ k ] then
+                                    subclassLogger (subLogging._ATTRIBUTESERASE, 'erasing: class method ', k )
+                                 else
+                                    subclassLogger (subLogging._ATTRIBUTESERASE, 'erasing: custom method ', k )
+                                 end
+                              else
+                                 subclassLogger (subLogging._ATTRIBUTESERASE, 'erasing: custom ', type ( v ), ' ' , k )
+                              end
+
+                              rawset ( caller, k, nil ) 
+                           end
+                           setmetatable ( caller, nil )
 
                            subclassLogger (subLogging._ATTRIBUTESERASE, 'erasing: object ', caller, ' success' )
 
@@ -864,6 +917,7 @@ local function buildingBlockBuilder ( where, func, name, private )
    errorLayer = errorLayer + 2 -- as called via another calling method
 
    private = private or false
+
    -- base error messages
    local baseError = 'attempt to build class with '
    -- test to see if func is a function
@@ -1036,7 +1090,7 @@ local function getNewObject ( class_tbl, argValue, ... )
    local methods
 
    -- construct methods
-   local methodBuilder = function ( klass, class_tbl, privateCheck )
+   local methodBuilder = function ( klass, class_tbl )
    
                            errorLayer = errorLayer + 1
 
@@ -1050,7 +1104,7 @@ local function getNewObject ( class_tbl, argValue, ... )
 
                                                          errorLayer = errorLayer + 1
                                                          subclassLogger ( subLogging._RUNNING, 'object calling method ', k ) 
-                                                         local result = executeMethodBound ( privateCheck, k, internalID [ GETINTERNALID_VALUE ], obj, v.method, class_tbl, ... )
+                                                         local result = executeMethodBound ( v.private, k, internalID [ GETINTERNALID_VALUE ], obj, v.method, class_tbl, ... )
                                                          subclassLogger ( subLogging._RUNNING, 'object finished method ', k ) 
                                                          errorLayer = errorLayer - 1
                                                          return result
@@ -1066,14 +1120,11 @@ local function getNewObject ( class_tbl, argValue, ... )
 
                         end
 
-   -- get your own methods first, they may be overloading other methods
-   methodBuilder ( class_tbl, class_tbl )
-
    -- look for inits, methods in your and parent classes
    local goBackUpInheretance
    goBackUpInheretance = function ( klass )
+                           methodBuilder ( klass, class_tbl )
                            if klass._base then
-                              methodBuilder ( klass._base, class_tbl, true )
                               goBackUpInheretance ( klass._base )
                            end
                         end
@@ -1625,11 +1676,13 @@ function classy:newClass ( base )
          end
          c [ types.methodsStore ] = {} -- don't need to rawset as no mettable yet
          for k, v in next, classBuildingBlocks [types.methods], nil do
-            c [ types.methodsStore ] [k] = v -- don't need to rawset as no mettable yet
-            c [k] = function ( ... ) 
+            c [ types.methodsStore ] [ k ] = v -- don't need to rawset as no mettable yet
+            c [ k ] = function ( ... ) 
+                           errorLayer = errorLayer + 1
                            subclassLogger ( subLogging._RUNNING, 'class calling method ', k ) 
-                           local result = executeMethodBound (false, k, classIDToAllocate, c, v.method, c, ...) 
+                           local result = executeMethodBound ( v.private, k, classIDToAllocate, c, v.method, c, ... ) 
                            subclassLogger ( subLogging._RUNNING, 'class ended method ', k ) 
+                           errorLayer = errorLayer  - 1
                            return result
                         end
          end
@@ -1659,7 +1712,7 @@ function classy:newClass ( base )
    -- se the classBuildingBlocks up for next class
    classBuildingBlocks = nil
 
-   classTypes = classTypes or { nextOrder = 1 }
+   classTypes = classTypes or setmetatable ( { nextOrder = 1 }, { __mode = 'k' } )
    classTypes [ c ] = classTypes.nextOrder
 
    subclassLogger (subLogging._BUILDING, 'attempt to create new class - success: allocated ID ',  classTypes.nextOrder, ', details are ', c )

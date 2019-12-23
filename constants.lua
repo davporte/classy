@@ -1,5 +1,5 @@
 local constants = {
-	 _VERSION = ... .. '.lua 1.0.0',
+	 _VERSION = ... .. '.lua 1.1.0',
      _URL = 'https://github.com/davporte/classy/blob/master/constants.lua',
      _DESCRIPTION = [[
       ============================================================================
@@ -47,9 +47,6 @@ local constants = {
       _DEPENDANCIES = { 'classy','inspect' },
 }
 
--- creates a random name for the secret store, that the user will never see
-local _SECRETSTORE_NAME = tostring( math.random (  ) )
-
 -- require dependancies if any
 local dependancies = constants._DEPENDANCIES
 if dependancies then
@@ -65,27 +62,9 @@ if dependancies then
 	end
 end
 
--- a function that returns a value from the secret store
-local function getAttributeFromStore (k, obj)
-	return rawget (obj [ _SECRETSTORE_NAME ], k)
-end
-
--- a function that sets a value v in an objects (obj) secret store for key k
-local function setAttributeInStore (k, v, obj)
-	if rawget (obj [ _SECRETSTORE_NAME ], k) then 
-		error ('attribute ' .. k .. ' is immutable, once you add to the attributeStore you can\'t remove or change an attribute', 6)
-		-- note the above error is 6 because the source code is calling inside __newindex->setValue->setAttributeInStore (class itself has 3 methods binding these calls)
-	else
-		if type ( v ) == constants._TABLETYPE then
-			setmetatable (v, obj.attributeStore)
-		end
-		rawset (obj [ _SECRETSTORE_NAME ], k, v)
-	end
-end
-
 -- returns the class that deals with immutable constants
 return classy:newClass (  
-			classy:attributes ( { attributeStore = Table ( Immutable ), locked = Bool ( Private ), fortress = Bool ( PrivateImmutable ), test = Table () } ),
+			classy:attributes ( { attributeStore = Table ( Immutable ), locked = Bool ( Private ), fortress = Bool ( PrivateImmutable ), test = Table (), secretStore = Table ( Private ) } ),
 			classy:initMethod (
 					function (obj)
 						-- set the attribute store up if not already there, user may have sent a constructor table
@@ -93,14 +72,14 @@ return classy:newClass (
 							obj.attributeStore = {}
 						end
 						-- create a secret place to store the objects, we don't want to access directly
-						rawset (obj, _SECRETSTORE_NAME, {})
+						obj.secretStore = {}
 
 						-- the user may have called attributes store in the constructor with objects in that constructor so move them into the secret store
 						local next = next
 						local k, v
 
 						for k, v in next, obj.attributeStore, nil do
-							obj [ _SECRETSTORE_NAME ] [ k ] = v
+							obj.secretStore [ k ] = v
 							rawset ( obj.attributeStore, k, nil )
 						end
 
@@ -109,16 +88,30 @@ return classy:newClass (
 							obj.locked = false
 						end
 
-						obj.attributeStore.__index = function (t, k) return getAttributeFromStore (k, obj) end
-						obj.attributeStore.__newindex = function (t, k, v) obj.setValue (obj, t, k, v) end 
+						-- as secretStore is Private we need to create classy methods to affact change on them, as they can't call directly 
+						-- we also have to test for obj values first before assumeing it is a secretStore Value
+						obj.attributeStore.__index = function (t, k) if obj [ k ] then return obj [ k ] else return obj:getValue ( k ) end end
+						obj.attributeStore.__newindex = function (t, k, v) obj:setValue ( t, k, v ) end 
 						setmetatable (obj.attributeStore, obj.attributeStore)
 					end
 				),
-			-- this private method is required to enusre locked and fortress are addresable, they would not be inside __newindex
-			classy:addPrivateMethod ('setValue', function (obj, t, k, v) if not (obj.locked or obj.fortress) then setAttributeInStore (k, v, obj) else error ('store is locked', 5 ) end end),
+			-- this method is required to enusre locked and fortress are addresable, they would not be inside __newindex
+			classy:addMethod ('setValue', function ( obj, t, k, v ) 
+												if not (obj.locked or obj.fortress) then -- if we have not locked the store
+													if not obj.secretStore [ k ] then -- if we have not already set the attribute, as we want attributes to be immutable
+														obj.secretStore [ k ] = v  
+													else
+														error ( k .. ' attribute, once set remain immutable', 5)
+													end
+												else 
+													error ('store is locked', 5 ) 
+												end 
+											end),
+			-- this method is required to enure secretStore is accessable, it would not be inside __index
+			classy:addMethod ('getValue', function ( obj, k ) if obj.secretStore then return obj.secretStore [ k ] end end),
 			-- note the above error is 5 because the source code is calling inside __newindex->setValue (class itself has 3 methods binding these calls)
 			classy:addMethod ('lock', function (obj) obj.locked = true end),
 			classy:addMethod ('unlock', function (obj) obj.locked = false end),
 			classy:addMethod ('fortify', function (obj) obj.fortress = true end),
-			classy:addNotes (constants._VERSION .. '\n\n' .. constants._DESCRIPTION .. '\n' .. constants._LICENSE)
+			classy:addNotes (constants._VERSION .. '\n\n' .. constants._DESCRIPTION .. '\n' .. constants._LICENSE, ... )
 			)

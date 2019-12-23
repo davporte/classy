@@ -1,5 +1,5 @@
 local enum = {
-	 _VERSION = ... .. '.lua 1.0.0',
+	 _VERSION = ... .. '.lua 1.0.1',
      _URL = '',
      _DESCRIPTION = [[
       ============================================================================
@@ -70,5 +70,5 @@ return classy:newClass ( Constants,
 												end
 												),
 
-			classy:addNotes (enum._VERSION .. '\n\n' .. enum._DESCRIPTION .. '\n' .. enum._LICENSE)
+			classy:addNotes (enum._VERSION .. '\n\n' .. enum._DESCRIPTION .. '\n' .. enum._LICENSE, ... )
 			)

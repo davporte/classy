@@ -1,7 +1,7 @@
 ------------
 -- a test rig for classy.lua
 -- @author David Porter
--- @release 1.0.0
+-- @release 1.0.1
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
@@ -60,7 +60,7 @@ end
 -- calls a TypesOfTests or a luaunit test
 local function callTest (why, testFunction, ... )
 	tests = tests + 1
-	local description = 'calling Test:' .. tests .. ':\t' .. why .. testFunction .. ', with' .. stringTogether ( ... )
+	local description = 'calling Test:' .. tests .. ':\t' .. why .. ' ' .. testFunction .. ', with' .. stringTogether ( ... )
 	local ok, err
 	if lu [ testFunction ] then
 		testFunction = lu [ testFunction ]
@@ -107,17 +107,21 @@ callTest ( 'objects are not same table', assertNotIs, a, b )
 
 b.attributeStore.c = 5
 
-callTest ( 'objects are not identical once attribute added', assertNotEquals, a, b )
+callTest ( 'objects are still identical once attribute added, as attributes stored in secretStore', assertEquals, a, b )
+
+callTest ( 'however they are not equal if pulled from the secretStore', assertNotEquals, a.attributeStore.c, b.attributeStore.c )
 
 a.attributeStore.c = 5
 
-callTest ( 'objects are  identical once attribute added to other member', assertEquals, a, b )
+callTest ( 'objects are still identical once attribute added to other member, as attributes stored in secretStore', assertEquals, a, b )
 
-callTest ( 'exception raised for locked attributes 1', exceptionForLockedAttribute, a, 'attributeStore', {} )
+callTest ( 'and they are equal if pulled from the secretStore', assertEquals, a.attributeStore.c, b.attributeStore.c )
 
-callTest ( 'exception raised for locked attributes 2', exceptionForLockedAttribute, a.attributeStore, 'c', 6 )
+callTest ( 'exception raised for locked attributes 1,', exceptionForLockedAttribute, a, 'attributeStore', {} )
 
-callTest ( 'exception raised for locked attributes 3', exceptionForLockedAttribute, b.attributeStore, 'c', nil )
+callTest ( 'exception raised for locked attributes 2,', exceptionForLockedAttribute, a.attributeStore, 'c', 6 )
+
+callTest ( 'exception raised for locked attributes 3,', exceptionForLockedAttribute, b.attributeStore, 'c', nil )
 
 callTest ( 'exception raised for incorrect class', exceptionForLockedAttribute, b, 'test', 5 )
 
@@ -143,9 +147,13 @@ callTest ( 'objects are identical once removeSelf( ) executed on second attribut
 
 callTest ( 'objects are identical once removeSelf( ) executed on second attribute', assertEquals, a, b )
 
-a.attributeStore = {}
+a.attributeStore = {  }
 
-callTest ( 'object a is back so the _attributeStore should exist again ', assertNotIsNil, aMeta._attributeStore  )
+callTest ( 'object a is back, and correctly constructed so the _attributeStore should exist again', assertIsNil, aMeta._attributeStore  )
+
+a = Constants ()
+
+callTest ( 'object a is back, and correctly constructed so the _attributeStore should exist again', assertNotIsNil, aMeta._attributeStore  )
 
 callTest ( 'object a attribute store is store should be exist', assertNotIsNil, aMeta._attributeStore [  a  ] )
 
@@ -153,7 +161,7 @@ callTest ( 'exception raised for immutble attributes attributeStore', exceptionF
 
 callTest ( 'no exception raised for adding attribute to a attributeStore', noExceptionForLockedAttribute, a.attributeStore, 'c', {} )
 
-callTest ( 'exception raised for changing attribute to a attributeStore', noExceptionForLockedAttribute, a.attributeStore, 'c', nil )
+callTest ( 'exception raised for changing attribute to nil attributeStore', exceptionForLockedAttribute, a.attributeStore, 'c', nil )
 
 callTest ( 'exception raised unknow attribute', exceptionForLockedAttribute, a, 'doopy', false )
 
