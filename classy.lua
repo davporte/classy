@@ -4,14 +4,14 @@
 -- such as Corona SDK
 -- @author David Porter
 -- @module classy
--- @release 1.2.1
+-- @release 1.2.2
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local classy = {
 
    --- version details
-   _VERSION = ... .. '.lua 1.2.1',
+   _VERSION = ... .. '.lua 1.2.2',
    _URL = 'https://github.com/davporte/classy',
    --- the current module description
    _DESCRIPTION = [[
@@ -115,8 +115,9 @@ local classTypes
 
 -- @local stores class building blocks initmethod, methods etc
 local classBuildingBlocks
--- @local reference to type names
-local types = {func =type (function () end), table = type ({}), init = 'init', methods = 'methods', special = 'special', number = type (9), string = type (''), bool = type (true), attributeStore = '_attributeStore', typeDescriber = '_typeDescriber', methodsStore = '_methods'}
+-- @local reference to type names and method references
+local types = {func =type (function () end), table = type ({}), init = 'init', methods = 'methods', special = 'special', number = type (9), string = type (''), bool = type (true), attributeStore = '_attributeStore', typeDescriber = '_typeDescriber', methodsStore = '_methods',
+               index = '__index', newindex = '__newindex'}
 
 --- operators that a class can be overload, > and >= supported using not > and not >=
 -- @within Global Attributes (Protected)
@@ -1198,6 +1199,23 @@ local function klassClean ( klass )
    return klass
 end
 
+--- @local runs a bound exectution from a metatable
+-- @param obj the object being run on
+-- @param func the functon the meta method is running
+-- @param t the table the meta method is actioning on
+-- @param k the key the meta method is actioning on
+-- @param v the value the metat table is assinging
+-- @return the value the function calculated
+local function boundMetaExecution ( obj, func, t, k, v )
+   -- + 3 as we are running 3 layers of code
+   errorLayer = errorLayer + 3
+   local mt = getmetatable ( obj )
+   classRunTracker ( mt, true ) 
+   local result = func ( t, k, v ) 
+   classRunTracker ( mt, false ) 
+   errorLayer = errorLayer - 3
+   return result 
+end
 --
 -- @local External Facing Calls Protected
 --
@@ -1248,6 +1266,31 @@ function classy:setDefaultValues ( obj, passedArguments, defaultArguments )
    subclassLogger (subLogging._BUILDING, 'finished initial settings for object ', obj)
 
    errorLayer = errorLayer - 1
+end
+
+--- this allows a metamethod like __index or __newindex to run a function that should only run in a classy constructor.
+-- See constants for an example
+-- @param obj the object making the call
+-- @param func the function that you wish to run
+-- @usage __index = classy:bindMetaMethod ( obj, function ( t, k ) ... end )
+-- @usage __newindex = classy:bindMetaMethod ( obj, function ( t, k, v ) ... end )
+-- @return the function you wish the meta method to run
+function classy:bindMetaMethod ( obj, func )   
+      errorLayer = errorLayer + 2
+
+      local mt = getmetatable ( obj )
+
+      if obj and amIInsideaClassMethod ( mt ) then 
+         if type ( func ) == types.func then
+            subclassLogger (subLogging._BUILDING, 'binding meta function to ', obj, func)
+            errorLayer = errorLayer - 2
+            return function ( t, k, v ) return boundMetaExecution ( obj, func, t, k, v ) end
+         else
+            myError ( 'attempt to bind metamethod failed, as no function passed')
+         end
+      else
+         myError ( 'attempt to bind a metatable method when not in a classy constructor function' )
+      end
 end
 
 --- allows an object inside a classy constructure to call their supers init, or any other method.

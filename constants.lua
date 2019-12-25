@@ -1,5 +1,5 @@
 local constants = {
-	 _VERSION = ... .. '.lua 1.1.0',
+	 _VERSION = ... .. '.lua 1.1.1',
      _URL = 'https://github.com/davporte/classy/blob/master/constants.lua',
      _DESCRIPTION = [[
       ============================================================================
@@ -62,17 +62,14 @@ if dependancies then
 	end
 end
 
+
 -- returns the class that deals with immutable constants
 return classy:newClass (  
-			classy:attributes ( { attributeStore = Table ( Immutable ), locked = Bool ( Private ), fortress = Bool ( PrivateImmutable ), test = Table (), secretStore = Table ( Private ) } ),
+			classy:attributes ( { attributeStore = Table ( Immutable ), locked = Bool ( Private ), fortress = Bool ( PrivateImmutable ), secretStore = Table ( Private ) } ),
 			classy:initMethod (
-					function (obj)
-						-- set the attribute store up if not already there, user may have sent a constructor table
-						if not obj.attributeStore then
-							obj.attributeStore = {}
-						end
-						-- create a secret place to store the objects, we don't want to access directly
-						obj.secretStore = {}
+					function (obj, arguments )
+
+						classy:setDefaultValues ( obj, arguments, { attributeStore = {}, secretStore = {}, locked = false } )
 
 						-- the user may have called attributes store in the constructor with objects in that constructor so move them into the secret store
 						local next = next
@@ -83,33 +80,29 @@ return classy:newClass (
 							rawset ( obj.attributeStore, k, nil )
 						end
 
-						-- mark the class initially unlocked, we do not set fortress
-						if not obj.locked then
-							obj.locked = false
-						end
-
 						-- as secretStore is Private we need to create classy methods to affact change on them, as they can't call directly 
 						-- we also have to test for obj values first before assumeing it is a secretStore Value
-						obj.attributeStore.__index = function (t, k) if obj [ k ] then return obj [ k ] else return obj:getValue ( k ) end end
-						obj.attributeStore.__newindex = function (t, k, v) obj:setValue ( t, k, v ) end 
+						-- bindMetaMethods expect the parameters t, k and optional v. We need to bind these methods so that __index/__newindex are viewed as running inside a constructor method.
+						obj.attributeStore.__index = classy:bindMetaMethod ( obj, function ( t, k )  
+																					if obj [ k ] then return obj [ k ] 
+																					elseif obj.secretStore then
+																						return obj.secretStore [ k ] 
+																						end 
+																					end )
+						obj.attributeStore.__newindex = classy:bindMetaMethod ( obj, function ( t, k, v ) 
+																						if not (obj.locked or obj.fortress) then -- if we have not locked the store
+																							if not obj.secretStore [ k ] then -- if we have not already set the attribute, as we want attributes to be immutable
+																								obj.secretStore [ k ] = v  
+																							else
+																								error ( tostring ( k ) .. ' attribute, once set remain immutable', 5)
+																							end
+																						else 
+																							error ('store is locked', 5 ) 
+																						end 
+																					end ) 
 						setmetatable (obj.attributeStore, obj.attributeStore)
 					end
 				),
-			-- this method is required to enusre locked and fortress are addresable, they would not be inside __newindex
-			classy:addMethod ('setValue', function ( obj, t, k, v ) 
-												if not (obj.locked or obj.fortress) then -- if we have not locked the store
-													if not obj.secretStore [ k ] then -- if we have not already set the attribute, as we want attributes to be immutable
-														obj.secretStore [ k ] = v  
-													else
-														error ( k .. ' attribute, once set remain immutable', 5)
-													end
-												else 
-													error ('store is locked', 5 ) 
-												end 
-											end),
-			-- this method is required to enure secretStore is accessable, it would not be inside __index
-			classy:addMethod ('getValue', function ( obj, k ) if obj.secretStore then return obj.secretStore [ k ] end end),
-			-- note the above error is 5 because the source code is calling inside __newindex->setValue (class itself has 3 methods binding these calls)
 			classy:addMethod ('lock', function (obj) obj.locked = true end),
 			classy:addMethod ('unlock', function (obj) obj.locked = false end),
 			classy:addMethod ('fortify', function (obj) obj.fortress = true end),
