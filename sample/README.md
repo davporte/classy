@@ -18,7 +18,7 @@ myLogger = Logger ()
 
 The default log levels, and their default states are; 
 
-**Debug (off/fasle) 
-**Info (off/false) 
-**Warning (on/true) 
-**Error (on/true)
+**Debug (off/fasle)** 
+**Info (off/false)** 
+**Warning (on/true)** 
+**Error (on/true)**
