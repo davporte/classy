@@ -43,7 +43,7 @@ objects of class Constants have the following attributes controlled via these me
 constants is build using the following code:
 
 ```
-return classy:newClass (  
+classy:newClass (  
 			classy:attributes ( { attributeStore = Table ( Immutable ), locked = Bool ( Private ), fortress = Bool ( PrivateImmutable ), secretStore = Table ( Private ) } ),
 			classy:initMethod (
 					function (obj, arguments )
@@ -63,22 +63,11 @@ return classy:newClass (
 						-- we also have to test for obj values first before assumeing it is a secretStore Value
 						-- bindMetaMethods expect the parameters t, k and optional v. We need to bind these methods so that __index/__newindex are viewed as running inside a constructor method.
 						obj.attributeStore.__index = classy:bindMetaMethod ( obj, function ( t, k )  
-							if obj [ k ] then return obj [ k ] 
-								elseif obj.secretStore then
-									return obj.secretStore [ k ] 
-								end 
-						end )
+																						return gettingAttribute ( obj, t, k )
+																					end )
 						obj.attributeStore.__newindex = classy:bindMetaMethod ( obj, function ( t, k, v ) 
-							if not (obj.locked or obj.fortress) then -- if we have not locked the store
-								if not obj.secretStore [ k ] then -- if we have not already set the attribute, as we want attributes to be immutable
-									obj.secretStore [ k ] = v  
-								else
-									error ( tostring ( k ) .. ' attribute, once set remain immutable', 5)
-								end
-							else 
-								error ('store is locked', 5 ) 
-							end 
-						end ) 
+																						settingAttribute ( obj, t, k, v )
+																					end ) 
 						setmetatable (obj.attributeStore, obj.attributeStore)
 					end
 				),
