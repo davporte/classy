@@ -5,9 +5,9 @@ Example logger class
 
 This creates a classy logger class. 
 
-[Full Documentation](http://htmlpreview.github.com/?https://github.com/davporte/classy/blob/master/sample/doc/logger.html) can be found here.
+[Full Documentation for Logger](http://htmlpreview.github.com/?https://github.com/davporte/classy/blob/master/sample/doc/logger.html) can be found here.
 
-[Example Use](https://github.com/davporte/classy/blob/master/sample/loggeruseexamples.lua)
+[Example Use of Logger](https://github.com/davporte/classy/blob/master/sample/loggeruseexamples.lua) can be found here.
 
 Usage:
 
@@ -15,3 +15,5 @@ Usage:
 local Logger = require ( 'logger' )
 myLogger = Logger ()
 ```
+
+The default log levels, and their default states are; **Debug (off/fasle) Info (off/false) Warning (on/true) Error (on/true)
