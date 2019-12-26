@@ -25,4 +25,4 @@ The default log levels, and their default states are;
 |**Warning (on/true)** | Log_Warning ( ... ) | module.Log_Warning ( ... ) | myLogger:log ( 'Warning', ... ) |
 |**Error (on/true)**| Log_Error ( ... ) | module.Log__Error ( ... ) | myLogger:log ( 'Error', ... ) |
 
-* - This can be slow
+\* \- This can be slow
