@@ -63,11 +63,11 @@ classy:newClass (
 						-- we also have to test for obj values first before assumeing it is a secretStore Value
 						-- bindMetaMethods expect the parameters t, k and optional v. We need to bind these methods so that __index/__newindex are viewed as running inside a constructor method.
 						obj.attributeStore.__index = classy:bindMetaMethod ( obj, function ( t, k )  
-																						return gettingAttribute ( obj, t, k )
-																					end )
+								return gettingAttribute ( obj, t, k )
+							end )
 						obj.attributeStore.__newindex = classy:bindMetaMethod ( obj, function ( t, k, v ) 
-																						settingAttribute ( obj, t, k, v )
-																					end ) 
+								settingAttribute ( obj, t, k, v )
+							end ) 
 						setmetatable (obj.attributeStore, obj.attributeStore)
 					end
 				),
