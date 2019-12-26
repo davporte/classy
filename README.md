@@ -104,6 +104,7 @@ Note: ALL custom classes must have a class describer! Base classes e.g. Bool, St
 |classy:addPrivateMethod | adds a method only avaialble internally to the class constructors. This method has a paramter called obj, that is the object |
 |classy:addMethod        | adds a public facing method. This method has a paramter called obj, that is the object   |
 |classy:bindMetaMethod   | allows a meta method such as \_\_index or \_\_newindex to execute as if in constructors |
+|classy:setDefaultValues | sets default values for the object |
 |classy:addNotes         | adds some notes for the class that can be displayed, see [Full Documentation](http://htmlpreview.github.com/?https://github.com/davporte/classy/blob/master/doc/index.html). This method has a paramter called obj, that is the object |
 
 Constants does not use the overload classy method:
