@@ -18,7 +18,8 @@ myLogger = Logger ()
 
 The default log levels, and their default states are; 
 
-**Debug (off/fasle)** 
-**Info (off/false)** 
-**Warning (on/true)** 
-**Error (on/true)**
+| Name | Called using _G | Called from module |
+|**Debug (off/fasle)** | Log_Debug ( ... ) | module.Log_Debug ( ... ) |
+|**Info (off/false)**| Log_Info ( ... ) | module.Log_Info ( ... ) | 
+|**Warning (on/true)** | Log_Warning ( ... ) | module.Log_Warning ( ... ) |
+|**Error (on/true)**| Log_Error ( ... ) | module.Log__Error ( ... ) |
