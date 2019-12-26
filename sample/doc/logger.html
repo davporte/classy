@@ -1,0 +1,1078 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ldoc</h1>
+
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Tables">Tables</a></li>
+<li><a href="#Fields">Fields</a></li>
+<li><a href="#Local_Functions">Local Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><strong>logger</strong></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>logger</code></h1>
+<p>creates a logger class.</p>
+<p>
+ this class does not throw exceptions directly, note return values and error messages need to be dealt with in your own code.
+ designed for use with the classy object creator</p>
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">Logger = require ( &apos;logger &apos; )
+</pre>
+    </ul>
+    <h3>Info:</h3>
+    <ul>
+        <li><strong>Copyright</strong>: (c) 2019 David Porter</li>
+        <li><strong>Release</strong>: 1.0.0</li>
+        <li><strong>License</strong>: MIT</li>
+        <li><strong>Author</strong>: David Porter</li>
+    </ul>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#initMethod">initMethod (obj)</a></td>
+	<td class="summary">adds the default log levels Error, Warning, Info and Debug and sets their associated default values ON (true), ON (true), OFF (false), OFF (false).</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#addLogLevel">addLogLevel (obj, logLevel)</a></td>
+	<td class="summary">addLogLevel, adds a log level completly from the logger.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#removeLogLevel">removeLogLevel (obj, logLevel)</a></td>
+	<td class="summary">removeLogLevel, removes a log level completly from the logger.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#registerModule">registerModule (obj, moduleName)</a></td>
+	<td class="summary">registerModule, registers a module from the logger.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#deregisterModule">deregisterModule (obj, moduleName)</a></td>
+	<td class="summary">deregisterModule, deregisters a module from the logger.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#log">log (obj, logLevel, ...)</a></td>
+	<td class="summary">log, test the master state and if OFF (false) stop all further log processing
+ the default use of log calls at the Global level, i.e.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#logFromModule">logFromModule (the, moduleName, logLevel, ...)</a></td>
+	<td class="summary">logFromModule, test the master state and if OFF (false) stop all further log processing
+ the default use of log calls at the Global level, i.e.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#setLogState">setLogState (the, logState, ...)</a></td>
+	<td class="summary">setLogState, sets a specific log value to true (on) or false (off)
+ if called by an object then that state ONLY applies to that object,
+ if called by the class itself then it applies to ALL objects, except those that have a specific state
+ note if master is off ( false ) then even objects that have their own log level of true WILL NOT LOG.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#setModuleLogState">setModuleLogState (obj, moduleName, logState, ...)</a></td>
+	<td class="summary">setModuleLogState, sets a specific log value for a module to true (on) or false (off)
+ if called by an object then that state ONLY applies to that object,
+ note if master is off ( false ) then even objects that have their own log level of true WILL NOT LOG.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#setMyOutput">setMyOutput (obj, outputFunc, defaultToFollow)</a></td>
+	<td class="summary">setMyOutput, allows the user to control where logs are sent</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#describe">describe (obj)</a></td>
+	<td class="summary">describes the current logger in a text string</td>
+	</tr>
+</table>
+<h2><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#CONSTANTS">CONSTANTS</a></td>
+	<td class="summary">a constants used by the module</td>
+	</tr>
+</table>
+<h2><a href="#Fields">Fields</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#_VERSION">_VERSION</a></td>
+	<td class="summary">version details</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#_URL">_URL</a></td>
+	<td class="summary">Git Hub Location of the master branch</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#_DESCRIPTION">_DESCRIPTION</a></td>
+	<td class="summary">the current module description</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#_LICENSE">_LICENSE</a></td>
+	<td class="summary">the current licence</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#_MODULENAME">_MODULENAME</a></td>
+	<td class="summary">the module name</td>
+	</tr>
+</table>
+<h2><a href="#Local_Functions">Local Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#defaultOutput">defaultOutput (output, userFunction)</a></td>
+	<td class="summary">this is the defualt output method for logging
+ the user can override this with a call to logger:setMyOutput</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#resolveModuleName">resolveModuleName (moduleName)</a></td>
+	<td class="summary">resolves the module name</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#log">log (obj, whatModule, logLevel, ...)</a></td>
+	<td class="summary">builds the log message if required</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#selfLogger">selfLogger (obj, ...)</a></td>
+	<td class="summary">the self logger is called to see if we need to log internal issues somewhere</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#changeLogState">changeLogState (obj, level, state)</a></td>
+	<td class="summary">changes a specific loglevels state to true (ON) or false (OFF)</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#changeModuleLogState">changeModuleLogState (obj, moduleName, level, state)</a></td>
+	<td class="summary">changes a specific loglevels state to true (ON) or false (OFF) for a module moduleName</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#argsCleaner">argsCleaner (obj, moduleName, logClass, ...)</a></td>
+	<td class="summary">allows both the .</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#installOrRemoveLoggingOnModule">installOrRemoveLoggingOnModule (obj, moduleName, install, defaultState, ...)</a></td>
+	<td class="summary">installs or removes a set of log types onto/from a module.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#registerDeregisterModule">registerDeregisterModule (obj, moduleName, register)</a></td>
+	<td class="summary">registers/deregisters a module and adds loggers to that module</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#addOrRemoveLogLevel">addOrRemoveLogLevel (obj, level, addOrRemove, defaultState)</a></td>
+	<td class="summary">adds/removes a log level to the known log levels.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getLogStateSettings">getLogStateSettings (obj, logState, ...)</a></td>
+	<td class="summary">checks the log state settings are ok</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "initMethod"></a>
+    <strong>initMethod (obj)</strong>
+    </dt>
+    <dd>
+    adds the default log levels Error, Warning, Info and Debug and sets their associated default values ON (true), ON (true), OFF (false), OFF (false).
+ also sets the logger to the default output.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the calling object
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        No return value
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="logger.html#setMyOutput">setMyOutput</a>
+    </ul>
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">myLogger = Logger ()</pre></li>
+        <li><pre class="example">myLogger = Logger ( { [ callLogOutput = YOUR_OWN_LOG_FUNCTION,
+                       masterLogState = <span class="keyword">true</span> | <span class="keyword">false</span>,
+                       myOwnLogState = <span class="keyword">true</span> | <span class="keyword">false</span> ]
+                   })</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "addLogLevel"></a>
+    <strong>addLogLevel (obj, logLevel)</strong>
+    </dt>
+    <dd>
+    addLogLevel, adds a log level completly from the logger.
+ All registered modules will also recive this log level
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the calling object OR class itself
+        </li>
+        <li><span class="parameter">logLevel</span>
+         the level you want to add
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if success, false if failed - Failed also returns an error message
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">logger:addLogLevel ( <span class="string">'LOG_LEVEL_NAME'</span> [, <span class="keyword">true</span> | <span class="keyword">false</span> ] )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "removeLogLevel"></a>
+    <strong>removeLogLevel (obj, logLevel)</strong>
+    </dt>
+    <dd>
+    removeLogLevel, removes a log level completly from the logger.
+ All registerd modules will loose this log level
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the calling object OR class itself
+        </li>
+        <li><span class="parameter">logLevel</span>
+         the level you want to remove
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if success, false if failed - Failed also returns an error message
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">logger:removeLogLevel ( <span class="string">'LOG_LEVEL_NAME'</span> )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "registerModule"></a>
+    <strong>registerModule (obj, moduleName)</strong>
+    </dt>
+    <dd>
+    registerModule, registers a module from the logger.
+ This adds the calls to module.Log_LOGLEVEL from the module
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the calling object OR class itself
+        </li>
+        <li><span class="parameter">moduleName</span>
+         the module name you want to deregister
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if success, false if failed - Failed also returns an error message
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">logger:registerModule ( <span class="string">'MODULE_NAME'</span> | <span class="global">module</span> )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "deregisterModule"></a>
+    <strong>deregisterModule (obj, moduleName)</strong>
+    </dt>
+    <dd>
+    deregisterModule, deregisters a module from the logger.
+ This removes the calls to module.Log_LOGLEVEL from the module
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the calling object OR class itself
+        </li>
+        <li><span class="parameter">moduleName</span>
+         the module name you want to deregister
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if success, false if failed - Failed also returns an error message
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">logger:deregisterModule ( <span class="string">'MODULE_NAME'</span> | <span class="global">module</span> )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "log"></a>
+    <strong>log (obj, logLevel, ...)</strong>
+    </dt>
+    <dd>
+    log, test the master state and if OFF (false) stop all further log processing
+ the default use of log calls at the Global level, i.e.  no module name provided
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the calling object OR class itself
+        </li>
+        <li><span class="parameter">logLevel</span>
+         the log level
+        </li>
+        <li><span class="parameter">...</span>
+         the items to log
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if success, false if failed - Failed also returns an error message, note that if called with no values it always returns the name of the logLevel called
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">logger:log ( <span class="string">'LOG_LEVEL_NAME'</span> | logLevel, [ ... Items you want to log <span class="keyword">in</span> a list ] )</pre></li>
+        <li><pre class="example">Log_LOG_LEVEL_NAME ( [ ... Items you want to log <span class="keyword">in</span> a list ] ) <span class="comment">-- note this calls up to _G scope</span></pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "logFromModule"></a>
+    <strong>logFromModule (the, moduleName, logLevel, ...)</strong>
+    </dt>
+    <dd>
+    logFromModule, test the master state and if OFF (false) stop all further log processing
+ the default use of log calls at the Global level, i.e.  no module name provided
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">the</span>
+         calling object OR class itself
+        </li>
+        <li><span class="parameter">moduleName</span>
+         the module name you want the log to come from
+        </li>
+        <li><span class="parameter">logLevel</span>
+         the log level
+        </li>
+        <li><span class="parameter">...</span>
+         the items to log
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if success, false if failed - Failed also returns an error message
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">logger:logFromModule ( <span class="global">module</span>, <span class="string">'LOG_LEVEL_NAME'</span> | logLevel, [ ... Items you want to log <span class="keyword">in</span> a list ] )</pre></li>
+        <li><pre class="example"><span class="global">module</span>.Log_LOG_LEVEL_NAME ( [ ... Items you want to log <span class="keyword">in</span> a list ] ) <span class="comment">-- note this calls up to the module scope</span></pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "setLogState"></a>
+    <strong>setLogState (the, logState, ...)</strong>
+    </dt>
+    <dd>
+    setLogState, sets a specific log value to true (on) or false (off)
+ if called by an object then that state ONLY applies to that object,
+ if called by the class itself then it applies to ALL objects, except those that have a specific state
+ note if master is off ( false ) then even objects that have their own log level of true WILL NOT LOG.
+ to log the global master MUST be ON, the local master log level must be ON and your object specific value must be ON
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">the</span>
+         calling object OR class itself
+        </li>
+        <li><span class="parameter">logState</span>
+         the specific state you want true or false (must be a bool)
+        </li>
+        <li><span class="parameter">...</span>
+         the various levels you wish to change
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if success, false if failed - Failed also returns an error message
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">logger:setLogState ( <span class="keyword">true</span> | <span class="keyword">false</span> [, LIST OF LOG LEVELS TO APPLY TO ] )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "setModuleLogState"></a>
+    <strong>setModuleLogState (obj, moduleName, logState, ...)</strong>
+    </dt>
+    <dd>
+    setModuleLogState, sets a specific log value for a module to true (on) or false (off)
+ if called by an object then that state ONLY applies to that object,
+ note if master is off ( false ) then even objects that have their own log level of true WILL NOT LOG.
+ to log the global master MUST be ON, the local master log level must be ON and your object specific value must be ON
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the calling object OR class itself
+        </li>
+        <li><span class="parameter">moduleName</span>
+         the calling object OR class itself
+        </li>
+        <li><span class="parameter">logState</span>
+         the specific state you want true or false (must be a bool)
+        </li>
+        <li><span class="parameter">...</span>
+         the various levels you wish to change
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if success, false if failed - Failed also returns an error message
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">logger:setModuleLogState ( <span class="global">module</span>, <span class="keyword">true</span> | <span class="keyword">false</span> [, LIST OF LOG LEVELS TO APPLY TO ] )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "setMyOutput"></a>
+    <strong>setMyOutput (obj, outputFunc, defaultToFollow)</strong>
+    </dt>
+    <dd>
+    setMyOutput, allows the user to control where logs are sent
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the calling object
+        </li>
+        <li><span class="parameter">outputFunc</span>
+         either a function the user wished to use of if a boolean and true it emplies use the default function only
+        </li>
+        <li><span class="parameter">defaultToFollow</span>
+         if set and true then after  the user function the default logger will also run
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        No return value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">logger:setMyOutput ( <span class="keyword">function</span> ( logData ) [ <span class="keyword">return</span> ] DO_STUFF_WITH logData <span class="keyword">end</span> [, <span class="keyword">true</span> ] )</pre></li>
+        <li><pre class="example">logger:setMyOutput ( <span class="keyword">true</span> )</pre></li>
+        <li><pre class="example">logger:setMyOutput ( )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "describe"></a>
+    <strong>describe (obj)</strong>
+    </dt>
+    <dd>
+    describes the current logger in a text string
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the calling object
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a string description of the current logger
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">logger:describe ()</pre>
+    </ul>
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Tables"></a>Tables</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "CONSTANTS"></a>
+    <strong>CONSTANTS</strong>
+    </dt>
+    <dd>
+    a constants used by the module
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">LOGLEVELS</span>
+
+        </li>
+        <li><span class="parameter">WARNING</span>
+
+        </li>
+        <li><span class="parameter">INFO</span>
+
+        </li>
+        <li><span class="parameter">DEBUG</span>
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Fields"></a>Fields</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "_VERSION"></a>
+    <strong>_VERSION</strong>
+    </dt>
+    <dd>
+    version details
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "_URL"></a>
+    <strong>_URL</strong>
+    </dt>
+    <dd>
+    Git Hub Location of the master branch
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "_DESCRIPTION"></a>
+    <strong>_DESCRIPTION</strong>
+    </dt>
+    <dd>
+    the current module description
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "_LICENSE"></a>
+    <strong>_LICENSE</strong>
+    </dt>
+    <dd>
+    the current licence
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "_MODULENAME"></a>
+    <strong>_MODULENAME</strong>
+    </dt>
+    <dd>
+    the module name
+
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "defaultOutput"></a>
+    <strong>defaultOutput (output, userFunction)</strong>
+    </dt>
+    <dd>
+    this is the defualt output method for logging
+ the user can override this with a call to logger:setMyOutput
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">output</span>
+         the text to be outputed
+        </li>
+        <li><span class="parameter">userFunction</span>
+         the user defined function
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        always returns true to say it logged, or a prorietry user value if the user function runs
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "resolveModuleName"></a>
+    <strong>resolveModuleName (moduleName)</strong>
+    </dt>
+    <dd>
+    resolves the module name
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">moduleName</span>
+         either a table or not a table. If table we look in package to find the moduel name
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the module name or the orgional attribute
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "log"></a>
+    <strong>log (obj, whatModule, logLevel, ...)</strong>
+    </dt>
+    <dd>
+    builds the log message if required
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">whatModule</span>
+         the module making the log call
+        </li>
+        <li><span class="parameter">logLevel</span>
+         the level being logged
+        </li>
+        <li><span class="parameter">...</span>
+         the paramters that build the log message
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        No return value
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "selfLogger"></a>
+    <strong>selfLogger (obj, ...)</strong>
+    </dt>
+    <dd>
+    the self logger is called to see if we need to log internal issues somewhere
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">...</span>
+         the paramters that build the log message
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the same as you sent me
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "changeLogState"></a>
+    <strong>changeLogState (obj, level, state)</strong>
+    </dt>
+    <dd>
+    changes a specific loglevels state to true (ON) or false (OFF)
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">level</span>
+         the level being changed
+        </li>
+        <li><span class="parameter">state</span>
+         what state value
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if succes, false and an error message if failed
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "changeModuleLogState"></a>
+    <strong>changeModuleLogState (obj, moduleName, level, state)</strong>
+    </dt>
+    <dd>
+    changes a specific loglevels state to true (ON) or false (OFF) for a module moduleName
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">moduleName</span>
+         the moduleName we are doing this for, either a string or the module table itself
+        </li>
+        <li><span class="parameter">level</span>
+         the level being changed
+        </li>
+        <li><span class="parameter">state</span>
+         what state value
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if succes, false and an error message if failed
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "argsCleaner"></a>
+    <strong>argsCleaner (obj, moduleName, logClass, ...)</strong>
+    </dt>
+    <dd>
+    allows both the .  and : form of a function to be called to log
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">moduleName</span>
+         the module that made the call
+        </li>
+        <li><span class="parameter">logClass</span>
+         the specific log name this call is for
+        </li>
+        <li><span class="parameter">...</span>
+         the log paramters
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the values generated by the call to logFromModule
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "installOrRemoveLoggingOnModule"></a>
+    <strong>installOrRemoveLoggingOnModule (obj, moduleName, install, defaultState, ...)</strong>
+    </dt>
+    <dd>
+    installs or removes a set of log types onto/from a module.
+ if the default sate is not set then the module assumes the state of the local masterLogState.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the logger object iteself
+        </li>
+        <li><span class="parameter">moduleName</span>
+         the module you wish to install onto
+        </li>
+        <li><span class="parameter">install</span>
+         true for install, false for uninstall
+        </li>
+        <li><span class="parameter">defaultState</span>
+         by default is it true or false
+        </li>
+        <li><span class="parameter">...</span>
+         optional list of log levels to perform this action on or default is ALL currently known
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        No return value
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "registerDeregisterModule"></a>
+    <strong>registerDeregisterModule (obj, moduleName, register)</strong>
+    </dt>
+    <dd>
+    registers/deregisters a module and adds loggers to that module
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         is the logger itself
+        </li>
+        <li><span class="parameter">moduleName</span>
+         is the module doing the register or deregister, can be a string or the module table
+        </li>
+        <li><span class="parameter">register</span>
+         is true to register or false to deregister
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if succes, false and an error message if failed
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "addOrRemoveLogLevel"></a>
+    <strong>addOrRemoveLogLevel (obj, level, addOrRemove, defaultState)</strong>
+    </dt>
+    <dd>
+    adds/removes a log level to the known log levels.
+ This will also add/rremove a call into _G named Log_LOGLEVEL ( ... ) that allows the log to be called without needin to call logger:log directly
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         what object wanted this log level to exist
+        </li>
+        <li><span class="parameter">level</span>
+         what was the name of the level
+        </li>
+        <li><span class="parameter">addOrRemove</span>
+         add is true remove is false
+        </li>
+        <li><span class="parameter">defaultState</span>
+         is the log
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        bool true or false if it worked or not</li>
+        <li>
+        errorMsg if failed an error message will also be returned</li>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> state, Msg = addLogLevel ( object, <span class="string">'NAME'</span>, defaultState )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getLogStateSettings"></a>
+    <strong>getLogStateSettings (obj, logState, ...)</strong>
+    </dt>
+    <dd>
+    checks the log state settings are ok
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object itself
+        </li>
+        <li><span class="parameter">logState</span>
+         the stae you wish to set
+        </li>
+        <li><span class="parameter">...</span>
+         the list of log states you wish to change
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the logstates we should process or false and an error message
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2019-12-26 17:04:32 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
