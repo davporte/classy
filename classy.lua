@@ -4,14 +4,14 @@
 -- such as Corona SDK
 -- @author David Porter
 -- @module classy
--- @release 1.2.2
+-- @release 1.2.3
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local classy = {
 
    --- version details
-   _VERSION = ... .. '.lua 1.2.2',
+   _VERSION = ... .. '.lua 1.2.3',
    _URL = 'https://github.com/davporte/classy',
    --- the current module description
    _DESCRIPTION = [[
@@ -588,6 +588,19 @@ local function appendTextOnNumber (n)
       return v
    end
 end
+
+
+-- @local returns a klass value from klass or if klass is a number the corresponding classtype
+-- @param klass the class or a class ID number
+-- @return the corresponding class, or klass 
+local function klassClean ( klass )
+   if type ( klass ) == types.number then
+      klass = classTypes [  klass  ]
+   end
+   
+   return klass
+end
+
 
 --- this function gets an attribute/method from the appropriate location
 -- @param t the calling table
@@ -1187,18 +1200,6 @@ local function getNewObject ( class_tbl, argValue, ... )
    return obj, initValue
 end
 
--- @local returns a klass value from klass or if klass is a number the corresponding classtype
--- @param klass the class or a class ID number
--- @return the corresponding class, or klass 
-local function klassClean ( klass )
-   if type ( klass ) == types.number then
-      klass = classTypes [  klass  ]
-   end
-
-
-   return klass
-end
-
 --- @local runs a bound exectution from a metatable
 -- @param obj the object being run on
 -- @param func the functon the meta method is running
@@ -1709,14 +1710,17 @@ function classy:newClass ( base )
 
    -- load the methods/attributes
    if classBuildingBlocks then
+
+      local classIDToAllocate = 1
+      if classTypes then
+         classIDToAllocate = classTypes.nextOrder
+      end
+
       c.init = classBuildingBlocks [types.init]
       if classBuildingBlocks [types.methods] then
          local next = next
          local k, v
-         local classIDToAllocate = 1
-         if classTypes then
-            classIDToAllocate = classTypes.nextOrder
-         end
+
          c [ types.methodsStore ] = {} -- don't need to rawset as no mettable yet
          for k, v in next, classBuildingBlocks [types.methods], nil do
             c [ types.methodsStore ] [ k ] = v -- don't need to rawset as no mettable yet
@@ -1734,7 +1738,13 @@ function classy:newClass ( base )
          local next = next
          local k, v
          for k, v in next, classBuildingBlocks [types.special], nil do
-            rawset (c, k, v.method)
+            local functionToCall = function ( obj1, obj2 )
+                                       classRunTracker ( c, true )
+                                       local result =  v.method ( obj1, obj2 )
+                                       classRunTracker ( c, false )
+                                       return result
+                                    end
+            rawset (c, k, functionToCall)
          end
       end
       if classBuildingBlocks.attributes then
@@ -1878,15 +1888,5 @@ addProtectionTo ( classy, myProtectedFunctions, ... .. ': attempt to alter prote
 
 -- remove locals we will not use from memory
 k, v, addProtectionTo, validAttributeDescribers, validBaseTypeDescribers, valuesInUse, newOverloadOperators, count, overloadFunctions, validBaseTypeFunctions = nil, nil, nil, nil, nil, nil, nil, nil, nil, nil
-
-function classy:Test ()
-   print ('stuff i knwo')
-   local k, v
-   for k,v in next, classTypes, nil do
-      print ( k, v )
-   end
-end
-
-
 
 return classy

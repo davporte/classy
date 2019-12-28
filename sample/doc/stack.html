@@ -1,0 +1,511 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ldoc</h1>
+
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Tables">Tables</a></li>
+<li><a href="#Fields">Fields</a></li>
+<li><a href="#Local_Functions">Local Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><strong>stack</strong></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>stack</code></h1>
+<p>creates a stack class.</p>
+<p>
+ designed for use with the classy object creator</p>
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">Stack = require ( &apos;stack&apos; )
+</pre>
+    </ul>
+    <h3>Info:</h3>
+    <ul>
+        <li><strong>Copyright</strong>: (c) 2019 David Porter</li>
+        <li><strong>Release</strong>: 1.0.0</li>
+        <li><strong>License</strong>: MIT</li>
+        <li><strong>Author</strong>: David Porter</li>
+    </ul>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#initMethod">initMethod (obj, args)</a></td>
+	<td class="summary">adds the default log levels Error, Warning, Info and Debug and sets their associated default values ON (true), ON (true), OFF (false), OFF (false).</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#pop">pop (obj, howMany)</a></td>
+	<td class="summary">pops an items off a stack.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#peek">peek (obj, howMany)</a></td>
+	<td class="summary">pops an items off a stack.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#push">push (obj, ...)</a></td>
+	<td class="summary">pushes one or more items onto a stack</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#drain">drain (obj)</a></td>
+	<td class="summary">drains all item from the stack and returns them</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#isEmpty">isEmpty (obj)</a></td>
+	<td class="summary">tests to see if a stack is empty</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#isEmpty">isEmpty (obj)</a></td>
+	<td class="summary">returns number of members in stack</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#overloaded">overloaded (obj1, obj2)</a></td>
+	<td class="summary">overloads + for stacks, adds two stacks together in one stack and drains the other stacks.</td>
+	</tr>
+</table>
+<h2><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#CONSTANTS">CONSTANTS</a></td>
+	<td class="summary">a constants used by the module</td>
+	</tr>
+</table>
+<h2><a href="#Fields">Fields</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#_MODULENAME">_MODULENAME</a></td>
+	<td class="summary">the module name</td>
+	</tr>
+</table>
+<h2><a href="#Local_Functions">Local Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#popFromStack">popFromStack (obj, dontRemove)</a></td>
+	<td class="summary">gets next item from stack</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#pushToStack">pushToStack (obj, item)</a></td>
+	<td class="summary">pushes an item to a stack</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#stackGet">stackGet (obj, howMany, dontRemove)</a></td>
+	<td class="summary">calls the various gets from the stack.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "initMethod"></a>
+    <strong>initMethod (obj, args)</strong>
+    </dt>
+    <dd>
+    adds the default log levels Error, Warning, Info and Debug and sets their associated default values ON (true), ON (true), OFF (false), OFF (false).
+ also sets the logger to the default output.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the calling object
+        </li>
+        <li><span class="parameter">args</span>
+         optional arguments sent to create the stack
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        No return value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">myStack = Stack ()</pre></li>
+        <li><pre class="example">myStack = Stack ( { stack = { item1, ...., itemN } } )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "pop"></a>
+    <strong>pop (obj, howMany)</strong>
+    </dt>
+    <dd>
+    pops an items off a stack.
+ howMany allows more than one item to be popped.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the stack object
+        </li>
+        <li><span class="parameter">howMany</span>
+         how many items you want off the stack
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        either a single item. If howMany is set then that number, if available, is returned in a table. With a paramter n = the number of entries
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "peek"></a>
+    <strong>peek (obj, howMany)</strong>
+    </dt>
+    <dd>
+    pops an items off a stack.
+ howMany allows more than one item to be popped.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the stack object
+        </li>
+        <li><span class="parameter">howMany</span>
+         how many items you want off the stack
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        either a single item. If howMany is set then that number, if available, is returned in a table. With a paramter n = the number of entries
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "push"></a>
+    <strong>push (obj, ...)</strong>
+    </dt>
+    <dd>
+    pushes one or more items onto a stack
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the stack object
+        </li>
+        <li><span class="parameter">...</span>
+         the list of objects to push
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "drain"></a>
+    <strong>drain (obj)</strong>
+    </dt>
+    <dd>
+    drains all item from the stack and returns them
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the stack object
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        All items from the stack
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "isEmpty"></a>
+    <strong>isEmpty (obj)</strong>
+    </dt>
+    <dd>
+    tests to see if a stack is empty
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the stack object
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if empty otherwise false
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "isEmpty"></a>
+    <strong>isEmpty (obj)</strong>
+    </dt>
+    <dd>
+    returns number of members in stack
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the stack object
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        number of members in stack
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "overloaded"></a>
+    <strong>overloaded (obj1, obj2)</strong>
+    </dt>
+    <dd>
+    overloads + for stacks, adds two stacks together in one stack and drains the other stacks.
+ can also do + just to add new object to stack, in this case obj2 is not a stack object
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj1</span>
+         the first stack object
+        </li>
+        <li><span class="parameter">obj2</span>
+         the second stack object, or another object type
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Tables"></a>Tables</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "CONSTANTS"></a>
+    <strong>CONSTANTS</strong>
+    </dt>
+    <dd>
+    a constants used by the module
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">METHODS</span>
+
+        </li>
+        <li><span class="parameter">PUSH</span>
+
+        </li>
+        <li><span class="parameter">DRAIN</span>
+
+        </li>
+        <li><span class="parameter">PEEK</span>
+
+        </li>
+        <li><span class="parameter">ISEMPTY</span>
+
+        </li>
+        <li><span class="parameter">MEMBERS</span>
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Fields"></a>Fields</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "_MODULENAME"></a>
+    <strong>_MODULENAME</strong>
+    </dt>
+    <dd>
+    the module name
+
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "popFromStack"></a>
+    <strong>popFromStack (obj, dontRemove)</strong>
+    </dt>
+    <dd>
+    gets next item from stack
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the stack object iteself
+        </li>
+        <li><span class="parameter">dontRemove</span>
+         optional flag that says don't remove the item from the stack but still return it
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the next item or nil
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "pushToStack"></a>
+    <strong>pushToStack (obj, item)</strong>
+    </dt>
+    <dd>
+    pushes an item to a stack
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the stack object itself
+        </li>
+        <li><span class="parameter">item</span>
+         the item being pushed
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        No return value
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "stackGet"></a>
+    <strong>stackGet (obj, howMany, dontRemove)</strong>
+    </dt>
+    <dd>
+    calls the various gets from the stack.  This is abstracted away from the user as we want dontRemove unexposed.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the stack object itself
+        </li>
+        <li><span class="parameter">howMany</span>
+         how many items you want off the stack
+        </li>
+        <li><span class="parameter">dontRemove</span>
+         optional flag if set to true stops items from being removed from the stack
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        either a single item. If howMany is set then that number, if available, is returned in a table. With a paramter n = the number of entries
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2019-12-28 11:15:22 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

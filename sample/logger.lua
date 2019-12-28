@@ -5,13 +5,13 @@
 -- @usage Logger = require ( 'logger ' )
 -- @author David Porter
 -- @module logger
--- @release 1.0.0
+-- @release 1.0.1
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local logger = {
    --- version details
-   _VERSION = ... .. '.lua 1.0.0',
+   _VERSION = ... .. '.lua 1.0.1',
      --- Git Hub Location of the master branch
      _URL = '',
       --- the current module description
@@ -58,7 +58,7 @@ local _STRINGTYPE, _NUMTYPE, _TABLETYPE, _BOOLTYPE , _FUNCTYPE = type ( '' ), ty
 local CONSTANTS = {
   LOGLEVELS = { ERROR = 'Error', WARNING = 'Warning', INFO = 'Info', DEBUG = 'Debug'}, -- the default log levels 
   METHODS = { ADDLOGLEVEL = 'addLogLevel', LOG = 'log' , SETLOGSTATE = 'setLogState', SETMYOUTPUT = 'setMyOutput', REMOVELOGLEVEL = 'removeLogLevel', REGISTERMODULE = 'registerModule',
-              LOGFROMMODULE = 'logFromModule', DEREGISTERMODULE = 'deregisterModule', DESCRIBE = 'describe', SETMODULELOGSTATE = 'setModuleLogState' }, -- the default methods
+              LOGFROMMODULE = 'logFromModule', DEREGISTERMODULE = 'deregisterModule', DESCRIBE = 'describe', SETMODULELOGSTATE = 'setModuleLogState', REGISTERSTATE = 'registerState' }, -- the default methods
   LOGPREFIX = 'Log_', -- a value placed in _G so the user can call the logger directly Log_LOGLEVEL ( ... )
   GLOBALID = '_G' -- a value to mark a function pusged to _G that it is global and not module local
 }
@@ -303,6 +303,21 @@ local function installOrRemoveLoggingOnModule ( obj, moduleName, install, defaul
 
 end
 
+--- returns true if module is registered else false
+-- @param obj the object iteself
+-- @param moduleName the module you are interested in
+-- @return true or false
+local function amIregistered ( obj, moduleName )
+  moduleName = resolveModuleName ( moduleName )
+  if obj.registestedModules then
+    if obj.registestedModules [ moduleName ] then
+      return true
+    end
+  end
+
+  return false
+end
+
 --- registers/deregisters a module and adds loggers to that module
 -- @param obj is the logger itself
 -- @param moduleName is the module doing the register or deregister, can be a string or the module table
@@ -310,7 +325,6 @@ end
 -- @return true if succes, false and an error message if failed
 local function registerDeregisterModule ( obj, moduleName, register )
     moduleName = resolveModuleName ( moduleName )
-
   if type ( moduleName ) == _STRINGTYPE  then
     local registestedModules = obj.registestedModules or {}
     if register and registestedModules [ moduleName ] then
@@ -484,6 +498,17 @@ return classy:newClass(
                     return registerDeregisterModule ( obj, moduleName, false )
                   end
                 ),
+              classy:addMethod ( CONSTANTS.METHODS.REGISTERSTATE,
+                    --- returns a value if the module is registered or not
+                    -- @function registerState
+                    -- @param obj the object
+                    -- @param moduleName the module you are interested in
+                    -- @return true or false
+                    -- @usage logger:registerState ( 'MODULE_NAME' | module )
+                    function ( obj, moduleName )
+                      return amIregistered ( obj, moduleName )
+                    end
+                  ),
               classy:addMethod ( CONSTANTS.METHODS.LOG,
                     --- log, test the master state and if OFF (false) stop all further log processing
                     -- the default use of log calls at the Global level, i.e. no module name provided
