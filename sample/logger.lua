@@ -11,7 +11,7 @@
 
 local logger = {
    --- version details
-   _VERSION = ... .. '.lua 1.0.1',
+   _VERSION = ... .. '.lua 1.0.2',
      --- Git Hub Location of the master branch
      _URL = '',
       --- the current module description
@@ -274,11 +274,14 @@ local function installOrRemoveLoggingOnModule ( obj, moduleName, install, defaul
         defaultState = v.masterLogState
       end
       specificModuleOverRide.masterLogState = defaultState
-      -- add the logger function to that module specifically, so it can be called using moduleName.Log_LOGLEVEL ( ... )
-      -- we do a test to see how the user made the call, we expect .Log_Level, however if you called with :Log_Level we fix it up
-      moduleLocation [ CONSTANTS.LOGPREFIX .. k ] = function ( ... )
-                                                      return argsCleaner ( obj, moduleName, k, ... )
-                                                    end
+      -- the first logger created only
+      if not  moduleLocation [ CONSTANTS.LOGPREFIX .. k ] then
+        -- add the logger function to that module specifically, so it can be called using moduleName.Log_LOGLEVEL ( ... )
+        -- we do a test to see how the user made the call, we expect .Log_Level, however if you called with :Log_Level we fix it up
+        moduleLocation [ CONSTANTS.LOGPREFIX .. k ] = function ( ... )
+                                                        return argsCleaner ( obj, moduleName, k, ... )
+                                                      end
+      end
     else
       specificModuleOverRide.masterLogState = nil
       -- remove the logger from that module
@@ -374,7 +377,10 @@ local function addOrRemoveLogLevel ( obj, level, addOrRemove, defaultState )
       if addOrRemove then
         knownLogLevels [ level ] = { masterLogState = defaultState, objectSpecificOverRides = nil }
         -- protect this name in _G so user can do a call to Log_LOGLEVEL, note if you do lots of logging you may want a local reference to this in that area
-        classy:addToProtectionIn_G ( CONSTANTS.LOGPREFIX .. level, function ( ... ) return obj [ CONSTANTS.METHODS.LOG ] ( obj, level, ... ) end )
+        local globalAddFunction = CONSTANTS.LOGPREFIX .. level
+        if not _G [ globalAddFunction ] then -- we only add to _G if no other logger has this already
+          classy:addToProtectionIn_G ( CONSTANTS.LOGPREFIX .. level, function ( ... ) return obj [ CONSTANTS.METHODS.LOG ] ( obj, level, ... ) end )
+        end
       else
         knownLogLevels [ level ] = nil
         classy:removeFromProtectionIn_G ( CONSTANTS.LOGPREFIX .. level )

@@ -9,7 +9,7 @@
 -- @copyright (c) 2019 David Porter
 
 local stack = {
-	 _VERSION = ... .. '.lua 1.0.0',
+	 _VERSION = ... .. '.lua 1.0.1',
      _URL = '',
      _DESCRIPTION = [[
       ============================================================================
@@ -241,10 +241,10 @@ return classy:newClass(
                   local newStack = getmetatable ( obj1 ) ()
                   local next = next
                   local nextStack
-                  for _, nextStack in next, { copy2, copy1 }, nil do    
+                  for _, nextStack in next, { copy1, copy2 }, nil do    
                     local x
                     if nextStack.n then -- many items
-                      for x = 1, nextStack.n do
+                      for x = nextStack.n, 1, -1 do
                         newStack [ CONSTANTS.METHODS.PUSH ] ( newStack, nextStack [ x ] )
                       end
                     else

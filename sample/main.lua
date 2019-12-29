@@ -10,8 +10,7 @@ local Animal = classy:newClass(
   classy:attributes  ( { name = String ( Public ), voice = String ( Public ) } ),
   classy:addMethod  ('speak',
       function ( obj, animal_type )
-        print ( 'I am a ' .. animal_type .. ' breed ' .. ( obj.name or 'Unnamed') .. ',
-                  and I say ' .. ( obj.voice or 'Silence') )
+        print ( 'I am a ' .. animal_type .. ' breed ' .. ( obj.name or 'Unnamed') .. ', and I say ' .. ( obj.voice or 'Silence') )
         end
    )
 )
