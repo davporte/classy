@@ -131,7 +131,7 @@ Classy also adds protection to the _G global table to prevent the user from chan
 
 ## Samples
 
-The main directory contains sample usage and test rig for classy. The sample directory contains other stand alone examples.
+The main directory contains sample usage and test rig for classy. The [sample directory](https://github.com/davporte/classy/tree/master/sample) contains other stand alone examples.
 
 ## Special Thanks To 
 [LuaUnit - a great unit testing tool](https://github.com/bluebird75/luaunit/tree/LUAUNIT_V3_2_1)
