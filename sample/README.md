@@ -45,7 +45,6 @@ myStack = Stack ()
 
 -- prepopulated stack
 mySecondStack = Stack ( { stack = { 'cat', 'dog', 'bird'}  } )
-print ('----')
 -- gives myThirdStack another instance of myLogger and prepopulates
 -- note that module logging and _G logging rules are attached to the _G.myLogger, the first logger created
 myThirdStack = Stack ( { stack = { 'fish', 'shark' }, myLogger = Logger () } ) 
