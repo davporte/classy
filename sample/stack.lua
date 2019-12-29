@@ -39,6 +39,7 @@ local stack = {
       ]],
       --- the module name
       _MODULENAME = ...,
+      
       _LOGGING = false,
       _TABLETYPE = type ( {} ),
       _DEPENDANCIES = 'classy',

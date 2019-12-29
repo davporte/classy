@@ -4,14 +4,14 @@
 -- such as Corona SDK
 -- @author David Porter
 -- @module classy
--- @release 1.2.3
+-- @release 1.3.1
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local classy = {
 
    --- version details
-   _VERSION = ... .. '.lua 1.2.3',
+   _VERSION = ... .. '.lua 1.3.1',
    _URL = 'https://github.com/davporte/classy',
    --- the current module description
    _DESCRIPTION = [[
@@ -1269,6 +1269,60 @@ function classy:setDefaultValues ( obj, passedArguments, defaultArguments )
    errorLayer = errorLayer - 1
 end
 
+--- assigns a method, or group of methods to an object or class
+-- if assigned to a class then all objects of that class after that assign will inheret the methods.
+-- All methods assigned will be public, you cannot assign to a class an methods that already exists in that class,
+-- however for an object you can.
+-- @param obj the object you wish to assign
+-- @param ... list of assignments to be made to object, these have to be tables of functions
+-- @usage object = object:assign ( ... )
+-- @return No return value
+function classy:assign ( obj, ... )
+   if obj then
+      local internalID = getInternalID ( obj )
+      local x
+      for x = 1, arg.n do
+         local methodData = arg [ x ]
+         if type ( methodData ) ~= types.table then
+            myError ( 'bad entry for assign, expect format { Table of Methods }' )
+         else
+            local k, v
+            local next = next
+            for k, v in next, methodData, nil do
+               if not tonumber ( k ) then
+                  if type ( v ) ~= types.func then
+                     myError ( 'bad entry for assign, expect format { Table of Methods }, entry ' .. k .. ' is a ' .. type ( v ) )
+                  else
+                     if internalID [ GETINTERNALID_RSLT ] then -- class type
+                        local methods = rawget ( obj, types.methodsStore ) or { }
+                        if methods [ k ] then
+                           myError ( 'bad entry for assign, method ' .. k .. ' already exists for class' )
+                        else                        
+                           methods [ k ] = { private = false, method = v }
+                        end
+                        rawset ( obj, types.methodsStore, methods )
+                     else -- object type
+                           rawset (obj, k, 
+                              function ( ... ) 
+                                 errorLayer = errorLayer + 1
+                                 subclassLogger ( subLogging._RUNNING, 'object calling assigned method ', k ) 
+                                 local result = executeMethodBound ( false, k, internalID [ GETINTERNALID_VALUE ], obj, v, obj, ... ) 
+                                 subclassLogger ( subLogging._RUNNING, 'object ended assigned method ', k ) 
+                                 errorLayer = errorLayer  - 1
+                                 return result
+                              end
+                           )
+                     end
+                  end
+               else
+                  myError ( 'bad entry for assign, no key name' )
+               end
+            end
+         end
+      end
+   end
+end
+
 --- this allows a metamethod like __index or __newindex to run a function that should only run in a classy constructor.
 -- See constants for an example
 -- @param obj the object making the call
@@ -1549,7 +1603,7 @@ end
 -- @see newClass
 function classy:initMethod ( func )
    subclassLogger (subLogging._BUILDING, 'attempt to add init method')
-   buildingBlockBuilder (types.init, func)
+   buildingBlockBuilder (types.init, func, true)
 end
 
 --- sets a method by name into a class. All decendants of that class can call it.
