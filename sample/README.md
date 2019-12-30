@@ -52,3 +52,37 @@ myThirdStack = Stack ( { stack = { 'fish', 'shark' }, myLogger = Logger () } )
 -- it also adds 'monster' into the stack
 myFourthStack =  mySecondStack + myThirdStack  + 'monster'
 ```
+## FileHandler
+Example file handler class. Also demonstrates use of calling a super init method. The usage example also demonstrates overloading a method in the base class.
+
+[Full Documentation for FileHandler](http://htmlpreview.github.com/?https://github.com/davporte/classy/blob/master/sample/doc/fileHandler.html)
+
+``` Lua
+Logger = require ('sample.logger')
+
+-- this is the default logger
+_G.myLogger = Logger ()
+
+-- load up the default file handler
+FileHandler = require ( 'sample.FileHandler' )
+
+NewFileHandler = classy:newClass( FileHandler,
+  classy:initMethod (
+                  -- example call of the super init method to construct this object
+                  function ( obj, args )
+      		   		    classy:callSuperMethod ( obj, obj.super.init, args )
+                  end       
+                  ),       
+                  -- example overloading of a method in the origional class
+                  classy:addPrivateMethod ( 'fileNameBuilder',
+                    function  ( obj, fileDetails )
+                      if type ( fileDetails ) == 'table' then
+                        local fileName, path = fileDetails.fileName, fileDetails.path
+                        if not path then path = system.TemporaryDirectory end
+                        fileDetails = system.pathForFile ( fileName, path )
+                      end
+                      return fileDetails
+                  end
+                  )
+                )
+```
