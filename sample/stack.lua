@@ -226,7 +226,7 @@ return classy:newClass(
                 ),
                 classy:addMethod ( CONSTANTS.METHODS.MEMBERS,
                 --- returns number of members in stack
-                -- @function isEmpty
+                -- @function members
                 -- @param obj the stack object
                 -- @usage local result = myStack:members ( )
                 -- @return number of members in stack
