@@ -67,14 +67,14 @@ _G.myLogger = Logger ()
 FileHandler = require ( 'sample.FileHandler' )
 
 NewFileHandler = classy:newClass( FileHandler,
-  classy:initMethod (
+         classy:initMethod (
           -- example call of the super init method to construct this object
           function ( obj, args )
             classy:callSuperMethod ( obj, obj.super.init, args )
           end       
           ),       
           -- example overloading of a method in the origional class
-          classy:addPrivateMethod ( 'fileNameBuilder',
+         classy:addPrivateMethod ( 'fileNameBuilder',
             function  ( obj, fileDetails )
               if type ( fileDetails ) == 'table' then
                 local fileName, path = fileDetails.fileName, fileDetails.path
@@ -82,7 +82,7 @@ NewFileHandler = classy:newClass( FileHandler,
                 fileDetails = system.pathForFile ( fileName, path )
               end
               return fileDetails
-          end
-          )
-        )
+         end
+         )
+       )
 ```
