@@ -4,12 +4,12 @@
 -- @usage Stack = require ( 'stack' )
 -- @author David Porter
 -- @module stack
--- @release 1.0.2
+-- @release 1.0.3
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local stack = {
-	 _VERSION = ... .. '.lua 1.0.2',
+	 _VERSION = ... .. '.lua 1.0.3',
      _URL = '',
      _DESCRIPTION = [[
       ============================================================================
@@ -173,6 +173,7 @@ return classy:newClass(
               -- @function pop
               -- @param obj the stack object
               -- @param howMany how many items you want off the stack
+              -- @usage local result = myStack:pop ( [ number ] )
               -- @return either a single item. If howMany is set then that number, if available, is returned in a table. With a paramter n = the number of entries
               function ( obj, howMany )
                     return stackGet ( obj, howMany )
@@ -184,6 +185,7 @@ return classy:newClass(
               -- @function peek
               -- @param obj the stack object
               -- @param howMany how many items you want off the stack
+              -- @usage local result = myStack:peek ( [ number ] )
               -- @return either a single item. If howMany is set then that number, if available, is returned in a table. With a paramter n = the number of entries
               function ( obj, howMany )
                     return stackGet ( obj, howMany, true )
@@ -193,6 +195,7 @@ return classy:newClass(
               --- pushes one or more items onto a stack
               -- @function push
               -- @param obj the stack object
+              -- @usage myStack:push ( itetm1 [ , ..., itemN ] )
               -- @param ... the list of objects to push
               function ( obj, ... )
                     local x
@@ -205,6 +208,7 @@ return classy:newClass(
                 --- drains all item from the stack and returns them
                 -- @function drain
                 -- @param obj the stack object
+                -- @usage local result = myStack:drain ( )
                 -- @return All items from the stack
                 function ( obj )
                   return obj [ CONSTANTS.METHODS.POP ] ( obj, obj.stackCount ) 
@@ -214,6 +218,7 @@ return classy:newClass(
                 --- tests to see if a stack is empty
                 -- @function isEmpty
                 -- @param obj the stack object
+                -- @usage local result = myStack:isEmpty ( )
                 -- @return true if empty otherwise false
                 function ( obj )
                   return obj.stackCount == 0 
@@ -223,6 +228,7 @@ return classy:newClass(
                 --- returns number of members in stack
                 -- @function isEmpty
                 -- @param obj the stack object
+                -- @usage local result = myStack:members ( )
                 -- @return number of members in stack
                 function ( obj )
                   return obj.stackCount
