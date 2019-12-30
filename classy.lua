@@ -4,14 +4,14 @@
 -- such as Corona SDK
 -- @author David Porter
 -- @module classy
--- @release 1.3.1
+-- @release 1.3.2
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local classy = {
 
    --- version details
-   _VERSION = ... .. '.lua 1.3.1',
+   _VERSION = ... .. '.lua 1.3.2',
    _URL = 'https://github.com/davporte/classy',
    --- the current module description
    _DESCRIPTION = [[
@@ -796,16 +796,21 @@ local reservedClassFunctions = {
    -- @within  External Calls (Protected)
    -- @param self the object or class you are testing
    -- @param klass the class you want to test against, can be a class or a class ID
-   -- @return true if self is of type klass, false if not
+   -- @return true if self is of type klass, false if not, if klass is nil then returns true if self is a classy class or object
    -- @usage obj:is_a ( internalID | ClassType )
    -- @usage class:is_a ( internalID | ClassType )
    is_a = function ( self, klass )
-               klass = klassClean ( klass )
-               local m = getmetatable( self )
-               while m do 
-                  if m == klass then return true end
-                  m = m._base
+               if klass then 
+                  klass = klassClean ( klass )
+                  local m = getmetatable( self )
+                  while m do 
+                     if m == klass then return true end
+                     m = m._base
+                  end
+               else
+                  return getInternalID ( self ) [ GETINTERNALID_RSLT ] or getInternalID ( getmetatable ( self ) ) [ GETINTERNALID_RSLT ]
                end
+
                return false
             end,
    --- a protected function to dump a class or object type, you CANNOT overload this
@@ -1273,6 +1278,7 @@ end
 -- if assigned to a class then all objects of that class after that assign will inheret the methods.
 -- All methods assigned will be public, you cannot assign to a class an methods that already exists in that class,
 -- however for an object you can.
+-- if the value is false then this sets the assign to nil.
 -- @param obj the object you wish to assign
 -- @param ... list of assignments to be made to object, these have to be tables of functions
 -- @usage object = object:assign ( ... )
@@ -1290,18 +1296,26 @@ function classy:assign ( obj, ... )
             local next = next
             for k, v in next, methodData, nil do
                if not tonumber ( k ) then
-                  if type ( v ) ~= types.func then
+                  if type ( v ) ~= types.func  and not ( type ( v ) == types.bool and not v ) then
                      myError ( 'bad entry for assign, expect format { Table of Methods }, entry ' .. k .. ' is a ' .. type ( v ) )
                   else
+                     if type ( v ) == types.bool then
+                        v = nil -- if we sent true as the value we want to nil the function
+                     end
                      if internalID [ GETINTERNALID_RSLT ] then -- class type
                         local methods = rawget ( obj, types.methodsStore ) or { }
                         if methods [ k ] then
                            myError ( 'bad entry for assign, method ' .. k .. ' already exists for class' )
                         else                        
-                           methods [ k ] = { private = false, method = v }
+                           if v ~= nil then
+                              methods [ k ] = { private = false, method = v }
+                           else
+                              methods [ k ] = nil
+                           end
                         end
                         rawset ( obj, types.methodsStore, methods )
                      else -- object type
+                        if v ~= nil then
                            rawset (obj, k, 
                               function ( ... ) 
                                  errorLayer = errorLayer + 1
@@ -1312,6 +1326,9 @@ function classy:assign ( obj, ... )
                                  return result
                               end
                            )
+                        else
+                           rawset ( obj, k, nil )
+                        end
                      end
                   end
                else

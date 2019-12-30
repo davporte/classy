@@ -4,12 +4,12 @@
 -- @usage Stack = require ( 'stack' )
 -- @author David Porter
 -- @module stack
--- @release 1.0.0
+-- @release 1.0.2
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local stack = {
-	 _VERSION = ... .. '.lua 1.0.1',
+	 _VERSION = ... .. '.lua 1.0.2',
      _URL = '',
      _DESCRIPTION = [[
       ============================================================================
@@ -88,10 +88,12 @@ local function popFromStack ( obj, dontRemove )
       obj.stack [ #obj.stack ] = nil
       obj.stackCount = obj.stackCount - 1
     end
-    obj.logEntity.Log_Info (  'popped item from stack "', result, '" stackID:', obj )
+    -- obj.myLogger:logFromModule_Info ( stack._MODULENAME, 'popped item from stack "', result, '" stackID:', obj ) -- alternative way to call, infact this is what the next line calls
+    obj.myLogger:Log_Info ( 'popped item from stack "', result, '" stackID:', obj )
     return result
   else
-    obj.logEntity.Log_Info ( 'no item to pop from stack', ' stackID:', obj  )
+    -- obj.myLogger:logFromModule_Info ( stack._MODULENAME, 'no item to pop from stack', ' stackID:', obj  ) -- alternative way to call, infact this is what the next line calls
+    obj.myLogger:Log_Info ( 'no item to pop from stack', ' stackID:', obj  )
     return nil
   end
 end
@@ -103,7 +105,8 @@ end
 local function pushToStack ( obj, item )
   obj.stack [ #obj.stack + 1 ] = item
   if item ~= nil then
-    obj.logEntity.Log_Info ( 'pushed item to stack "', item, '" stackID:', obj  )
+    -- obj.myLogger:logFromModule_Info ( stack._MODULENAME, 'pushed item to stack "', item, '" stackID:', obj  ) -- alternative way to call, infact this is what the next line calls
+    obj.myLogger:Log_Info ( 'pushed item to stack "', item, '" stackID:', obj  )
     obj.stackCount = obj.stackCount + 1
   end
 end
@@ -136,7 +139,8 @@ local function stackGet ( obj, howMany, dontRemove )
     
     return allResult
   else
-    obj.logEntity.Log_Error ( 'attempt to pull a non numerical number of items value from stackID:', obj  )
+    -- obj.myLogger:logFromModule_Error  ( obj, 'attempt to pull a non numerical number of items value from stackID:', obj  ) -- alternative way to call, infact this is what the next line calls
+    obj.myLogger:Log_Error  ( 'attempt to pull a non numerical number of items value from stackID:', obj  )
   end
 end
 
@@ -157,6 +161,7 @@ return classy:newClass(
                     obj.stackCount = #obj.stack -- you may have prepopulated the stack
                     -- check to see if the class is registerd by the logger, if not register it so we get the Log_ functions created
                     obj.logEntity = getmetatable ( obj )
+
                     if not obj.myLogger:registerState ( obj.logEntity ) then
                       obj.myLogger:registerModule ( obj.logEntity )
                     end

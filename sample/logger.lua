@@ -5,13 +5,13 @@
 -- @usage Logger = require ( 'logger ' )
 -- @author David Porter
 -- @module logger
--- @release 1.0.1
+-- @release 1.0.3
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local logger = {
    --- version details
-   _VERSION = ... .. '.lua 1.0.2',
+   _VERSION = ... .. '.lua 1.0.3',
      --- Git Hub Location of the master branch
      _URL = '',
       --- the current module description
@@ -212,7 +212,7 @@ local function changeModuleLogState ( obj, moduleName, level, state )
       obj.currentLogLevels = knownLogLevels
       return true
     else
-      return false, selfLogger ( obj, 'module ' .. moduleName .. ' is unregistered for log level ' .. level )
+      return false, selfLogger ( obj, 'module ' .. tostring ( moduleName ) .. ' is unregistered for log level ' .. level )
     end
   else
     return false, selfLogger ( obj, 'unkown log level ' .. level .. ', ignored' )
@@ -275,17 +275,29 @@ local function installOrRemoveLoggingOnModule ( obj, moduleName, install, defaul
       end
       specificModuleOverRide.masterLogState = defaultState
       -- the first logger created only
-      if not  moduleLocation [ CONSTANTS.LOGPREFIX .. k ] then
+      if not moduleLocation [ CONSTANTS.LOGPREFIX .. k ] then
         -- add the logger function to that module specifically, so it can be called using moduleName.Log_LOGLEVEL ( ... )
         -- we do a test to see how the user made the call, we expect .Log_Level, however if you called with :Log_Level we fix it up
-        moduleLocation [ CONSTANTS.LOGPREFIX .. k ] = function ( ... )
-                                                        return argsCleaner ( obj, moduleName, k, ... )
-                                                      end
+        if obj.is_a and obj:is_a () then -- classy object
+                  local assignDetails = { }
+                  assignDetails [ CONSTANTS.LOGPREFIX .. k ] = function ( caller, ... ) return caller [ CONSTANTS.METHODS.LOGFROMMODULE .. '_' .. k ] ( caller, moduleName, ... ) end
+                  classy:assign ( obj, assignDetails )
+          else -- not a classy object
+            moduleLocation [ CONSTANTS.LOGPREFIX .. k ] = function ( ... )
+                                                return argsCleaner ( obj, moduleName, k, ... )
+                                              end
+          end
       end
     else
       specificModuleOverRide.masterLogState = nil
       -- remove the logger from that module
-      moduleLocation [ CONSTANTS.LOGPREFIX .. k ] = nil
+      if obj.is_a and obj:is_a () then -- classy object
+                  local assignDetails = { }
+                  assignDetails [ CONSTANTS.LOGPREFIX .. k ] = false
+                  classy:assign ( obj, assignDetails )
+        else -- not a classy object
+          moduleLocation [ CONSTANTS.LOGPREFIX .. k ] = nil
+        end
     end
 
     if tableIsEmpty ( specificModuleOverRide ) then
@@ -381,8 +393,16 @@ local function addOrRemoveLogLevel ( obj, level, addOrRemove, defaultState )
         if not _G [ globalAddFunction ] then -- we only add to _G if no other logger has this already
           classy:addToProtectionIn_G ( CONSTANTS.LOGPREFIX .. level, function ( ... ) return obj [ CONSTANTS.METHODS.LOG ] ( obj, level, ... ) end )
         end
+        -- add this level to the logger itself, so we can call logFromModule:Log_Info etc
+        local assignDetails = { }
+        assignDetails [ CONSTANTS.METHODS.LOGFROMMODULE .. '_' .. level ] = function ( caller, moduleName, ... ) return caller [ CONSTANTS.METHODS.LOGFROMMODULE ] ( caller, moduleName, level, ... ) end
+        classy:assign ( obj, assignDetails )
       else
         knownLogLevels [ level ] = nil
+        -- remove this level from the logger itself
+        local assignDetails = { }
+        assignDetails [ CONSTANTS.METHODS.LOGFROMMODULE .. '_' .. level ] = false
+        classy:assign ( obj, assignDetails )
         classy:removeFromProtectionIn_G ( CONSTANTS.LOGPREFIX .. level )
       end
 
