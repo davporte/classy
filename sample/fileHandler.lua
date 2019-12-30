@@ -1,9 +1,9 @@
 ------------
 -- creates a file handler class.
 -- designed for use with the classy object creator
--- @usage Stack = require ( 'stack' )
+-- @usage FileHandler = require ( 'fileHandler' )
 -- @author David Porter
--- @module stack
+-- @module fileHandler
 -- @release 1.0.0
 -- @license MIT
 -- @copyright (c) 2019 David Porter
