@@ -68,21 +68,21 @@ FileHandler = require ( 'sample.FileHandler' )
 
 NewFileHandler = classy:newClass( FileHandler,
   classy:initMethod (
-                  -- example call of the super init method to construct this object
-                  function ( obj, args )
-      		   		classy:callSuperMethod ( obj, obj.super.init, args )
-                  end       
-                  ),       
-                  -- example overloading of a method in the origional class
-                  classy:addPrivateMethod ( 'fileNameBuilder',
-                    function  ( obj, fileDetails )
-                      if type ( fileDetails ) == 'table' then
-                        local fileName, path = fileDetails.fileName, fileDetails.path
-                        if not path then path = system.TemporaryDirectory end
-                        fileDetails = system.pathForFile ( fileName, path )
-                      end
-                      return fileDetails
-                  end
-                  )
-                )
+          -- example call of the super init method to construct this object
+          function ( obj, args )
+            classy:callSuperMethod ( obj, obj.super.init, args )
+          end       
+          ),       
+          -- example overloading of a method in the origional class
+          classy:addPrivateMethod ( 'fileNameBuilder',
+            function  ( obj, fileDetails )
+              if type ( fileDetails ) == 'table' then
+                local fileName, path = fileDetails.fileName, fileDetails.path
+                if not path then path = system.TemporaryDirectory end
+                fileDetails = system.pathForFile ( fileName, path )
+              end
+              return fileDetails
+          end
+          )
+        )
 ```
