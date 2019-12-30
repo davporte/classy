@@ -240,6 +240,8 @@ return classy:newClass(
                 -- @function '+' overloaded
                 -- @param obj1 the first stack object
                 -- @param obj2 the second stack object, or another object type
+                -- @usage newStack = oldStack + anotherStack | object [ + ... + [ + anotherStack | object ] ]
+                -- @return A new stack object
                 function ( obj1, obj2 )
                   -- get a copy of each stack
                   local copy1 = obj1 [ CONSTANTS.METHODS.DRAIN ] ( obj1 )
