@@ -4,12 +4,12 @@
 -- @usage Stack = require ( 'stack' )
 -- @author David Porter
 -- @module stack
--- @release 1.0.3
+-- @release 1.0.4
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local stack = {
-	 _VERSION = ... .. '.lua 1.0.3',
+	 _VERSION = ... .. '.lua 1.0.4',
      _URL = '',
      _DESCRIPTION = [[
       ============================================================================
@@ -165,8 +165,8 @@ return classy:newClass(
                     classy:setDefaultValues ( obj, args, { stack = {}, myLogger = _G.myLogger } )
                     obj.stackCount = #obj.stack -- you may have prepopulated the stack
                     -- check to see if the class is registerd by the logger, if not register it so we get the Log_ functions created
-                    obj.logEntity = getmetatable ( obj )
-
+                    -- ensure we do with this base class, any future classes build on this we want to use the base class as it is the registerd module
+                    obj.logEntity = classy:getBaseClass ( getmetatable ( obj ) )
                     if not obj.myLogger:registerState ( obj.logEntity ) then
                       obj.myLogger:registerModule ( obj.logEntity )
                     end

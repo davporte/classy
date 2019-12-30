@@ -1,0 +1,831 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ldoc</h1>
+
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Tables">Tables</a></li>
+<li><a href="#Fields">Fields</a></li>
+<li><a href="#Local_Functions">Local Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><strong>stack</strong></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>stack</code></h1>
+<p>creates a file handler class.</p>
+<p>
+ designed for use with the classy object creator</p>
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">Stack = require ( &apos;stack&apos; )
+</pre>
+    </ul>
+    <h3>Info:</h3>
+    <ul>
+        <li><strong>Copyright</strong>: (c) 2019 David Porter</li>
+        <li><strong>Release</strong>: 1.0.0</li>
+        <li><strong>License</strong>: MIT</li>
+        <li><strong>Author</strong>: David Porter</li>
+    </ul>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#initMethod">initMethod (obj, args)</a></td>
+	<td class="summary">sets the default read behavour flags</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#setDefaultReadBehavour">setDefaultReadBehavour (obj, param1, param2)</a></td>
+	<td class="summary">setDefaultReadBehavour can adjust the default corona behavour of one line at a time for a read, it can also force a file close at the end
+ takes to paramters param1, param2, they are not manditory but if there one must be boolean the other a string
+ the boolean sets the closeAfterRead and the string the adjusted file default read method.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#openFile">openFile (obj, fileDetails, mode)</a></td>
+	<td class="summary">opens a file</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#closeFile">closeFile (obj, fhd)</a></td>
+	<td class="summary">closes a file</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#readFrom">readFrom (obj, fhd, ...)</a></td>
+	<td class="summary">reads from a file</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#writeTo">writeTo (obj, fhd, ...)</a></td>
+	<td class="summary">writes to a file</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#fileExists">fileExists (obj, fileName)</a></td>
+	<td class="summary">tests if a file exists or not</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#copyFile">copyFile (obj, fromFile, toFile)</a></td>
+	<td class="summary">copies a file</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#fileIsEmpty">fileIsEmpty (obj, fileName)</a></td>
+	<td class="summary">tests to see if a file is empty</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#fileNameBuilder">fileNameBuilder (obj, fileDetails)</a></td>
+	<td class="summary">builds file name if path table otherwise returns orgional value.</td>
+	</tr>
+</table>
+<h2><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#CONSTANTS">CONSTANTS</a></td>
+	<td class="summary">constants used by the module</td>
+	</tr>
+</table>
+<h2><a href="#Fields">Fields</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#_MODULENAME">_MODULENAME</a></td>
+	<td class="summary">the module name</td>
+	</tr>
+</table>
+<h2><a href="#Local_Functions">Local Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#openFileLocal">openFileLocal (obj, fileDetails, mode)</a></td>
+	<td class="summary">opens a file with mode "r" by default or mode defined by "mode"
+ "r" — Read mode (the default); the file pointer is placed at the beginning of the file.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#fileState">fileState (fhd)</a></td>
+	<td class="summary">checks a file "fhd" to see if real or already closed</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#closeFileLocal">closeFileLocal (obj, fhd)</a></td>
+	<td class="summary">attempts to close a file "fhd"</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#readFileLocal">readFileLocal (obj, fhd, ...)</a></td>
+	<td class="summary">attempts a read on a file "fhd"</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#writeFileLocal">writeFileLocal (obj, fhd, ...)</a></td>
+	<td class="summary">attempts a write on a file "fhd"</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#fileExistsLocal">fileExistsLocal (obj, fileName)</a></td>
+	<td class="summary">tests if a file exists or not</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#copyToDocumentsDirectory">copyToDocumentsDirectory (obj, overWrite, ...)</a></td>
+	<td class="summary">copies the Resources to the DocumentsDirectory - system.DocumentsDirectory</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "initMethod"></a>
+    <strong>initMethod (obj, args)</strong>
+    </dt>
+    <dd>
+    sets the default read behavour flags
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the calling object
+        </li>
+        <li><span class="parameter">args</span>
+         optional arguments sent to create the file handler
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        No return value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">myFileHandler = FileHandler ()</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "setDefaultReadBehavour"></a>
+    <strong>setDefaultReadBehavour (obj, param1, param2)</strong>
+    </dt>
+    <dd>
+    setDefaultReadBehavour can adjust the default corona behavour of one line at a time for a read, it can also force a file close at the end
+ takes to paramters param1, param2, they are not manditory but if there one must be boolean the other a string
+ the boolean sets the closeAfterRead and the string the adjusted file default read method.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the file hander object
+        </li>
+        <li><span class="parameter">param1</span>
+         the first parameter to check
+        </li>
+        <li><span class="parameter">param2</span>
+         the second parameter to check
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        No return value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">fileHandler:setDefaultReadBehavour ( param1 [, param <span class="number">2</span> ] )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "openFile"></a>
+    <strong>openFile (obj, fileDetails, mode)</strong>
+    </dt>
+    <dd>
+    opens a file
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the file handler object
+        </li>
+        <li><span class="parameter">fileDetails</span>
+         is an actual path or a table containing filename/path
+        </li>
+        <li><span class="parameter">mode</span>
+         is the mode you want the file to open in, if not specified then this is the defaultReadBehavour "r"
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a file handler or nil
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="fileHandler.html#openFileLocal">openFileLocal</a>
+    </ul>
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> fhd = fileHandler:openFile ( { fileName = fileName [, path = pathToFile ] } [, mode ])</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "closeFile"></a>
+    <strong>closeFile (obj, fhd)</strong>
+    </dt>
+    <dd>
+    closes a file
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the file handler object
+        </li>
+        <li><span class="parameter">fhd</span>
+         the file you wish to close
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if success false if failed
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="fileHandler.html#closeFileLocal">closeFileLocal</a>
+    </ul>
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> success = fileHandler:close ()</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "readFrom"></a>
+    <strong>readFrom (obj, fhd, ...)</strong>
+    </dt>
+    <dd>
+    reads from a file
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the file handler object
+        </li>
+        <li><span class="parameter">fhd</span>
+         the file you wish to read from
+        </li>
+        <li><span class="parameter">...</span>
+         optional mode settings
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        readData if success nil if failed
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="fileHandler.html#readFileLocal">readFileLocal</a>
+    </ul>
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> data = fileHandler:readFrom ( fileId [ , ... ] )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "writeTo"></a>
+    <strong>writeTo (obj, fhd, ...)</strong>
+    </dt>
+    <dd>
+    writes to a file
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the file handler object
+        </li>
+        <li><span class="parameter">fhd</span>
+         the file you wish to write from
+        </li>
+        <li><span class="parameter">...</span>
+         optional data being writen
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        No return value
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="fileHandler.html#writeFileLocal">writeFileLocal</a>
+    </ul>
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">fileHandler:writeTo ( fileId [ , ... ] )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "fileExists"></a>
+    <strong>fileExists (obj, fileName)</strong>
+    </dt>
+    <dd>
+    tests if a file exists or not
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the file handler object
+        </li>
+        <li><span class="parameter">fileName</span>
+         the file name
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if file exists, false if it does not
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="fileHandler.html#fileExistsLocal">fileExistsLocal</a>
+    </ul>
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> result = fileHandler:fileExists ( { fileName = fileName [, path = pathToFile ] } )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "copyFile"></a>
+    <strong>copyFile (obj, fromFile, toFile)</strong>
+    </dt>
+    <dd>
+    copies a file
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the file handler object
+        </li>
+        <li><span class="parameter">fromFile</span>
+         the file to copy from
+        </li>
+        <li><span class="parameter">toFile</span>
+         the file to copy to
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        returns true on success or false on error
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> result = fileHandler:copyFile ( fromFileId, toFileId )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "fileIsEmpty"></a>
+    <strong>fileIsEmpty (obj, fileName)</strong>
+    </dt>
+    <dd>
+    tests to see if a file is empty
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the file handler object
+        </li>
+        <li><span class="parameter">fileName</span>
+         the file name
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        returns true if empty or false if file does not exist or is not empty
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> result = fileHandler:fileIsEmpty ( { fileName = fileName [, path = pathToFile ] } )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "fileNameBuilder"></a>
+    <strong>fileNameBuilder (obj, fileDetails)</strong>
+    </dt>
+    <dd>
+    builds file name if path table otherwise returns orgional value.
+ You may have to overload this with your own method if not using Corona SDK
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the file handler object
+        </li>
+        <li><span class="parameter">fileDetails</span>
+         either a path table or a fileName as a string
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a filename format for Corona SDK
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Tables"></a>Tables</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "CONSTANTS"></a>
+    <strong>CONSTANTS</strong>
+    </dt>
+    <dd>
+    constants used by the module
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">METHODS</span>
+        the set default read behavour method name
+        </li>
+        <li><span class="parameter">OPENFILE</span>
+        the open file  method name
+        </li>
+        <li><span class="parameter">CLOSEFILE</span>
+        the close file  method name
+        </li>
+        <li><span class="parameter">READ</span>
+        the read file method name
+        </li>
+        <li><span class="parameter">FILEEXISTS</span>
+        the file exists method name
+        </li>
+        <li><span class="parameter">COPYFILE</span>
+        the copy file  method name
+        </li>
+        <li><span class="parameter">FILEISEMPTY</span>
+        the file IsEmpty method name
+        </li>
+        <li><span class="parameter">WRITE</span>
+        the write file method
+        </li>
+        <li><span class="parameter">FILENAMEBUILDER</span>
+        the filename builder (overload this if not using corona SDK in your own class object)
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Fields"></a>Fields</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "_MODULENAME"></a>
+    <strong>_MODULENAME</strong>
+    </dt>
+    <dd>
+    the module name
+
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "openFileLocal"></a>
+    <strong>openFileLocal (obj, fileDetails, mode)</strong>
+    </dt>
+    <dd>
+    opens a file with mode "r" by default or mode defined by "mode"
+ "r" — Read mode (the default); the file pointer is placed at the beginning of the file.
+"w" — Write-only mode; overwrites the file if the file exists. If the file does not exist, creates a new file for writing.
+ "a" — Append mode (write only); the file pointer is at the end of the file if the file exists (the file is in the append mode). If the file does not exist, it creates a new file for writing.
+ "r+" — Update mode (read/write); all previous data is preserved. The file pointer will be at the beginning of the file. If the file exists, it will only be overwritten if you explicitly write to it.
+"w+" — Update mode (read/write); all previous data is erased. Overwrites the existing file if the file exists. If the file does not exist, creates a new file for reading and writing.
+"a+" — Append update mode (read/write); previous data is preserved and writing is only allowed at the end of file. The file pointer is at the end of the file if the file exists (the file opens in the append mode). If the file does not exist, it creates a new file for reading and writing.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the file handler object
+        </li>
+        <li><span class="parameter">fileDetails</span>
+         is an actual path or a table containing filename/path
+        </li>
+        <li><span class="parameter">mode</span>
+         is the mode you want the file to open in, if not specified then this is the defaultReadBehavour "r"
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a file handler or nil
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="fileHandler.html#openFile">openFile</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "fileState"></a>
+    <strong>fileState (fhd)</strong>
+    </dt>
+    <dd>
+    checks a file "fhd" to see if real or already closed
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">fhd</span>
+         the file handler you want to check
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        nil if all OK otherwise an error message
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "closeFileLocal"></a>
+    <strong>closeFileLocal (obj, fhd)</strong>
+    </dt>
+    <dd>
+    attempts to close a file "fhd"
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the file handler object
+        </li>
+        <li><span class="parameter">fhd</span>
+         the file you wish to close
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if success false if failed
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="fileHandler.html#closeFile">closeFile</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "readFileLocal"></a>
+    <strong>readFileLocal (obj, fhd, ...)</strong>
+    </dt>
+    <dd>
+    attempts a read on a file "fhd"
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the file handler object
+        </li>
+        <li><span class="parameter">fhd</span>
+         the file you wish to read from
+        </li>
+        <li><span class="parameter">...</span>
+         optional mode settings
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        readData if success nil if failed
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="fileHandler.html#readFrom">readFrom</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "writeFileLocal"></a>
+    <strong>writeFileLocal (obj, fhd, ...)</strong>
+    </dt>
+    <dd>
+    attempts a write on a file "fhd"
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the file handler object
+        </li>
+        <li><span class="parameter">fhd</span>
+         the file you wish to read from
+        </li>
+        <li><span class="parameter">...</span>
+         optional items you are putting into the file
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        No return value
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="fileHandler.html#writeTo">writeTo</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "fileExistsLocal"></a>
+    <strong>fileExistsLocal (obj, fileName)</strong>
+    </dt>
+    <dd>
+    tests if a file exists or not
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the file handler object
+        </li>
+        <li><span class="parameter">fileName</span>
+         the file name
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if file exists, false if it does not
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="fileHandler.html#fileExists">fileExists</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "copyToDocumentsDirectory"></a>
+    <strong>copyToDocumentsDirectory (obj, overWrite, ...)</strong>
+    </dt>
+    <dd>
+    copies the Resources to the DocumentsDirectory - system.DocumentsDirectory
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the file handler object
+        </li>
+        <li><span class="parameter">overWrite</span>
+         forces an overwrite if the file exists
+        </li>
+        <li><span class="parameter">...</span>
+         the files you want to copy
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        returns true on success or false on error
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2019-12-30 19:57:00 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
