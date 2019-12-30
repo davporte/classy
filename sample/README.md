@@ -70,7 +70,7 @@ NewFileHandler = classy:newClass( FileHandler,
   classy:initMethod (
                   -- example call of the super init method to construct this object
                   function ( obj, args )
-      		   		    classy:callSuperMethod ( obj, obj.super.init, args )
+      		   		classy:callSuperMethod ( obj, obj.super.init, args )
                   end       
                   ),       
                   -- example overloading of a method in the origional class
