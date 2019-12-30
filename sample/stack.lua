@@ -48,10 +48,15 @@ local stack = {
 -- a refernce to the various LUA types, generate them by code just incase it ever did change in the future
 local _STRINGTYPE, _NUMTYPE, _TABLETYPE, _BOOLTYPE , _FUNCTYPE = type ( '' ), type ( 9 ), type ( {} ), type ( true ), type ( function () end )
 
---- a constants used by the module
-local CONSTANTS = {
-  METHODS = { POP = 'pop', PUSH = 'push', DRAIN = 'drain', PEEK = 'peek', ISEMPTY = 'isEmpty', MEMBERS = 'members'} -- the default methods
-}
+--- constants used by the module
+local CONSTANTS = { 
+  METHODS = { POP = 'pop', -- the pop method name
+  PUSH = 'push', -- the push method name
+  DRAIN = 'drain', -- the drain method name
+  PEEK = 'peek', -- the peek method name
+  ISEMPTY = 'isEmpty', -- the is empty method name
+  MEMBERS = 'members'} -- the members method name
+} -- the default methods names
 
 -- @local require dependancies if any, this method will be removed after run creation of the module
 local function getDependancies ()
@@ -240,7 +245,7 @@ return classy:newClass(
                 -- @function '+' overloaded
                 -- @param obj1 the first stack object
                 -- @param obj2 the second stack object, or another object type
-                -- @usage newStack = oldStack + anotherStack | object [ + ... + [ + anotherStack | object ] ]
+                -- @usage local newStack = oldStack + anotherStack | object [ + ... + [ + anotherStack | object ] ]
                 -- @return A new stack object
                 function ( obj1, obj2 )
                   -- get a copy of each stack
