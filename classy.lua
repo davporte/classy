@@ -4,14 +4,14 @@
 -- such as Corona SDK
 -- @author David Porter
 -- @module classy
--- @release 1.3.2
+-- @release 1.3.3
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local classy = {
 
    --- version details
-   _VERSION = ... .. '.lua 1.3.2',
+   _VERSION = ... .. '.lua 1.3.3',
    _URL = 'https://github.com/davporte/classy',
    --- the current module description
    _DESCRIPTION = [[
@@ -473,13 +473,17 @@ local function executeMethodBound (privateState, method_name, methodClassIDOwner
       -- set the current running class
 
       classRunTracker ( c, true )
-      local returnValue = method ( ... )
+      local returnValue = { method ( ... ) }
       -- clear the current running class
       classRunTracker ( c, false )
 
       errorLayer = errorLayer - 1
 
-      return returnValue
+      if versionIsFivePointTwoOrAbove then
+         return table.unpack ( returnValue )
+      else
+         return unpack ( returnValue )
+      end
 
    end
 end
@@ -1123,10 +1127,14 @@ local function getNewObject ( class_tbl, argValue, ... )
 
                                                          errorLayer = errorLayer + 1
                                                          subclassLogger ( subLogging._RUNNING, 'object calling method ', k ) 
-                                                         local result = executeMethodBound ( v.private, k, internalID [ GETINTERNALID_VALUE ], obj, v.method, class_tbl, ... )
+                                                         local result = { executeMethodBound ( v.private, k, internalID [ GETINTERNALID_VALUE ], obj, v.method, class_tbl, ... ) }
                                                          subclassLogger ( subLogging._RUNNING, 'object finished method ', k ) 
                                                          errorLayer = errorLayer - 1
-                                                         return result
+                                                         if versionIsFivePointTwoOrAbove then
+                                                            return table.unpack ( result )
+                                                         else
+                                                            return unpack ( result )
+                                                         end                                                      
                                                       end
                                              )
                                  elseif not v.private and obj [ types.methodsStore ] [k].private then -- it already exists and a subclass already had it public, you can't now make it private
@@ -1306,7 +1314,7 @@ function classy:assign ( obj, ... )
                         local methods = rawget ( obj, types.methodsStore ) or { }
                         if methods [ k ] then
                            myError ( 'bad entry for assign, method ' .. k .. ' already exists for class' )
-                        else                        
+                        else      
                            if v ~= nil then
                               methods [ k ] = { private = false, method = v }
                            else
@@ -1320,10 +1328,14 @@ function classy:assign ( obj, ... )
                               function ( ... ) 
                                  errorLayer = errorLayer + 1
                                  subclassLogger ( subLogging._RUNNING, 'object calling assigned method ', k ) 
-                                 local result = executeMethodBound ( false, k, internalID [ GETINTERNALID_VALUE ], obj, v, obj, ... ) 
+                                 local result = { executeMethodBound ( false, k, internalID [ GETINTERNALID_VALUE ], obj, v, getmetatable ( obj ), ... ) }
                                  subclassLogger ( subLogging._RUNNING, 'object ended assigned method ', k ) 
                                  errorLayer = errorLayer  - 1
-                                 return result
+                                 if versionIsFivePointTwoOrAbove then
+                                    return table.unpack ( result )
+                                 else
+                                    return unpack ( result )
+                                 end                              
                               end
                            )
                         else
@@ -1798,10 +1810,14 @@ function classy:newClass ( base )
             c [ k ] = function ( ... ) 
                            errorLayer = errorLayer + 1
                            subclassLogger ( subLogging._RUNNING, 'class calling method ', k ) 
-                           local result = executeMethodBound ( v.private, k, classIDToAllocate, c, v.method, c, ... ) 
+                           local result = { executeMethodBound ( v.private, k, classIDToAllocate, c, v.method, c, ... ) }
                            subclassLogger ( subLogging._RUNNING, 'class ended method ', k ) 
                            errorLayer = errorLayer  - 1
-                           return result
+                           if versionIsFivePointTwoOrAbove then
+                              return table.unpack ( result )
+                           else
+                              return unpack ( result )
+                           end
                         end
          end
       end
