@@ -4,14 +4,14 @@
 -- such as Corona SDK
 -- @author David Porter
 -- @module classy
--- @release 1.3.3
+-- @release 1.3.4
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local classy = {
 
    --- version details
-   _VERSION = ... .. '.lua 1.3.3',
+   _VERSION = ... .. '.lua 1.3.4',
    _URL = 'https://github.com/davporte/classy',
    --- the current module description
    _DESCRIPTION = [[
@@ -160,6 +160,7 @@ end
 overloadOperators = newOverloadOperators
 
 -- @local notes the LUA version as a number id 5.2 or above, thisis due to __gc needing a proxy if it is below 5.2
+-- all classy objects get this method
 local versionIsFivePointTwoOrAbove =    _VERSION:gsub("[^0-9.]", "") 
 versionIsFivePointTwoOrAbove = tonumber ( versionIsFivePointTwoOrAbove ) >= 5.2
 
@@ -796,6 +797,14 @@ end
 
 -- @local these are the reserved functions all classes and object have. You cannot overload them
 local reservedClassFunctions = {
+   --- a protected function to return the version state of LUA
+   -- @within  External Calls (Protected)
+   -- @return true if LUA above 5.2, otherwise false
+   -- @usage obj:isVersionFivePointTwoOrAbove (  )
+   -- @usage class:isVersionFivePointTwoOrAbove (  )
+   isVersionFivePointTwoOrAbove = function ()
+      return versionIsFivePointTwoOrAbove
+   end,
    --- a protected function to test class or object type, you CANNOT overload this
    -- @within  External Calls (Protected)
    -- @param self the object or class you are testing
