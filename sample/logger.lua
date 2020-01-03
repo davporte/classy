@@ -5,13 +5,13 @@
 -- @usage Logger = require ( 'logger ' )
 -- @author David Porter
 -- @module logger
--- @release 1.0.3
+-- @release 1.0.4
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local logger = {
    --- version details
-   _VERSION = ... .. '.lua 1.0.3',
+   _VERSION = ... .. '.lua 1.0.4',
      --- Git Hub Location of the master branch
      _URL = '',
       --- the current module description
@@ -58,7 +58,7 @@ local _STRINGTYPE, _NUMTYPE, _TABLETYPE, _BOOLTYPE , _FUNCTYPE = type ( '' ), ty
 local CONSTANTS = {
   LOGLEVELS = { ERROR = 'Error', WARNING = 'Warning', INFO = 'Info', DEBUG = 'Debug'}, -- the default log levels 
   METHODS = { ADDLOGLEVEL = 'addLogLevel', LOG = 'log' , SETLOGSTATE = 'setLogState', SETMYOUTPUT = 'setMyOutput', REMOVELOGLEVEL = 'removeLogLevel', REGISTERMODULE = 'registerModule',
-              LOGFROMMODULE = 'logFromModule', DEREGISTERMODULE = 'deregisterModule', DESCRIBE = 'describe', SETMODULELOGSTATE = 'setModuleLogState', REGISTERSTATE = 'registerState' }, -- the default methods
+              LOGFROMMODULE = 'logFromModule', DEREGISTERMODULE = 'deregisterModule', DESCRIBE = 'describe', SETMODULELOGSTATE = 'setModuleLogState', REGISTERSTATE = 'registerState', GETLOGPREFIX = 'getLogPrefix' }, -- the default methods
   LOGPREFIX = 'Log_', -- a value placed in _G so the user can call the logger directly Log_LOGLEVEL ( ... )
   GLOBALID = '_G' -- a value to mark a function pusged to _G that it is global and not module local
 }
@@ -689,6 +689,15 @@ return classy:newClass(
 
                     return description
                   end
+                ),
+              classy:addMethod ( CONSTANTS.METHODS.GETLOGPREFIX, 
+                --- returns the Log prefix the logger uses, so other module can know this without magic numbers
+                -- @param obj the calling object
+                -- @return the log prefix
+                -- @usage logger:getLogPrefix ()
+                function ( obj )
+                  return CONSTANTS.LOGPREFIX
+                end
                 ),
 
               classy:addNotes (logger._VERSION .. '\n\n' .. logger._DESCRIPTION .. '\n' .. logger._LICENSE)
