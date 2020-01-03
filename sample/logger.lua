@@ -692,6 +692,7 @@ return classy:newClass(
                 ),
               classy:addMethod ( CONSTANTS.METHODS.GETLOGPREFIX, 
                 --- returns the Log prefix the logger uses, so other module can know this without magic numbers
+                -- @function getLogPrefix
                 -- @param obj the calling object
                 -- @return the log prefix
                 -- @usage logger:getLogPrefix ()
