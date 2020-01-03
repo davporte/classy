@@ -4,12 +4,12 @@
 -- @usage Stack = require ( 'stack' )
 -- @author David Porter
 -- @module stack
--- @release 1.0.4
+-- @release 1.0.5
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local stack = {
-	 _VERSION = ... .. '.lua 1.0.4',
+   _VERSION = ... .. '.lua 1.0.5',
      _URL = '',
      _DESCRIPTION = [[
       ============================================================================
@@ -125,7 +125,7 @@ local function stackGet ( obj, howMany, dontRemove )
   if howMany == nil then howMany = 1 end
   if type ( howMany ) == _NUMTYPE then
     local result
-    if howmany == 1 then
+    if howMany == 1 then
       return popFromStack ( obj )
     end
 
