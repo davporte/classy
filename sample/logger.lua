@@ -5,13 +5,13 @@
 -- @usage Logger = require ( 'logger ' )
 -- @author David Porter
 -- @module logger
--- @release 1.0.4
+-- @release 1.0.5
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local logger = {
    --- version details
-   _VERSION = ... .. '.lua 1.0.4',
+   _VERSION = ... .. '.lua 1.0.5',
      --- Git Hub Location of the master branch
      _URL = '',
       --- the current module description
@@ -62,6 +62,9 @@ local CONSTANTS = {
   LOGPREFIX = 'Log_', -- a value placed in _G so the user can call the logger directly Log_LOGLEVEL ( ... )
   GLOBALID = '_G' -- a value to mark a function pusged to _G that it is global and not module local
 }
+
+-- a store to keep note of which objects expect the global Log to exists
+local globalLogUsers
 
 -- @section  internal functions
 
@@ -280,7 +283,7 @@ local function installOrRemoveLoggingOnModule ( obj, moduleName, install, defaul
         -- we do a test to see how the user made the call, we expect .Log_Level, however if you called with :Log_Level we fix it up
         if obj.is_a and obj:is_a () then -- classy object
                   local assignDetails = { }
-                  assignDetails [ CONSTANTS.LOGPREFIX .. k ] = function ( caller, ... ) return caller [ CONSTANTS.METHODS.LOGFROMMODULE .. '_' .. k ] ( caller, moduleName, ... ) end
+                  assignDetails [ CONSTANTS.LOGPREFIX .. k .. '_' .. moduleName ] = function ( caller, ... ) return caller [ CONSTANTS.LOGPREFIX .. k ] ( caller, moduleName, ... ) end
                   classy:assign ( obj, assignDetails )
           else -- not a classy object
             moduleLocation [ CONSTANTS.LOGPREFIX .. k ] = function ( ... )
@@ -293,7 +296,7 @@ local function installOrRemoveLoggingOnModule ( obj, moduleName, install, defaul
       -- remove the logger from that module
       if obj.is_a and obj:is_a () then -- classy object
                   local assignDetails = { }
-                  assignDetails [ CONSTANTS.LOGPREFIX .. k ] = false
+                  assignDetails [CONSTANTS.LOGPREFIX .. k .. '_' .. moduleName ] = false
                   classy:assign ( obj, assignDetails )
         else -- not a classy object
           moduleLocation [ CONSTANTS.LOGPREFIX .. k ] = nil
@@ -388,14 +391,21 @@ local function addOrRemoveLogLevel ( obj, level, addOrRemove, defaultState )
     else
       if addOrRemove then
         knownLogLevels [ level ] = { masterLogState = defaultState, objectSpecificOverRides = nil }
+        globalLogUsers = globalLogUsers or {}
         -- protect this name in _G so user can do a call to Log_LOGLEVEL, note if you do lots of logging you may want a local reference to this in that area
         local globalAddFunction = CONSTANTS.LOGPREFIX .. level
         if not _G [ globalAddFunction ] then -- we only add to _G if no other logger has this already
           classy:addToProtectionIn_G ( CONSTANTS.LOGPREFIX .. level, function ( ... ) return obj [ CONSTANTS.METHODS.LOG ] ( obj, level, ... ) end )
+          -- create a obj ( logger ) weak reference, so if the loggers go so do these references
+          globalLogUsers [ globalAddFunction ] = setmetatable ( {} , { _mode = 'k' } )
         end
-        -- add this level to the logger itself, so we can call logFromModule:Log_Info etc
+
+        -- note the logger holding this, hold them as weak references
+        globalLogUsers [ globalAddFunction ] [ obj ] = true
+
+        -- add this level to the logger itself, so we can call obj.myLogger:Log_Info etc, expect the following parameters :LOG_XXX ( moduleName, ... ) 
         local assignDetails = { }
-        assignDetails [ CONSTANTS.METHODS.LOGFROMMODULE .. '_' .. level ] = function ( caller, moduleName, ... ) return caller [ CONSTANTS.METHODS.LOGFROMMODULE ] ( caller, moduleName, level, ... ) end
+        assignDetails [  CONSTANTS.LOGPREFIX .. level  ] = function ( caller, moduleName, ... ) return caller [ CONSTANTS.METHODS.LOGFROMMODULE ] ( caller, moduleName, level, ... ) end
         classy:assign ( obj, assignDetails )
       else
         knownLogLevels [ level ] = nil
@@ -403,7 +413,16 @@ local function addOrRemoveLogLevel ( obj, level, addOrRemove, defaultState )
         local assignDetails = { }
         assignDetails [ CONSTANTS.METHODS.LOGFROMMODULE .. '_' .. level ] = false
         classy:assign ( obj, assignDetails )
-        classy:removeFromProtectionIn_G ( CONSTANTS.LOGPREFIX .. level )
+
+        local globalRemoveFunction = CONSTANTS.LOGPREFIX .. level
+        globalLogUsers [ globalRemoveFunction ] [ obj ] = nil
+        if tableIsEmpty ( globalLogUsers [ globalRemoveFunction ] ) then
+          classy:removeFromProtectionIn_G ( CONSTANTS.LOGPREFIX .. level )
+          globalLogUsers [ globalRemoveFunction ] = nil
+          if tableIsEmpty ( globalLogUsers [ globalRemoveFunction ] ) then
+            globalLogUsers = nil
+          end
+        end
       end
 
       -- give state change to the registered modules to
