@@ -25,7 +25,7 @@ The default log levels, and their default states are;
 |**Warning (on/true)** | Log_Warning ( ... ) | myLogger:Log_Warning ( moduleName, ... ) | myLogger:Log_Warning_moduleName ( ... ) | myLogger:log ( 'Warning', ... ) |
 |**Error (on/true)**| Log_Error ( ... ) | myLogger:Log__Error ( moduleName, ... ) | myLogger:Log_Error_moduleName ( ... ) | myLogger:log ( 'Error', ... ) |
 
-\* \- Log_XXX -> calls log directly, Log_XXX_moduleName -> calls Log_XXX first -> calls log directly
+\* \- Log_XXX -> calls log directly, Log_XXX_moduleName -> calls Log_XXX -> calls log directly
 
 ## Stack
 Example stack class. This example also shows logger being passed as a parameter. It also demonstates the overloading of the + operator.
