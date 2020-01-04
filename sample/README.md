@@ -20,12 +20,12 @@ The default log levels, and their default states are;
 
 | Name | Called using _G* | Called from module A | Called from Module B | Called Directly |
 |------------------|--------------|---------|------------|----------|
-|**Debug (off/fasle)** | Log_Debug ( ... ) | myLogger:Log_Debug ( ... ) | myLogger:logFromModule_Debug ( moduleName, ... ) | myLogger:log ( 'Debug', ... ) |
-|**Info (off/false)**| Log_Info ( ... ) | myLogger:Log_Info ( ... ) | myLogger:logFromModule_Info ( moduleName, ... ) | myLogger:log ( 'Info', ... ) |
-|**Warning (on/true)** | Log_Warning ( ... ) | myLogger:Log_Warning ( ... ) | myLogger:logFromModule_Warning ( moduleName, ... ) | myLogger:log ( 'Warning', ... ) |
-|**Error (on/true)**| Log_Error ( ... ) | myLogger:Log__Error ( ... ) | myLogger:logFromModule_Error ( moduleName, ... ) | myLogger:log ( 'Error', ... ) |
+|**Debug (off/fasle)** | Log_Debug ( ... ) | myLogger:Log_Debug ( ... ) | myLogger:Log_Debug_moduleName ( ... ) | myLogger:log ( 'Debug', ... ) |
+|**Info (off/false)**| Log_Info ( ... ) | myLogger:Log_Info ( ... ) | myLogger:Log_Info_moduleName ( ... ) | myLogger:log ( 'Debug', ... ) |
+|**Warning (on/true)** | Log_Warning ( ... ) | myLogger:Log_Warning ( ... ) | myLogger:Log_Warning_moduleName ( moduleName, ... ) | myLogger:log ( 'Warning', ... ) |
+|**Error (on/true)**| Log_Error ( ... ) | myLogger:Log__Error ( ... ) | myLogger:Log_Error_moduleName ( ... ) | myLogger:log ( 'Error', ... ) |
 
-\* \- These are in order of speed slowest to fastest call
+\* \- Log_XXX -> calls log directly, Log_XXX_moduleName -> calls Log_XXX first
 
 ## Stack
 Example stack class. This example also shows logger being passed as a parameter. It also demonstates the overloading of the + operator.
