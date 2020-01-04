@@ -21,11 +21,11 @@ The default log levels, and their default states are;
 | Name | Called using _G* | Called from module A | Called from Module B | Called Directly |
 |------------------|--------------|---------|------------|----------|
 |**Debug (off/fasle)** | Log_Debug ( ... ) | myLogger:Log_Debug ( moduleName, ... ) | myLogger:Log_Debug_moduleName ( ... ) | myLogger:log ( 'Debug', ... ) |
-|**Info (off/false)**| Log_Info ( ... ) | myLogger:Log_Info ( moduleName, ... ) | myLogger:Log_Info_moduleName ( ... ) | myLogger:log ( 'Debug', ... ) |
+|**Info (off/false)**| Log_Info ( ... ) | myLogger:Log_Info ( moduleName, ... ) | myLogger:Log_Info_moduleName ( ... ) | myLogger:log ( 'Info', ... ) |
 |**Warning (on/true)** | Log_Warning ( ... ) | myLogger:Log_Warning ( moduleName, ... ) | myLogger:Log_Warning_moduleName ( ... ) | myLogger:log ( 'Warning', ... ) |
 |**Error (on/true)**| Log_Error ( ... ) | myLogger:Log__Error ( moduleName, ... ) | myLogger:Log_Error_moduleName ( ... ) | myLogger:log ( 'Error', ... ) |
 
-\* \- Log_XXX -> calls log directly, Log_XXX_moduleName -> calls Log_XXX first
+\* \- Log_XXX -> calls log directly, Log_XXX_moduleName -> calls Log_XXX first -> calls log directly
 
 ## Stack
 Example stack class. This example also shows logger being passed as a parameter. It also demonstates the overloading of the + operator.
