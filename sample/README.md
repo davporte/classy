@@ -94,7 +94,7 @@ Example that demonstrates the use of embedded classes e.g. Stack, also shows the
 classy:assign ( obj, _G.myUtils:giveMeFunctions (  unpack ( CONSTANTS.TOASSIGNTOOBJECT ) ) )
 ```
 
-Mixins are held in the file [utils.lua]() and consumed by allocating _G.myUtils 
+Mixins are held in the file [utils.lua](http://htmlpreview.github.com/?https://github.com/davporte/classy/blob/master/sample/doc/utils.html) and consumed by allocating _G.myUtils 
 
 ```LUA
 _G.myUtils = require ( 'utils' )
