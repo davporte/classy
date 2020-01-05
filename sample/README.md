@@ -106,4 +106,4 @@ MathParser can then be used to pass strings and turn these strings into executab
 print ( myParser:compileAndExecute ( 'a, "b", c [2] , 7', 'a * a', { a= 6, b= 2, c = {2,4,6} }  ) )
 ```
 
-[Full Documentation for MathParser](http://htmlpreview.github.com/?https://github.com/davporte/classy/blob/master/sample/mathParser.lua)
+[Full Documentation for MathParser](http://htmlpreview.github.com/?https://github.com/davporte/classy/blob/master/sample/doc/mathParser.html)
