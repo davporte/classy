@@ -1,0 +1,1899 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ldoc</h1>
+
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Tables">Tables</a></li>
+<li><a href="#Fields">Fields</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><strong>utils</strong></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>utils</code></h1>
+<p>creates a utility class.</p>
+<p>
+ designed for use with the classy object creator</p>
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">Utils = require ( &apos;utils&apos; )
+</pre>
+    </ul>
+    <h3>Info:</h3>
+    <ul>
+        <li><strong>Copyright</strong>: (c) 2019 David Porter</li>
+        <li><strong>Release</strong>: 1.0.0</li>
+        <li><strong>License</strong>: MIT</li>
+        <li><strong>Author</strong>: David Porter</li>
+    </ul>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#string:stripAllWS">string:stripAllWS ()</a></td>
+	<td class="summary">removes all WS from string</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#string:removeLeadTrailWS">string:removeLeadTrailWS ()</a></td>
+	<td class="summary">removes leading and trailing WS</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#string:isWhiteSpaceOnly">string:isWhiteSpaceOnly ()</a></td>
+	<td class="summary">tests a string for whitespace only or empty</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#string:breakFilenameAppart">string:breakFilenameAppart ()</a></td>
+	<td class="summary">returns directory, filename, extension</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#string:stripDirectory">string:stripDirectory ()</a></td>
+	<td class="summary">returns directory, filename, extension</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#string:stripFilename">string:stripFilename ()</a></td>
+	<td class="summary">returns directory, filename, extension</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#tableCopier">tableCopier (obj, from, to)</a></td>
+	<td class="summary">copies from one table to another</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#listToKVPair">listToKVPair (obj, list)</a></td>
+	<td class="summary">takes a list l1, l2 ...</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#timeDiff">timeDiff (obj, t1)</a></td>
+	<td class="summary">logs a time difference between now an t1 to the Log_Info log</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#dataIsNumber">dataIsNumber (obj, data)</a></td>
+	<td class="summary">if data is a number it returns as a number</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#replaceDataReferences">replaceDataReferences (obj, dataKey, tbl, data)</a></td>
+	<td class="summary">replaces data references.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#stringToTable">stringToTable (obj, str, loggingOff)</a></td>
+	<td class="summary">transforms a string to a table, loggingOff stops all warnings</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#tableToString">tableToString (obj, tbl, specials)</a></td>
+	<td class="summary">transforms a table to a string, note we can force commas and " ..</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#defaultDataValue">defaultDataValue (obj, dataType)</a></td>
+	<td class="summary">default type values, nil if not defined</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getRidofMetaTables">getRidofMetaTables (obj, tab)</a></td>
+	<td class="summary">removes metatables recursivley
+ default type values, nil if not defined</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#stringsToTable">stringsToTable (obj, str, value)</a></td>
+	<td class="summary">takes a string array and returns a k,v pair table with v == true or value, if table passed it returns the table as the value</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#dumpTable">dumpTable (obj, tbl, tabs)</a></td>
+	<td class="summary">dumps a table into a string</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#appendTextOnNumber">appendTextOnNumber (obj, n)</a></td>
+	<td class="summary">converts a number to number with english follow on eg 1st 2nd 3rd 4th etc</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#unpack">unpack (obj, ...)</a></td>
+	<td class="summary">unpack, unpacks a table or if already not a table just returns paramter stream</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#breakAppart">breakAppart (obj, iter, careAboutStrings, matchCounter, matchA, matchB, hasOccured, matchAOcurred, level, items, stringsActive)</a></td>
+	<td class="summary">returns a table corresponding to the items descovered between matchA, matchB; by default matchA = '(', matchB = ')'; iter is the string iterated across</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#rebuildStrings">rebuildStrings (obj, tableOfResults, resultsRebuilt)</a></td>
+	<td class="summary">rebuilds strings that are brocken into a table</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#convertFromStrings">convertFromStrings (obj, tbl, tblResult)</a></td>
+	<td class="summary">convert from strings, converts bools, number, tables to there orgional data form</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#deepCopy">deepCopy (obj, onObj, seen)</a></td>
+	<td class="summary">attempt a table deep copy, there are senarios where this module fails</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#testForNumber">testForNumber (obj, testValue)</a></td>
+	<td class="summary">returns test if a parameter is a number or not</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#tableIsEmpty">tableIsEmpty (obj, value)</a></td>
+	<td class="summary">tests to see if a table is empty or not</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#mergeArrays">mergeArrays (obj, ...)</a></td>
+	<td class="summary">merges ...</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#mergeTables">mergeTables (obj, ...)</a></td>
+	<td class="summary">merges ...</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#setInSet">setInSet (obj, setA, setB)</a></td>
+	<td class="summary">returns set in set and set not inset</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#dropValues">dropValues (obj, list)</a></td>
+	<td class="summary">removes values and returns keys</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#isValueinList">isValueinList (obj, value, list)</a></td>
+	<td class="summary">returns the key for a value if value found in a list otherwise nil.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#allValueinList">allValueinList (obj, values, list)</a></td>
+	<td class="summary">returns nil if all values are in list otherwise any missing keys in comma seperated string</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#isKeyinList">isKeyinList (obj, key, list)</a></td>
+	<td class="summary">returns the value for a key if key found in a list otherwise nil</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#appendWithComma">appendWithComma (obj, str, append)</a></td>
+	<td class="summary">append with comma, appends item to string with comma separation</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#appendListWithComma">appendListWithComma (obj, list)</a></td>
+	<td class="summary">append list with comma, creates a string with commas</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#appendKeysWithComma">appendKeysWithComma (obj, kvPair)</a></td>
+	<td class="summary">append keys with comma, creates a string with commas based on key in a key1, ...</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#appendValuesWithComma">appendValuesWithComma (obj, kvPair)</a></td>
+	<td class="summary">append values with comma, creates a string with commas based on key in a value1, ...</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#printKeyValues">printKeyValues (obj, table)</a></td>
+	<td class="summary">prints k, v pairs to the logger as Info</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#splitString">splitString (obj, str, pat)</a></td>
+	<td class="summary">splits a string into a table</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#splitStringWithClean">splitStringWithClean (obj, str, pat)</a></td>
+	<td class="summary">splits strings but aslo removes all trailing an leading removeLeadTrailWS</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#splitStringAccountingForStrings">splitStringAccountingForStrings (obj, str, pat)</a></td>
+	<td class="summary">returns a table with results of string:str split by character split, but also checks for strings.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#typeCount">typeCount (obj, object, whatType, whatCount)</a></td>
+	<td class="summary">returns true / false based on object type and count</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getArgs">getArgs (obj, func)</a></td>
+	<td class="summary">returns the names of arguments passed to a function func as a csv string.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#returnArray">returnArray (obj, v)</a></td>
+	<td class="summary">returns an array form a key, handles single entry or array for keys</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getPercentage">getPercentage (obj, v)</a></td>
+	<td class="summary">converts a string% from 0 to 100 to a percentage 0 to 1</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#initMethod">initMethod (obj, args)</a></td>
+	<td class="summary">loads the utils into the functions table so they can be consumed by giveMeFunctions</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#giveMeFunctions">giveMeFunctions (obj, ...)</a></td>
+	<td class="summary">returns a table that classy:assign can use, not if a function does not exist you just get a logger message</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#addAnotherFunction">addAnotherFunction (obj, ...)</a></td>
+	<td class="summary">returns a table that classy:assign can use, not if a function does not exist you just get a logger message</td>
+	</tr>
+</table>
+<h2><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#CONSTANTS">CONSTANTS</a></td>
+	<td class="summary">constants used by the module</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#dataDefaults">dataDefaults</a></td>
+	<td class="summary">sets the a default data type values</td>
+	</tr>
+</table>
+<h2><a href="#Fields">Fields</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#_MODULENAME">_MODULENAME</a></td>
+	<td class="summary">the module name</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "string:stripAllWS"></a>
+    <strong>string:stripAllWS ()</strong>
+    </dt>
+    <dd>
+    removes all WS from string
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "string:removeLeadTrailWS"></a>
+    <strong>string:removeLeadTrailWS ()</strong>
+    </dt>
+    <dd>
+    removes leading and trailing WS
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "string:isWhiteSpaceOnly"></a>
+    <strong>string:isWhiteSpaceOnly ()</strong>
+    </dt>
+    <dd>
+    tests a string for whitespace only or empty
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "string:breakFilenameAppart"></a>
+    <strong>string:breakFilenameAppart ()</strong>
+    </dt>
+    <dd>
+    returns directory, filename, extension
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "string:stripDirectory"></a>
+    <strong>string:stripDirectory ()</strong>
+    </dt>
+    <dd>
+    returns directory, filename, extension
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "string:stripFilename"></a>
+    <strong>string:stripFilename ()</strong>
+    </dt>
+    <dd>
+    returns directory, filename, extension
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "tableCopier"></a>
+    <strong>tableCopier (obj, from, to)</strong>
+    </dt>
+    <dd>
+    copies from one table to another
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+        , the object making the call
+        </li>
+        <li><span class="parameter">from</span>
+         the from table
+        </li>
+        <li><span class="parameter">to</span>
+         the to table
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        No return Value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:tableCopier ( FROM, TO )</pre></li>
+        <li><pre class="example">obj.tableCopier ( obj, FROM, TO )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "listToKVPair"></a>
+    <strong>listToKVPair (obj, list)</strong>
+    </dt>
+    <dd>
+    takes a list l1, l2 ...  ln and returns a k,v table based on that list l1 = l1, l2 = l2 ... ln = ln
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+        , the object making the call
+        </li>
+        <li><span class="parameter">list</span>
+         the list
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a key value pair table
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:listToKVPair ( item1 [, ... itemN ] )</pre></li>
+        <li><pre class="example">obj.listToKVPair ( obj, item1 [, ... itemN ] )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "timeDiff"></a>
+    <strong>timeDiff (obj, t1)</strong>
+    </dt>
+    <dd>
+    logs a time difference between now an t1 to the Log_Info log
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">t1</span>
+         the old time
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        No return value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:timeDiff ( oldTime )</pre></li>
+        <li><pre class="example">obj.timeDiff ( obj, oldTime )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "dataIsNumber"></a>
+    <strong>dataIsNumber (obj, data)</strong>
+    </dt>
+    <dd>
+    if data is a number it returns as a number
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">data</span>
+         the data under test
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        data as a number or the orgional value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:dataIsNumber ( DataUnderTest )</pre></li>
+        <li><pre class="example">obj.dataIsNumber ( obj, DataUnderTest )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "replaceDataReferences"></a>
+    <strong>replaceDataReferences (obj, dataKey, tbl, data)</strong>
+    </dt>
+    <dd>
+    replaces data references.
+ For example you set dataKey = data, then we look in tbl for refernces data/XXX, if we find such a reference we look in data for a key XXX, if we find key XXX we replace data/XXX with the value of key XXX
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">dataKey</span>
+         the data key your are looking to replace
+        </li>
+        <li><span class="parameter">tbl</span>
+         the table that contains the data to look at, if you see the data key then replace that with information in teh data table
+        </li>
+        <li><span class="parameter">data</span>
+         table that contains the replacment values
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if success false if failed
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:replaceDataReferences ( TheDataKeyYouAreLookingFor ( e.g. Data ), TheTableYouWantToTest, TheKeyReplaceMents )</pre></li>
+        <li><pre class="example">obj.replaceDataReferences ( obj, TheDataKeyYouAreLookingFor ( e.g. Data ), TheTableYouWantToTest, TheKeyReplaceMents )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "stringToTable"></a>
+    <strong>stringToTable (obj, str, loggingOff)</strong>
+    </dt>
+    <dd>
+    transforms a string to a table, loggingOff stops all warnings
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">str</span>
+         the string to convert
+        </li>
+        <li><span class="parameter">loggingOff</span>
+         can turn logging off for this method
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        data string as a table or nil if failed
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:stringToTable ( String [, <span class="keyword">true</span> ] )</pre></li>
+        <li><pre class="example">obj.stringToTable ( obj, String [, <span class="keyword">true</span> ] )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "tableToString"></a>
+    <strong>tableToString (obj, tbl, specials)</strong>
+    </dt>
+    <dd>
+    transforms a table to a string, note we can force commas and " ..  " away and change the bracket with specials table
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">tbl</span>
+         the table to convert
+        </li>
+        <li><span class="parameter">specials</span>
+         an optional list of controls that sets the values for quote ", comma , , open table bracket { and close table bracket }
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        table as string or nil if failed
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:tableToString ( Table [, { OptionalChangesToSpecialCharacters } ] )</pre></li>
+        <li><pre class="example">obj.tableToString ( obj, Table [, { OptionalChangesToSpecialCharacters } ] )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "defaultDataValue"></a>
+    <strong>defaultDataValue (obj, dataType)</strong>
+    </dt>
+    <dd>
+    default type values, nil if not defined
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">dataType</span>
+         the data type to get the default value for
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the data type default value or nil
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:defaultDataValue ( DataType )</pre></li>
+        <li><pre class="example">obj.defaultDataValue ( obj, DataType )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getRidofMetaTables"></a>
+    <strong>getRidofMetaTables (obj, tab)</strong>
+    </dt>
+    <dd>
+    removes metatables recursivley
+ default type values, nil if not defined
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">tab</span>
+         the table you want to do this for
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        No return value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:getRidofMetaTables ( Table )</pre></li>
+        <li><pre class="example">obj.getRidofMetaTables ( obj, Table )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "stringsToTable"></a>
+    <strong>stringsToTable (obj, str, value)</strong>
+    </dt>
+    <dd>
+    takes a string array and returns a k,v pair table with v == true or value, if table passed it returns the table as the value
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">str</span>
+         the list in keys you want as a table
+        </li>
+        <li><span class="parameter">value</span>
+         the value you want to set the keys to, defaults to true
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        A table
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:stringsToTable ( StringList [, DefaultValue ] )</pre></li>
+        <li><pre class="example">obj.stringsToTable ( obj, StringList [, DefaultValue ] )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "dumpTable"></a>
+    <strong>dumpTable (obj, tbl, tabs)</strong>
+    </dt>
+    <dd>
+    dumps a table into a string
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">tbl</span>
+         the table you want as a string
+        </li>
+        <li><span class="parameter">tabs</span>
+         the tab indents for formating
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the formated dump string or the empty string if error
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:dumpTable ( Table )</pre></li>
+        <li><pre class="example">obj.dumpTable ( obj, Table )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "appendTextOnNumber"></a>
+    <strong>appendTextOnNumber (obj, n)</strong>
+    </dt>
+    <dd>
+    converts a number to number with english follow on eg 1st 2nd 3rd 4th etc
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">n</span>
+         the number
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a string with the correct attachment
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:appendTextOnNumber ( Number )</pre></li>
+        <li><pre class="example">obj.appendTextOnNumber ( obj, Number )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "unpack"></a>
+    <strong>unpack (obj, ...)</strong>
+    </dt>
+    <dd>
+    unpack, unpacks a table or if already not a table just returns paramter stream
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">...</span>
+         the paramter list or a table to unpack
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an unpack value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:unpack ( ... )</pre></li>
+        <li><pre class="example">obj.unpack ( obj, ... )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "breakAppart"></a>
+    <strong>breakAppart (obj, iter, careAboutStrings, matchCounter, matchA, matchB, hasOccured, matchAOcurred, level, items, stringsActive)</strong>
+    </dt>
+    <dd>
+    returns a table corresponding to the items descovered between matchA, matchB; by default matchA = '(', matchB = ')'; iter is the string iterated across
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">iter</span>
+         the data under test, this gets called recursively
+        </li>
+        <li><span class="parameter">careAboutStrings</span>
+         true if we care about lookin if the match characters are bound in a string or not, if we care and we are we ignore them when in a string
+        </li>
+        <li><span class="parameter">matchCounter</span>
+         counts the number of opens vs closes to ensure we have a complete match
+        </li>
+        <li><span class="parameter">matchA</span>
+         the open match character
+        </li>
+        <li><span class="parameter">matchB</span>
+         the close match character
+        </li>
+        <li><span class="parameter">hasOccured</span>
+         turns true if a pair is found matchA .... matchB
+        </li>
+        <li><span class="parameter">matchAOcurred</span>
+         turns true if we have found a matchA only, lets us know to look for matchB
+        </li>
+        <li><span class="parameter">level</span>
+         how deep are we in the recursion
+        </li>
+        <li><span class="parameter">items</span>
+         a table of the items found
+        </li>
+        <li><span class="parameter">stringsActive</span>
+         the current state of strings, are they active i.e. we are in a string, or inactive i.e. we are not in a string
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the items brocken appart in a table, c ( an internal counter ), the matchCounter ( should be 0, i.e. complete closure ), has occured true or false
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="utils.html#stringToTable">stringToTable</a>
+    </ul>
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:breakAppart ( String, <span class="keyword">true</span>, <span class="number">0</span>, <span class="string">'{'</span>, <span class="string">'}'</span> ) <span class="comment">-- breaks appart tables</span></pre></li>
+        <li><pre class="example">obj.breakAppart ( Obj, String, <span class="keyword">true</span>, <span class="number">0</span>, <span class="string">'('</span>, <span class="string">')'</span> ) <span class="comment">-- breaks appart parenthesis</span></pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "rebuildStrings"></a>
+    <strong>rebuildStrings (obj, tableOfResults, resultsRebuilt)</strong>
+    </dt>
+    <dd>
+    rebuilds strings that are brocken into a table
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">tableOfResults</span>
+         the strings in component parts
+        </li>
+        <li><span class="parameter">resultsRebuilt</span>
+         the results as they are computed itreatively
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        resultsRebuilt the rebuilt strings
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:rebuildStrings ( TableOfStrings )</pre></li>
+        <li><pre class="example">obj.rebuildStrings ( obj, TableOfStrings )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "convertFromStrings"></a>
+    <strong>convertFromStrings (obj, tbl, tblResult)</strong>
+    </dt>
+    <dd>
+    convert from strings, converts bools, number, tables to there orgional data form
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">tbl</span>
+         the object we want to convert to native form
+        </li>
+        <li><span class="parameter">tblResult</span>
+         the results as they are computed itreatively
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the native form of the data object
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:convertFromStrings ( Table )</pre></li>
+        <li><pre class="example">obj.convertFromStrings ( obj, ... )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "deepCopy"></a>
+    <strong>deepCopy (obj, onObj, seen)</strong>
+    </dt>
+    <dd>
+    attempt a table deep copy, there are senarios where this module fails
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">onObj</span>
+         the object we want to deep copy
+        </li>
+        <li><span class="parameter">seen</span>
+         a flag the routine uses
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a copy of the table
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:deepCopy ( ObjectToCopy )</pre></li>
+        <li><pre class="example">obj.deepCopy ( obj, ObjectToCopy )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "testForNumber"></a>
+    <strong>testForNumber (obj, testValue)</strong>
+    </dt>
+    <dd>
+    returns test if a parameter is a number or not
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">testValue</span>
+         the data type we need to match
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if is number otherwise false
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:testForNumber ( TestItem )</pre></li>
+        <li><pre class="example">obj.testForNumber ( obj, TestItem )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "tableIsEmpty"></a>
+    <strong>tableIsEmpty (obj, value)</strong>
+    </dt>
+    <dd>
+    tests to see if a table is empty or not
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">value</span>
+         the data type we need to match
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        returns true if a table is empty otherwise false, nil if not a table
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:tableIsEmpty ( TableToTest )</pre></li>
+        <li><pre class="example">obj.tableIsEmpty ( obj, TableToTest )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "mergeArrays"></a>
+    <strong>mergeArrays (obj, ...)</strong>
+    </dt>
+    <dd>
+    merges ...  arrays into one array with duplicate removal.
+ Arrays are actually key value pairs of 1, 2, 3 ... N for the key
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">...</span>
+         the arrays to merge
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the merged array
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:mergeArrays ( Array1 [, ... ArrayN ] )</pre></li>
+        <li><pre class="example">obj.mergeArrays ( obj, Array1 [, ... ArrayN ] )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "mergeTables"></a>
+    <strong>mergeTables (obj, ...)</strong>
+    </dt>
+    <dd>
+    merges ...  tables into one table with duplicate removal.
+ Arrays are actually key value pairs of not 1, 2, 3 ... N for the key
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">...</span>
+         the arrays to merge
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the merged table
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:mergeTables ( Table1 [, ... TableN ] )</pre></li>
+        <li><pre class="example">obj.mergeTables ( obj, Table1 [, ... TableN ] )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "setInSet"></a>
+    <strong>setInSet (obj, setA, setB)</strong>
+    </dt>
+    <dd>
+    returns set in set and set not inset
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">setA</span>
+         the first set
+        </li>
+        <li><span class="parameter">setB</span>
+         the second set
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        items in both sets as a set, those items unique to either setA or setB as a set
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:setInSet ( { setAMember1Key = valueA1 [, ... setAmMemberN = valueAN ] }, { setBMember1 = valueB1 [, ... setBmMemberN = valueBN ] } )</pre></li>
+        <li><pre class="example">obj.setInSet ( obj, { setAMember1Key = valueA1 [, ... setAmMemberN = valueAN ] }, { setBMember1 = valueB1 [, ... setBmMemberN = valueBN ] } )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "dropValues"></a>
+    <strong>dropValues (obj, list)</strong>
+    </dt>
+    <dd>
+    removes values and returns keys
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">list</span>
+         a table
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a list of key only in an array
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:dropValues ( { key1 = value1 [, ... keyN = valueN ] } )</pre></li>
+        <li><pre class="example">obj.dropValues ( obj, { key1 = value1 [, ... keyN = valueN ] } )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "isValueinList"></a>
+    <strong>isValueinList (obj, value, list)</strong>
+    </dt>
+    <dd>
+    returns the key for a value if value found in a list otherwise nil.
+ If two or more occurances then only first is reported.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">value</span>
+         the value we are looking for
+        </li>
+        <li><span class="parameter">list</span>
+         the key value pair we are looking in
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a list of key only in an array
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:isValueinList ( ForWhat, { key1 = value1 [, ... keyN = valueN ] } )</pre></li>
+        <li><pre class="example">obj.isValueinList ( obj, ForWhat, { key1 = value1 [, ... keyN = valueN ] } )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "allValueinList"></a>
+    <strong>allValueinList (obj, values, list)</strong>
+    </dt>
+    <dd>
+    returns nil if all values are in list otherwise any missing keys in comma seperated string
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">values</span>
+         the value we are looking for
+        </li>
+        <li><span class="parameter">list</span>
+         the key value pair we are looking in
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        returns nil if all values are in list otherwise any missing keys in comma seperated string
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:allValueinList ( { value1 [, ... valueN ] } , { key1 = value1 [, ... keyN = valueN ] } )</pre></li>
+        <li><pre class="example">obj.allValueinList ( obj,{ value1 [, ... valueN ] } , { key1 = value1 [, ... keyN = valueN ] } )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "isKeyinList"></a>
+    <strong>isKeyinList (obj, key, list)</strong>
+    </dt>
+    <dd>
+    returns the value for a key if key found in a list otherwise nil
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">key</span>
+         the key we are looking for
+        </li>
+        <li><span class="parameter">list</span>
+         the key value pair we are looking in
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        returns the value for a key if key found in a list otherwise nil
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:isKeyinList ( { key , { key1 = value1 [, ... keyN = valueN ] } )</pre></li>
+        <li><pre class="example">obj.isKeyinList ( obj, key , { key1 = value1 [, ... keyN = valueN ] } )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "appendWithComma"></a>
+    <strong>appendWithComma (obj, str, append)</strong>
+    </dt>
+    <dd>
+    append with comma, appends item to string with comma separation
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">str</span>
+         the orgional string or nil
+        </li>
+        <li><span class="parameter">append</span>
+         item to append
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        returns the orgional string , append or if only one parameter the nappend only
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:appendWithComma ( <span class="string">'string1'</span>, <span class="string">'string2'</span> ) <span class="comment">-- outputs string1, string2</span></pre></li>
+        <li><pre class="example">obj.appendWithComma ( obj, <span class="string">'string1'</span>, <span class="string">'string2'</span> ) <span class="comment">-- outputs string1, string2</span></pre></li>
+        <li><pre class="example">obj:appendWithComma ( <span class="string">'string2'</span> ) <span class="comment">-- outputs string2</span></pre></li>
+        <li><pre class="example">obj.appendWithComma ( obj, <span class="string">'string2'</span> ) <span class="comment">-- outputs string2</span></pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "appendListWithComma"></a>
+    <strong>appendListWithComma (obj, list)</strong>
+    </dt>
+    <dd>
+    append list with comma, creates a string with commas
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">list</span>
+         the list looking in
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        returns the list as comma separated
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:appendListWithComma ( { value1 [, ... valueN ] } )</pre></li>
+        <li><pre class="example">obj.appendListWithComma ( obj, { value1 [, ... valueN ] } )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "appendKeysWithComma"></a>
+    <strong>appendKeysWithComma (obj, kvPair)</strong>
+    </dt>
+    <dd>
+    append keys with comma, creates a string with commas based on key in a key1, ...  keyN string
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">kvPair</span>
+         the list looking in
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        returns the list as comma separated string key1, ... keyN
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:appendKeysWithComma ( { key1 = value1 [, ... keyN = valueN ] } )</pre></li>
+        <li><pre class="example">obj.appendKeysWithComma ( obj, { key1 = value1 [, ... keyN = valueN ] } )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "appendValuesWithComma"></a>
+    <strong>appendValuesWithComma (obj, kvPair)</strong>
+    </dt>
+    <dd>
+    append values with comma, creates a string with commas based on key in a value1, ...  valueN string
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">kvPair</span>
+         the list looking in
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        returns the list as comma separated string value1, ... valueN
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:appendValuesWithComma ( { key1 = value1 [, ... keyN = valueN ] } )</pre></li>
+        <li><pre class="example">obj.appendValuesWithComma ( obj, { key1 = value1 [, ... keyN = valueN ] } )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "printKeyValues"></a>
+    <strong>printKeyValues (obj, table)</strong>
+    </dt>
+    <dd>
+    prints k, v pairs to the logger as Info
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">table</span>
+         the k, v pairs you want to log
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        rNo return value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:appendValuesWithComma ( { key1 = value1 [, ... keyN = valueN ] } )</pre></li>
+        <li><pre class="example">obj.appendValuesWithComma ( obj, { key1 = value1 [, ... keyN = valueN ] } )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "splitString"></a>
+    <strong>splitString (obj, str, pat)</strong>
+    </dt>
+    <dd>
+    splits a string into a table
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">str</span>
+         the string
+        </li>
+        <li><span class="parameter">pat</span>
+         the pattern that splits the string, this defaults to comma ,
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a table with results of string:str split by character split, defaults to ','
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:splitString ( StringToSplit [, PatternThatSplits ] )</pre></li>
+        <li><pre class="example">obj.splitString ( obj, StringToSplit [, PatternThatSplits ] )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "splitStringWithClean"></a>
+    <strong>splitStringWithClean (obj, str, pat)</strong>
+    </dt>
+    <dd>
+    splits strings but aslo removes all trailing an leading removeLeadTrailWS
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">str</span>
+         the string
+        </li>
+        <li><span class="parameter">pat</span>
+         the pattern that splits the string, this defaults to comma ,
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a table with results of string:str split by character split, defaults to ','
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:splitStringWithClean ( StringToSplit [, PatternThatSplits ] )</pre></li>
+        <li><pre class="example">obj.splitStringWithClean ( obj, StringToSplit [, PatternThatSplits ] )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "splitStringAccountingForStrings"></a>
+    <strong>splitStringAccountingForStrings (obj, str, pat)</strong>
+    </dt>
+    <dd>
+    returns a table with results of string:str split by character split, but also checks for strings.
+ If pat is found inside astring it will not match.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">str</span>
+         the string
+        </li>
+        <li><span class="parameter">pat</span>
+         the pattern that splits the string, this defaults to comma ,
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a table with results of string:str split by character split, defaults to ','
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:splitStringAccountingForStrings ( StringToSplit [, PatternThatSplits ] )</pre></li>
+        <li><pre class="example">obj.splitStringAccountingForStrings ( obj, StringToSplit [, PatternThatSplits ] )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "typeCount"></a>
+    <strong>typeCount (obj, object, whatType, whatCount)</strong>
+    </dt>
+    <dd>
+    returns true / false based on object type and count
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">object</span>
+         the object under test
+        </li>
+        <li><span class="parameter">whatType</span>
+         the type you need to match
+        </li>
+        <li><span class="parameter">whatCount</span>
+         the count you need to match
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if type not equal or count not equal, false if type is equal and count is equal
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:typeCount ( TestItem, TypeToTest, CountToTest )</pre></li>
+        <li><pre class="example">obj.typeCount ( obj, TestItem, TypeToTest, CountToTest )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getArgs"></a>
+    <strong>getArgs (obj, func)</strong>
+    </dt>
+    <dd>
+    returns the names of arguments passed to a function func as a csv string.
+ Note if debug is off this does not operate and returns a message
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">func</span>
+         the function under test
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        debug information
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:getArgs ( TestFunction )</pre></li>
+        <li><pre class="example">obj.getArgs ( obj, TestFunction )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "returnArray"></a>
+    <strong>returnArray (obj, v)</strong>
+    </dt>
+    <dd>
+    returns an array form a key, handles single entry or array for keys
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">v</span>
+         the the value to test
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        value if value was an array otherwise value in an array
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:returnArray ( Value )</pre></li>
+        <li><pre class="example">obj.returnArray ( obj, Value )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "getPercentage"></a>
+    <strong>getPercentage (obj, v)</strong>
+    </dt>
+    <dd>
+    converts a string% from 0 to 100 to a percentage 0 to 1
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">v</span>
+         the the value to convert
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        0 to 1 conversion of a % in a string, also false = 0, true = 1, error is 0
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:getPercentage ( Value )</pre></li>
+        <li><pre class="example">obj.getPercentage ( obj, Value )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "initMethod"></a>
+    <strong>initMethod (obj, args)</strong>
+    </dt>
+    <dd>
+    loads the utils into the functions table so they can be consumed by giveMeFunctions
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the calling object
+        </li>
+        <li><span class="parameter">args</span>
+         optional arguments sent to create the file handler
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        No return value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">myUtil = Utils ()</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "giveMeFunctions"></a>
+    <strong>giveMeFunctions (obj, ...)</strong>
+    </dt>
+    <dd>
+    returns a table that classy:assign can use, not if a function does not exist you just get a logger message
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the utils object
+        </li>
+        <li><span class="parameter">...</span>
+         a list of function names
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a table containing the functions and optional table containing the list of functions that were not found
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> assignTable, errorM = myUtils:giveMeFunctions ( [ function1, .. functionN ] )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "addAnotherFunction"></a>
+    <strong>addAnotherFunction (obj, ...)</strong>
+    </dt>
+    <dd>
+    returns a table that classy:assign can use, not if a function does not exist you just get a logger message
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the utils object
+        </li>
+        <li><span class="parameter">...</span>
+         a list of function names
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        No return value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">myUtils:addAnotherFunction ( { name = FunctionName1, func = Function1 [, overload = <span class="keyword">true</span> ] } [, ... { name = FunctionNameN, func = FunctionN [, overload = <span class="keyword">true</span> ] } ] )</pre>
+    </ul>
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Tables"></a>Tables</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "CONSTANTS"></a>
+    <strong>CONSTANTS</strong>
+    </dt>
+    <dd>
+    constants used by the module
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">METHODS</span>
+        the giveMeFunctions method name
+        </li>
+        <li><span class="parameter">ADDANOTHERFUNCTION</span>
+        the addAnotherFunction method name
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "dataDefaults"></a>
+    <strong>dataDefaults</strong>
+    </dt>
+    <dd>
+    sets the a default data type values
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">[_STRINGTYPE]</span>
+        string defaults to ''
+        </li>
+        <li><span class="parameter">[_NUMTYPE]</span>
+        number defaults to 0
+        </li>
+        <li><span class="parameter">[_TABLETYPE]</span>
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Fields"></a>Fields</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "_MODULENAME"></a>
+    <strong>_MODULENAME</strong>
+    </dt>
+    <dd>
+    the module name
+
+
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2020-01-05 19:48:51 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
