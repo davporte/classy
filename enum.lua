@@ -59,7 +59,8 @@ getDependancies = nil
 
 
 -- returns the class that deals with enumtypes 
-local Enum =  classy:newClass ( Constants,
+local Enum
+Enum  =  classy:newClass ( Constants,
       -- create the base enumtable this will consist of a Constants class, we will store each enum type in attributeStore inside constants
       classy:initMethod (         function ( obj, ... )
                           -- run my super to init me, this creates an attributesStore that is immutable

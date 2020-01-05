@@ -5,13 +5,13 @@
 -- @usage Logger = require ( 'logger ' )
 -- @author David Porter
 -- @module logger
--- @release 1.0.6
+-- @release 1.0.7
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local logger = {
    --- version details
-   _VERSION = ... .. '.lua 1.0.6',
+   _VERSION = ... .. '.lua 1.0.7',
      --- Git Hub Location of the master branch
      _URL = '',
       --- the current module description
@@ -45,7 +45,7 @@ local logger = {
       --- the module name
       _MODULENAME = ...,
       -- any depandancies
-      _DEPENDANCIES = 'classy',
+      _DEPENDANCIES = { classy = 'classy' },
 }
 
 -- a local reference to a the module name
@@ -88,16 +88,13 @@ local function getDependancies ()
   local dependancies = logger._DEPENDANCIES
 
   if dependancies then
-    if type ( dependancies ) == _TABLETYPE then
-      local x
-      for x = 1, #dependancies do
-        if not _G [dependancies [x]] then
-          _G [dependancies [x]] = require ( dependancies [x] )
+      local next = next
+      local k, v
+      for k, v in next, dependancies, nil do
+        if not _G [ k ] then
+          _G [ k ] = require ( v )
         end
       end
-    else
-      _G [ dependancies ] = require ( dependancies )
-    end
   end
 
 end
@@ -106,6 +103,7 @@ end
 getDependancies ()
 -- @local remove this method it is no longer required
 getDependancies = nil
+
 
 -- @local returns true if a table is empty, true if not empty table, nil if not a table 
 -- @param tbl the table we want to check

@@ -4,12 +4,12 @@
 -- @usage Stack = require ( 'stack' )
 -- @author David Porter
 -- @module stack
--- @release 1.0.7
+-- @release 1.0.8
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local stack = {
-   _VERSION = ... .. '.lua 1.0.7',
+   _VERSION = ... .. '.lua 1.0.8',
      _URL = '',
      _DESCRIPTION = [[
       ============================================================================
@@ -42,7 +42,7 @@ local stack = {
       
       _LOGGING = false,
       _TABLETYPE = type ( {} ),
-      _DEPENDANCIES = 'classy',
+      _DEPENDANCIES = { classy = 'classy' },
 }
 
 -- a refernce to the various LUA types, generate them by code just incase it ever did change in the future
@@ -63,16 +63,13 @@ local function getDependancies ()
   local dependancies = stack._DEPENDANCIES
 
   if dependancies then
-    if type ( dependancies ) == _TABLETYPE then
-      local x
-      for x = 1, #dependancies do
-        if not _G [dependancies [x]] then
-          _G [dependancies [x]] = require ( dependancies [x] )
+      local next = next
+      local k, v
+      for k, v in next, dependancies, nil do
+        if not _G [ k ] then
+          _G [ k ] = require ( v )
         end
       end
-    else
-      _G [ dependancies ] = require ( dependancies )
-    end
   end
 
 end
@@ -81,6 +78,7 @@ end
 getDependancies ()
 -- @local remove this method it is no longer required
 getDependancies = nil
+
 
 --- gets next item from stack
 -- @param obj the stack object iteself

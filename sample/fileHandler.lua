@@ -4,12 +4,12 @@
 -- @usage FileHandler = require ( 'fileHandler' )
 -- @author David Porter
 -- @module fileHandler
--- @release 1.0.0
+-- @release 1.0.1
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local filer = {
-	 _VERSION = ... .. '.lua 1.0.0',
+	 _VERSION = ... .. '.lua 1.0.1',
      _URL = '',
      _DESCRIPTION = [[
       ============================================================================
@@ -43,7 +43,7 @@ local filer = {
       
       _LOGGING = false,
       _TABLETYPE = type ( {} ),
-      _DEPENDANCIES = 'classy',
+      _DEPENDANCIES = { classy = 'classy' },
 }
 
 -- a refernce to the various LUA types, generate them by code just incase it ever did change in the future
@@ -68,16 +68,13 @@ local function getDependancies ()
   local dependancies = filer._DEPENDANCIES
 
   if dependancies then
-    if type ( dependancies ) == _TABLETYPE then
-      local x
-      for x = 1, #dependancies do
-        if not _G [dependancies [x]] then
-          _G [dependancies [x]] = require ( dependancies [x] )
+      local next = next
+      local k, v
+      for k, v in next, dependancies, nil do
+        if not _G [ k ] then
+          _G [ k ] = require ( v )
         end
       end
-    else
-      _G [ dependancies ] = require ( dependancies )
-    end
   end
 
 end
@@ -86,6 +83,7 @@ end
 getDependancies ()
 -- @local remove this method it is no longer required
 getDependancies = nil
+
 
 --- opens a file with mode "r" by default or mode defined by "mode"
 -- "r" — Read mode (the default); the file pointer is placed at the beginning of the file.
@@ -257,6 +255,7 @@ local function copyToDocumentsDirectory ( obj, overWrite, ... )
     end
   end
 end
+
 
 return classy:newClass(
               classy:attributes ( { defaultReadBehavour = Table ( Private ), myLogger = Logger ( Private ), logEntity = Table ( Private ) } ),
