@@ -70,7 +70,7 @@ NewFileHandler = classy:newClass( FileHandler,
          classy:initMethod (
           -- example call of the super init method to construct this object
           function ( obj, args )
-            classy:callSuperMethod ( obj, obj.super.init, args )
+            obj:callSuperMethod ( obj, 'init', args )
           end       
           ),       
           -- example overloading of a method in the origional class
@@ -86,3 +86,24 @@ NewFileHandler = classy:newClass( FileHandler,
          )
        )
 ```
+
+## MathParser
+Example that demonstrates the use of embedded classes e.g. Stack, also shows the use of mixins
+
+```LUA
+classy:assign ( obj, _G.myUtils:giveMeFunctions (  unpack ( CONSTANTS.TOASSIGNTOOBJECT ) ) )
+```
+
+Mixins are held in the file [utils.lua]() and consumed by allocating _G.myUtils 
+
+```LUA
+_G.myUtils = require ( 'utils' )
+```
+
+MathParser can then be used to pass strings and turn these strings into executable code, for example:
+
+```LUA
+print ( myParser:compileAndExecute ( 'a, "b", c [2] , 7', 'a * a', { a= 6, b= 2, c = {2,4,6} }  ) )
+```
+
+[Full Documentation for MathParser](http://htmlpreview.github.com/?https://github.com/davporte/classy/blob/master/sample/mathParser.lua)
