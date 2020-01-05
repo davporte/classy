@@ -800,6 +800,7 @@ local reservedClassFunctions = {
    --- allows an object inside a classy constructure to call their supers init, or any other method.
    -- this CAN NOT be called from outside a classy: constructor method.
    -- @within  External Calls (Protected)
+   -- @function callSuperMethod
    -- @usage CLASSTYPE:callSuperMethod ( obj, METHOD NAME, ... )
    -- @param the class that is making the request for it's super method
    -- @param obj the object wishing to call there supers method
