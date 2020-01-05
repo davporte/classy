@@ -1,5 +1,5 @@
 local enum = {
-	 _VERSION = ... .. '.lua 1.0.2',
+	 _VERSION = ... .. '.lua 1.0.3',
      _URL = '',
      _DESCRIPTION = [[
       ============================================================================
@@ -57,7 +57,7 @@ return classy:newClass ( Constants,
 			-- create the base enumtable this will consist of a Constants class, we will store each enum type in attributeStore inside constants
 			classy:initMethod (					function ( obj, ... )
 													-- run my super to init me, this creates an attributesStore that is immutable
-													Constants:callSuperMethod ( obj, 'init', ... )
+													obj:callSuperMethod ( obj, 'init' )
 													local count
 													-- go through each entry and add them to the enum
 
