@@ -4,12 +4,12 @@
 -- @usage Stack = require ( 'stack' )
 -- @author David Porter
 -- @module stack
--- @release 1.0.6
+-- @release 1.0.7
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local stack = {
-   _VERSION = ... .. '.lua 1.0.6',
+   _VERSION = ... .. '.lua 1.0.7',
      _URL = '',
      _DESCRIPTION = [[
       ============================================================================
@@ -94,11 +94,11 @@ local function popFromStack ( obj, dontRemove )
       obj.stackCount = obj.stackCount - 1
     end
     -- obj.myLogger:logFromModule_Info ( stack._MODULENAME, 'popped item from stack "', result, '" stackID:', obj ) -- alternative way to call, infact this is what the next line calls
-    obj.myLogger:Log_Info_stack ( 'popped item from stack "', result, '" stackID:', obj )
+    obj.myLogger:Log_Info_stack ( 'popped item from stack, ', result, ', ', obj.myStackName )
     return result
   else
     -- obj.myLogger:logFromModule_Info ( stack._MODULENAME, 'no item to pop from stack', ' stackID:', obj  ) -- alternative way to call, infact this is what the next line calls
-    obj.myLogger:Log_Info_stack ( 'no item to pop from stack', ' stackID:', obj  )
+    obj.myLogger:Log_Info_stack ( 'no item to pop from stack, ', obj.myStackName  )
     return nil
   end
 end
@@ -111,7 +111,7 @@ local function pushToStack ( obj, item )
   obj.stack [ #obj.stack + 1 ] = item
   if item ~= nil then
     -- obj.myLogger:logFromModule_Info ( stack._MODULENAME, 'pushed item to stack "', item, '" stackID:', obj  ) -- alternative way to call, infact this is what the next line calls
-    obj.myLogger:Log_Info_stack ( 'pushed item to stack "', item, '" stackID:', obj  )
+    obj.myLogger:Log_Info_stack ( 'pushed item to stack, ', item, ', ', obj.myStackName  )
     obj.stackCount = obj.stackCount + 1
   end
 end
@@ -145,12 +145,12 @@ local function stackGet ( obj, howMany, dontRemove )
     return allResult
   else
     -- obj.myLogger:logFromModule_Error  ( obj, 'attempt to pull a non numerical number of items value from stackID:', obj  ) -- alternative way to call, infact this is what the next line calls
-    obj.myLogger:Log_Error_stack  ( 'attempt to pull a non numerical number of items value from stackID:', obj  )
+    obj.myLogger:Log_Error_stack  ( 'attempt to pull a non numerical number of items value', obj.myStackName  )
   end
 end
 
 return classy:newClass(
-              classy:attributes ( { stack = Table ( Private ), stackCount = Number ( Private ), myLogger = Logger ( Private ), logEntity = Table ( Private ) } ),
+              classy:attributes ( { stack = Table ( Private ), stackCount = Number ( Private ), myLogger = Logger ( Private ), logEntity = Table ( Private ), myStackName = String ( Private ) } ),
               classy:initMethod (
                    --- adds the default log levels Error, Warning, Info and Debug and sets their associated default values ON (true), ON (true), OFF (false), OFF (false).
                   -- also sets the logger to the default output.
@@ -162,8 +162,9 @@ return classy:newClass(
                   -- @usage myStack = Stack ( { stack = { item1, ...., itemN } } )
                   function ( obj, args )
                     -- classy:default values will load all the args into the object and any that are not passed over but in the default values table will be defaulted.
-                    classy:setDefaultValues ( obj, args, { stack = {}, myLogger = _G.myLogger } )
+                    classy:setDefaultValues ( obj, args, { stack = {}, myLogger = _G.myLogger, myStackName = tostring ( obj ):gsub ('table: ','' ) } )
                     obj.stackCount = #obj.stack -- you may have prepopulated the stack
+                    obj.myStackName =  ' from stackID: ' .. obj.myStackName -- sets a string that logs output, defaults to the obj table name unless you preset it
                     -- check to see if the class is registerd by the logger, if not register it so we get the Log_ functions created
                     -- ensure we do with this base class, any future classes build on this we want to use the base class as it is the registerd module
                     obj.logEntity = classy:getBaseClass ( getmetatable ( obj ) )
