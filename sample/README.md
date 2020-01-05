@@ -103,6 +103,8 @@ _G.myUtils = require ( 'utils' )
 MathParser can then be used to pass strings and turn these strings into executable code, for example:
 
 ```LUA
+Parser = require ( 'mathParser' )
+myParser = Parser ()
 print ( myParser:compileAndExecute ( 'a, "b", c [2] , 7', 'a * a', { a= 6, b= 2, c = {2,4,6} }  ) )
 ```
 
