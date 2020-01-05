@@ -4,14 +4,14 @@
 -- such as Corona SDK
 -- @author David Porter
 -- @module classy
--- @release 1.3.4
+-- @release 1.3.5
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local classy = {
 
    --- version details
-   _VERSION = ... .. '.lua 1.3.4',
+   _VERSION = ... .. '.lua 1.3.5',
    _URL = 'https://github.com/davporte/classy',
    --- the current module description
    _DESCRIPTION = [[
@@ -257,14 +257,14 @@ local function getInternalID ( c )
       if c._notes and c._notes.moduleName then
          className = ', ' .. c._notes.moduleName
       end
-      return { returnValue .. classTypes [  c  ] .. className , true,  classTypes [  c  ]  }
+      return { returnValue .. classTypes [  c  ] .. className , true,  classTypes [  c  ], classTypes [  c  ] .. className }
    else
-      return { returnValue .. 'None', false, nil }
+      return { returnValue .. 'None', false, nil, nil }
    end
 end
 
 -- return values of getInternalID array, we reference these as constants
-local GETINTERNALID_TXT, GETINTERNALID_RSLT, GETINTERNALID_VALUE = 1, 2, 3
+local GETINTERNALID_TXT, GETINTERNALID_RSLT, GETINTERNALID_VALUE, GETINTERNALID_SUBTXT = 1, 2, 3, 4
 
 -- @local this is the class logger function. If logging is true it constructs the message, if false it does not
 -- ... paramter list are converted to strings and constructed p1 ... pN
@@ -633,7 +633,7 @@ local function getAttribute (t, k, c)
    -- @raise attribute ATTRIBUTENAME is private and can only be read from within its class
    attributeGetter = function (t, k, c)
 
-                              collectgarbage ('collect') -- only in testing, we are testing the weak key associations
+                              --collectgarbage ('collect') -- only in testing, we are testing the weak key associations
 
                               errorLayer = errorLayer + 1
 
@@ -789,7 +789,7 @@ local function newAttributeSet ( t, k, c, v, checkOff )
       end
    end
 
-   collectgarbage ('collect') -- only in testing, we are testing the weak key associations
+   --collectgarbage ('collect') -- only in testing, we are testing the weak key associations
 
    errorLayer = errorLayer - 1
 
@@ -797,6 +797,28 @@ end
 
 -- @local these are the reserved functions all classes and object have. You cannot overload them
 local reservedClassFunctions = {
+   --- allows an object inside a classy constructure to call their supers init, or any other method.
+   -- this CAN NOT be called from outside a classy: constructor method.
+   -- @within  External Calls (Protected)
+   -- @usage CLASSTYPE:callSuperMethod ( obj, METHOD NAME, ... )
+   -- @param the class that is making the request for it's super method
+   -- @param obj the object wishing to call there supers method
+   -- @param methodName the method name you wish to call
+   -- @param pass the ... up to the method
+   -- @return what ever the super method returned
+   callSuperMethod = function ( klass, obj, methodName, ... )
+      errorLayer = errorLayer + 1
+      if obj and amIInsideaClassMethod ( getmetatable ( obj ) ) then 
+         if obj.super and klass._base and klass._base [ methodName ] then
+            errorLayer = errorLayer - 1
+            return klass._base [ methodName ] ( obj, ... )
+         else
+            myError ( 'attempt to call a super method ' .. methodName .. ', when method does not exist' )
+         end
+      else
+         myError ( 'attempt to call a super method ' .. methodName .. ' when not in a classy constructor function' )
+      end
+   end,
    --- a protected function to return the version state of LUA
    -- @within  External Calls (Protected)
    -- @return true if LUA above 5.2, otherwise false
@@ -809,7 +831,7 @@ local reservedClassFunctions = {
    -- @within  External Calls (Protected)
    -- @param self the object or class you are testing
    -- @param klass the class you want to test against, can be a class or a class ID
-   -- @return true if self is of type klass, false if not, if klass is nil then returns true if self is a classy class or object
+   -- @return true if self is of type klass, false if not. Also returns text description if available as paramter 2. If klass is nil then returns true if self is a classy class or object
    -- @usage obj:is_a ( internalID | ClassType )
    -- @usage class:is_a ( internalID | ClassType )
    is_a = function ( self, klass )
@@ -821,7 +843,11 @@ local reservedClassFunctions = {
                      m = m._base
                   end
                else
-                  return getInternalID ( self ) [ GETINTERNALID_RSLT ] or getInternalID ( getmetatable ( self ) ) [ GETINTERNALID_RSLT ]
+                  local internalID = getInternalID ( self )
+                  if not internalID [ GETINTERNALID_RSLT ] then
+                     internalID = getInternalID ( getmetatable ( self ) ) 
+                  end
+                  return internalID [ GETINTERNALID_RSLT ], internalID [ GETINTERNALID_TXT ]
                end
 
                return false
@@ -1386,42 +1412,6 @@ function classy:bindMetaMethod ( obj, func )
       end
 end
 
---- allows an object inside a classy constructure to call their supers init, or any other method.
--- this CAN NOT be called from outside a classy: constructor method.
--- @within  External Calls (Protected)
--- @usage classy:callSuperMethod ( obj, obj,super.METHOD, ... )
--- @param obj the object wishing to call there supers method
--- @param method the method name you wish to call
--- @param pass the ... up to the method
--- @return what ever the super init method returned
-function classy:callSuperMethod ( obj, method, ... )
-
-   errorLayer = errorLayer + 1
-
-   local result
-   if obj and amIInsideaClassMethod ( getmetatable ( obj ) ) then 
-      if obj.super then
-         if type ( method ) == types.func then
-            -- set the current running class super + 1
-            classRunTracker ( obj.super, true )
-            result = method ( obj, ... )
-            -- set the current running class super - 1
-            classRunTracker ( obj.super, false )
-         else
-            myError ('attempt to call a super method, when method does not exist')
-         end
-      else
-         myError ('attempt to call a super method, when super does not exist')
-      end
-   else
-      myError ('attempt to call a super method when not in a classy constructor function')
-   end
-
-   errorLayer = errorLayer - 1
-
-   return result
-end
-
 --- adds key in key with a value to the protected _G table
 -- also adds this key into the user protected table, this ensures that removeFromProtectionIn_G can only affect user defined values
 -- @usage classy:addToProtectionIn_G ( key, value )
@@ -1740,6 +1730,7 @@ function classy:newClass ( base )
    subclassLogger (subLogging._BUILDING, 'attempt to create new class - begin')
 
    local c = {}
+
    -- test to see if base class exists then note your base class
    if base then
       if classTypes [  base  ] then
@@ -1868,6 +1859,17 @@ function classy:newClass ( base )
 
    classTypes.nextOrder = classTypes.nextOrder + 1
 
+
+   -- class inheratance description, in text
+   --[[
+   local description = getInternalID ( c ) [ GETINTERNALID_SUBTXT ]
+   local me = c
+   while me._base do
+      me = me._base
+      description = description .. ':' .. me._description
+   end
+   c._description = description
+]]
    setmetatable (c, mt)
 
    errorLayer = errorLayer - 1
