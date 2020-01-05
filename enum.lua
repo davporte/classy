@@ -1,5 +1,5 @@
 local enum = {
-	 _VERSION = ... .. '.lua 1.0.3',
+   _VERSION = ... .. '.lua 1.0.4',
      _URL = '',
      _DESCRIPTION = [[
       ============================================================================
@@ -30,45 +30,53 @@ local enum = {
       _MODULENAME = ...,
       _LOGGING = false,
       _TABLETYPE = type ( {} ),
-      _DEPENDANCIES = { 'classy','constants' },
+      _DEPENDANCIES = { classy = 'classy', Constants = 'constants' },
 }
 
 -- a refernce to the string type
 local stringType, numType = type ( '' ), type ( 9 )
 
--- require dependancies if any
-local dependancies = enum._DEPENDANCIES
-if dependancies then
-	if type ( dependancies ) == enum._TABLETYPE then
-		local x
-		for x = 1, #dependancies do
-			if not _G [dependancies [x]] then
-				_G [dependancies [x]] = require ( dependancies [x] )
-			end
-		end
-	else
-		_G [ dependancies ] = require ( dependancies )
-	end
+-- @local require dependancies if any, this method will be removed after run creation of the module
+local function getDependancies ()
+  local dependancies = enum._DEPENDANCIES
+
+  if dependancies then
+      local next = next
+      local k, v
+      for k, v in next, dependancies, nil do
+        if not _G [ k ] then
+          _G [ k ] = require ( v )
+        end
+      end
+  end
+
 end
+
+-- @local generate any dependancie
+getDependancies ()
+-- @local remove this method it is no longer required
+getDependancies = nil
 
 
 -- returns the class that deals with enumtypes 
-return classy:newClass ( Constants,
-			-- create the base enumtable this will consist of a Constants class, we will store each enum type in attributeStore inside constants
-			classy:initMethod (					function ( obj, ... )
-													-- run my super to init me, this creates an attributesStore that is immutable
-													obj:callSuperMethod ( obj, 'init' )
-													local count
-													-- go through each entry and add them to the enum
+local Enum =  classy:newClass ( Constants,
+      -- create the base enumtable this will consist of a Constants class, we will store each enum type in attributeStore inside constants
+      classy:initMethod (         function ( obj, ... )
+                          -- run my super to init me, this creates an attributesStore that is immutable
+                          Enum:callSuperMethod ( obj, 'init' )
+                          local count
+                          -- go through each entry and add them to the enum
 
-													for count = 1, arg.n do
-														local nameOfEnumObject = tostring ( arg [ count ] )
-														obj.attributeStore [ nameOfEnumObject ] = count
-														obj.attributeStore [ count ] = nameOfEnumObject
-													end
+                          for count = 1, arg.n do
+                            local nameOfEnumObject = tostring ( arg [ count ] )
+                            obj.attributeStore [ nameOfEnumObject ] = count
+                            obj.attributeStore [ count ] = nameOfEnumObject
+                          end
 
-												end
-												),
+                        end
+                        ),
 
-			classy:addNotes (enum._VERSION .. '\n\n' .. enum._DESCRIPTION .. '\n' .. enum._LICENSE, ... )
-			)
+      classy:addNotes (enum._VERSION .. '\n\n' .. enum._DESCRIPTION .. '\n' .. enum._LICENSE, ... )
+      )
+
+return Enum
