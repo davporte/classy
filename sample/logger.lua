@@ -5,13 +5,13 @@
 -- @usage Logger = require ( 'logger ' )
 -- @author David Porter
 -- @module logger
--- @release 1.0.5
+-- @release 1.0.6
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local logger = {
    --- version details
-   _VERSION = ... .. '.lua 1.0.5',
+   _VERSION = ... .. '.lua 1.0.6',
      --- Git Hub Location of the master branch
      _URL = '',
       --- the current module description
@@ -58,7 +58,7 @@ local _STRINGTYPE, _NUMTYPE, _TABLETYPE, _BOOLTYPE , _FUNCTYPE = type ( '' ), ty
 local CONSTANTS = {
   LOGLEVELS = { ERROR = 'Error', WARNING = 'Warning', INFO = 'Info', DEBUG = 'Debug'}, -- the default log levels 
   METHODS = { ADDLOGLEVEL = 'addLogLevel', LOG = 'log' , SETLOGSTATE = 'setLogState', SETMYOUTPUT = 'setMyOutput', REMOVELOGLEVEL = 'removeLogLevel', REGISTERMODULE = 'registerModule',
-              LOGFROMMODULE = 'logFromModule', DEREGISTERMODULE = 'deregisterModule', DESCRIBE = 'describe', SETMODULELOGSTATE = 'setModuleLogState', REGISTERSTATE = 'registerState', GETLOGPREFIX = 'getLogPrefix' }, -- the default methods
+              LOGFROMMODULE = 'logFromModule', DEREGISTERMODULE = 'deregisterModule', DESCRIBE = 'describe', SETMODULELOGSTATE = 'setModuleLogState', REGISTERSTATE = 'registerState', GETLOGPREFIX = 'getLogPrefix', SETMASTERLOGSTATE = 'setMasterLogState' }, -- the default methods
   LOGPREFIX = 'Log_', -- a value placed in _G so the user can call the logger directly Log_LOGLEVEL ( ... )
   GLOBALID = '_G' -- a value to mark a function pusged to _G that it is global and not module local
 }
@@ -283,7 +283,7 @@ local function installOrRemoveLoggingOnModule ( obj, moduleName, install, defaul
         -- we do a test to see how the user made the call, we expect .Log_Level, however if you called with :Log_Level we fix it up
         if obj.is_a and obj:is_a () then -- classy object
                   local assignDetails = { }
-                  assignDetails [ CONSTANTS.LOGPREFIX .. k .. '_' .. moduleName ] = function ( caller, ... ) return caller [ CONSTANTS.LOGPREFIX .. k ] ( caller, moduleName, ... ) end
+                  assignDetails [ CONSTANTS.LOGPREFIX .. k .. '_' .. moduleName ] = function ( caller, ... ) if obj.masterLogState then return caller [ CONSTANTS.LOGPREFIX .. k ] ( caller, moduleName, ... ) end end
                   classy:assign ( obj, assignDetails )
           else -- not a classy object
             moduleLocation [ CONSTANTS.LOGPREFIX .. k ] = function ( ... )
@@ -405,7 +405,7 @@ local function addOrRemoveLogLevel ( obj, level, addOrRemove, defaultState )
 
         -- add this level to the logger itself, so we can call obj.myLogger:Log_Info etc, expect the following parameters :LOG_XXX ( moduleName, ... ) 
         local assignDetails = { }
-        assignDetails [  CONSTANTS.LOGPREFIX .. level  ] = function ( caller, moduleName, ... ) return caller [ CONSTANTS.METHODS.LOGFROMMODULE ] ( caller, moduleName, level, ... ) end
+        assignDetails [  CONSTANTS.LOGPREFIX .. level  ] = function ( caller, moduleName, ... ) if obj.masterLogState then return caller [ CONSTANTS.METHODS.LOGFROMMODULE ] ( caller, moduleName, level, ... ) end end
         classy:assign ( obj, assignDetails )
       else
         knownLogLevels [ level ] = nil
@@ -679,11 +679,18 @@ return classy:newClass(
                     local description = moduleName .. ':\n\tMaster Logging is:' .. onoff ( obj.masterLogState ) .. '\n\tSelf Logging is:' .. onoff ( obj.myOwnLogState )
 
                     local next = next
-                    local k
+                    local k, v
                     if obj.registestedModules then
                       description = description .. '\n\tRegistered Modules:'
-                      for k, _ in next, obj.registestedModules, nil do
+                      for k, v in next, obj.registestedModules, nil do
                         description = description .. '\n\t\t' .. k .. ':'
+                        -- if a classy module also get its id
+                        if v.is_a then
+                          local isA, info =  v:is_a ()
+                          if isA and info then 
+                            description = description .. ' is a '.. ( classy._MODULENAME or 'classy' ) .. ' object,' .. info 
+                          end
+                        end
                         if obj.currentLogLevels then
                           local key, value
                           local next = next
@@ -708,6 +715,29 @@ return classy:newClass(
 
                     return description
                   end
+                ),
+              classy:addMethod ( CONSTANTS.METHODS.SETMASTERLOGSTATE,
+                --- sets the master log state
+                -- note if no value it toggles the current state
+                -- @function setMasterLogState
+                -- @param obj the logging object
+                -- @param state the state true (On), false (Off)
+                -- @return No return value
+                -- @usage logger:setMasterLogState ( true | false )
+                -- @usage logger:setMasterLogState ( )
+                function ( obj, state )
+                  state = state or not obj.masterLogState
+                  if type ( state ) ~= _BOOLTYPE then
+                    -- if you do this wrong and logging is off still you still want to see the log message, it would be undisplayed if masterLogState is currently false
+                    local currentState = obj.masterLogState
+                    obj.masterLogState = true
+                    selfLogger ( obj, 'cannot set a state value of ', state, ' for master log state, must be ', _BOOLTYPE )
+                    -- set back to old masterLog state
+                    obj.masterLogState = currentState
+                  else
+                    obj.masterLogState = state
+                  end
+                end
                 ),
               classy:addMethod ( CONSTANTS.METHODS.GETLOGPREFIX, 
                 --- returns the Log prefix the logger uses, so other module can know this without magic numbers
