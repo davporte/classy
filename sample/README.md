@@ -66,11 +66,13 @@ _G.myLogger = Logger ()
 -- load up the default file handler
 FileHandler = require ( 'sample.FileHandler' )
 
+local NewFileHandler
+-- do this way so NewFileHandler is available for consuptin in the NewFileHandler class
 NewFileHandler = classy:newClass( FileHandler,
          classy:initMethod (
           -- example call of the super init method to construct this object
           function ( obj, args )
-            obj:callSuperMethod ( obj, 'init', args )
+            NewFileHandler:callSuperMethod ( obj, 'init', args )
           end       
           ),       
           -- example overloading of a method in the origional class
