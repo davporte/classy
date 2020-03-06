@@ -1,10 +1,12 @@
 -- Another simple example of classy
 
+-- as this file is one diretory below wher eclassy is stored add classy to path
+package.path = package.path .. ";../classy.lua"
 
 local classy = require ('classy')
  
- 
 -- A base Animal class that contains the name and the voice
+ 
  
 local Animal = classy:newClass( 
   classy:attributes  ( { name = String ( Public ), voice = String ( Public ) } ),
@@ -16,21 +18,23 @@ local Animal = classy:newClass(
 )
  
 -- Dog inherits from Animal  
- 
-local Dog = classy:newClass( Animal,
+-- note this has to be declared this was as Dog calls a super method, we need to know the value of Dog 
+local Dog 
+Dog = classy:newClass( Animal,
   classy:addMethod  ('speak',
     function ( obj )
-      classy:callSuperMethod ( obj, obj.super.speak, 'dog' )
+      Dog:callSuperMethod ( obj, 'speak', 'Dog' )
     end
   )
 )
  
 -- Cat inherits from Animal  
- 
-local Cat = classy:newClass( Animal,
+-- note this has to be declared this was as Cat calls a super method, we need to know the value of Dog  
+local Cat 
+Cat = classy:newClass( Animal,
   classy:addMethod  ('speak',
     function ( obj )
-      classy:callSuperMethod ( obj, obj.super.speak, 'cat' )
+      Cat:callSuperMethod ( obj, 'speak', 'Cat' )
     end
   )
 )

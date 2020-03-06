@@ -4,14 +4,14 @@
 -- such as Corona SDK
 -- @author David Porter
 -- @module classy
--- @release 1.3.5
+-- @release 1.3.6
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local classy = {
 
    --- version details
-   _VERSION = ... .. '.lua 1.3.5',
+   _VERSION = ... .. '.lua 1.3.6',
    _URL = 'https://github.com/davporte/classy',
    --- the current module description
    _DESCRIPTION = [[
@@ -1269,6 +1269,34 @@ end
 --
 -- @local External Facing Calls Protected
 --
+
+--- a unversal get dependancies routine for clasyy object
+-- @uasage classy:getDependancies ( klass )
+-- @within  External Calls (Protected)
+-- @param klass the class object you want to check dependancies for
+-- @return No return value
+function classy:getDependancies ( klass )
+   if klass then 
+     local dependancies = klass._DEPENDANCIES
+     subclassLogger (subLogging._BUILDING, 'building a new class "', klass, '", so getting dependancies:')
+     if dependancies then
+         local next = next
+         local k, v
+         for k, v in next, dependancies, nil do
+            subclassLogger (subLogging._BUILDING, 'checking ', k )
+            if not _G [ k ] then
+               subclassLogger (subLogging._BUILDING, 'requiring')
+              _G [ k ] = require ( v )
+            else
+               subclassLogger (subLogging._BUILDING, 'already installed')
+            end
+         end
+         subclassLogger (subLogging._BUILDING, 'completed *')
+      else
+         subclassLogger (subLogging._BUILDING, 'none detected *')
+      end
+   end
+end
 
 --- allows an object to have default values set.
 -- If attribute is in passedArguments then that attribute is set to that value.
