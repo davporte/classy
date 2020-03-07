@@ -28,13 +28,11 @@ Dog = classy:newClass( Animal,
   )
 )
  
--- Cat inherits from Animal  
--- note this has to be declared this was as Cat calls a super method, we need to know the value of Dog  
-local Cat 
-Cat = classy:newClass( Animal,
+-- Cat inherits from Animal, we can call obj:CallSuperMethod directly 
+local Cat = classy:newClass( Animal,
   classy:addMethod  ('speak',
     function ( obj )
-      Cat:callSuperMethod ( obj, 'speak', 'Cat' )
+      obj:callSuperMethod ( obj, 'speak', 'Cat' )
     end
   )
 )
