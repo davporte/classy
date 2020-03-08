@@ -5,13 +5,13 @@
 -- @usage Logger = require ( 'logger ' )
 -- @author David Porter
 -- @module logger
--- @release 1.0.7
+-- @release 1.0.8
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local logger = {
    --- version details
-   _VERSION = ... .. '.lua 1.0.7',
+   _VERSION = ... .. '.lua 1.0.8',
      --- Git Hub Location of the master branch
      _URL = '',
       --- the current module description
@@ -489,7 +489,7 @@ return classy:newClass(
                     obj:addLogLevel ( CONSTANTS.LOGLEVELS.WARNING )
                     obj:addLogLevel ( CONSTANTS.LOGLEVELS.ERROR )
                     -- classy:default values will load all the args into the object and any that are not passed over but in the default values table will be defaulted.
-                    classy:setDefaultValues ( obj, args, { callLogOutput = defaultOutput, masterLogState = true, myOwnLogState = true } )
+                    classy:setDefaultValues ( obj, { callLogOutput = defaultOutput, masterLogState = true, myOwnLogState = true } )
                   end
                 ),
               classy:addMethod ( CONSTANTS.METHODS.ADDLOGLEVEL,

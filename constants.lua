@@ -1,5 +1,5 @@
 local constants = {
-	 _VERSION = ... .. '.lua 1.1.2',
+	 _VERSION = ... .. '.lua 1.1.3',
      _URL = 'https://github.com/davporte/classy/blob/master/constants.lua',
      _DESCRIPTION = [[
       ============================================================================
@@ -155,7 +155,7 @@ return classy:newClass (
 			classy:initMethod (
 					function (obj, arguments )
 
-						classy:setDefaultValues ( obj, arguments, { attributeStore = {}, secretStore = {}, locked = false } )
+						classy:setDefaultValues ( obj, { attributeStore = {}, secretStore = {}, locked = false } )
 
 						-- the user may have called attributes store in the constructor with objects in that constructor so move them into the secret store
 						local next = next

@@ -4,14 +4,14 @@
 -- such as Corona SDK
 -- @author David Porter
 -- @module classy
--- @release 1.3.6
+-- @release 1.4.0
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local classy = {
 
    --- version details
-   _VERSION = ... .. '.lua 1.3.6',
+   _VERSION = ... .. '.lua 1.4.0',
    _URL = 'https://github.com/davporte/classy',
    --- the current module description
    _DESCRIPTION = [[
@@ -57,7 +57,8 @@ local classy = {
                         _ATTRIBUTESSET = false,  -- the setting of attributes
                         _ATTRIBUTESGET = false, -- the getting of attributes
                         _BUILDING = false, -- the building of a class
-                        _RUNNING = false  -- the running of class methods
+                        _RUNNING = false,  -- the running of class methods
+                        _GARBAGECOLLECT = false  -- the garbage collection of class objects
                      },
       --- a function you can set to do something with logs,
       -- if not set then the default logger is called.
@@ -253,18 +254,19 @@ local PRIVATEBIT, IMMUTABLEBIT, MAXBITSSUPPORTED = 1, 2, 2 -- if we add more the
 local function getInternalID ( c )
    local returnValue = INTERNALIDSTR
    if c and classTypes and classTypes [ c ] then
-      local className = ''
+      local className, moduleName = '', 'None'
       if c._notes and c._notes.moduleName then
          className = ', ' .. c._notes.moduleName
+         moduleName = c._notes.moduleName
       end
-      return { returnValue .. classTypes [  c  ] .. className , true,  classTypes [  c  ], classTypes [  c  ] .. className }
+      return { returnValue .. classTypes [  c  ] .. className , true,  classTypes [  c  ], classTypes [  c  ] .. className , moduleName}
    else
-      return { returnValue .. 'None', false, nil, nil }
+      return { returnValue .. 'None', false, nil, nil, nil }
    end
 end
 
 -- return values of getInternalID array, we reference these as constants
-local GETINTERNALID_TXT, GETINTERNALID_RSLT, GETINTERNALID_VALUE, GETINTERNALID_SUBTXT = 1, 2, 3, 4
+local GETINTERNALID_TXT, GETINTERNALID_RSLT, GETINTERNALID_VALUE, GETINTERNALID_SUBTXT, GETINTERNALID_CLASSNAME = 1, 2, 3, 4, 5
 
 -- @local this is the class logger function. If logging is true it constructs the message, if false it does not
 -- ... paramter list are converted to strings and constructed p1 ... pN
@@ -304,6 +306,20 @@ local function subclassLogger ( logType, ... )
       classLogger (logType.name ,':',  ... )
    end
 end
+
+-- @local this is the garbage collection routine that removes classy objects from classy when no longer referenced
+-- called via system garbage collection using __gc on an object
+-- @return No return value
+local function garbageCollect ( obj )
+   local internalID = getInternalID ( getmetatable ( obj  ) )
+   if internalID then
+      -- if user has already programtically called removeSelf this object will already be removed
+      if obj.removeSelf then
+         subclassLogger ( subLogging._GARBAGECOLLECT, 'collecting an object: ', obj , ' : ', internalID  [GETINTERNALID_CLASSNAME] or 'None' )
+         obj:removeSelf ( )
+      end
+   end
+end 
 
 -- @local track the state of currentRunningClass(s), we may have nested action e.g. obj = obj or ( classType () ), this would be nested x  2: one for ClassType () one for obj =
 -- @param classThatMadeCall is the class identifier
@@ -1244,6 +1260,9 @@ local function getNewObject ( class_tbl, argValue, ... )
    -- clear the current running class
    classRunTracker ( class_tbl, false )
 
+   -- allow garbage collection the ability to clean up classy objects
+   attachGCEvent ( obj, function () garbageCollect ( obj ) end ) 
+
    subclassLogger (subLogging._ATTRIBUTESGET, 'get new object success')
 
    return obj, initValue
@@ -1271,22 +1290,29 @@ end
 --
 
 --- a unversal get dependancies routine for clasyy object
--- @uasage classy:getDependancies ( klass )
+-- @usage classy:getDependancies ( klass )
 -- @within  External Calls (Protected)
 -- @param klass the class object you want to check dependancies for
 -- @return No return value
 function classy:getDependancies ( klass )
    if klass then 
-     local dependancies = klass._DEPENDANCIES
-     subclassLogger (subLogging._BUILDING, 'building a new class "', klass, '", so getting dependancies:')
-     if dependancies then
+      local errors = false
+      local dependancies = klass._DEPENDANCIES
+      subclassLogger (subLogging._BUILDING, 'building a new class "', klass, '", so getting dependancies:')
+      if dependancies then
          local next = next
          local k, v
          for k, v in next, dependancies, nil do
             subclassLogger (subLogging._BUILDING, 'checking ', k )
             if not _G [ k ] then
                subclassLogger (subLogging._BUILDING, 'requiring')
-              _G [ k ] = require ( v )
+               local ok, err = pcall( function () return require ( v ) end )
+               if not ok then
+                  print ('error: ' ..  err )
+                  errors = true
+               else
+                  _G [ k ] = err
+               end
             else
                subclassLogger (subLogging._BUILDING, 'already installed')
             end
@@ -1295,13 +1321,14 @@ function classy:getDependancies ( klass )
       else
          subclassLogger (subLogging._BUILDING, 'none detected *')
       end
+      if errors then 
+         native.requestExit ('can\'t locate dependancies, exiting')
+      end
    end
 end
 
 --- allows an object to have default values set.
--- If attribute is in passedArguments then that attribute is set to that value.
--- If attribute is not in passedArguments but is in defaultArguments it is defaulted to that value.
--- If attribute is in neither it remains nil. You can directly affect that attribute using;
+-- Sets default values if not already set by user calling them in the constructor
 --
 -- obj.ATTRIBUTE = value
 -- 
@@ -1312,23 +1339,17 @@ end
 -- @usage classy:setDefaultValues ( { attribute1 = value, ... , attributeN = value } )
 -- @within  External Calls (Protected)
 -- @param obj the object wishing to set its attributes
--- @param passedArguments the passed arguments
 -- @param defaultArguments the default setting if item is not in passedArguments
 -- @return No return value
-function classy:setDefaultValues ( obj, passedArguments, defaultArguments )
+function classy:setDefaultValues ( obj, defaultArguments )
 
    errorLayer = errorLayer + 1
 
    if obj and amIInsideaClassMethod ( getmetatable ( obj ) ) then 
       subclassLogger (subLogging._BUILDING, 'loading initial settings for object ', obj)
-      passedArguments = passedArguments or {}
       defaultArguments = defaultArguments or {}
       local next = next
       local k, v
-      for k, v in next, passedArguments, nil do
-         subclassLogger (subLogging._BUILDING, 'setting attribute ', k, ' = ', v)
-         obj [ k ] = v
-      end
       for k, v in next, defaultArguments, nil do
          if not obj [ k ] then
             subclassLogger (subLogging._BUILDING, 'defaulting attribute ', k, ' = ', v)

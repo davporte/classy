@@ -4,12 +4,12 @@
 -- @usage Parser = require ( 'mathParser' )
 -- @author David Porter
 -- @module mathParser
--- @release 1.0.0
+-- @release 1.0.1
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local mathParser = {
-	 _VERSION = ... .. '.lua 1.0.0',
+	 _VERSION = ... .. '.lua 1.0.1',
      _URL = '',
      _DESCRIPTION = [[
       ============================================================================
@@ -739,7 +739,7 @@ return classy:newClass(
                   -- @usage myParser = mathParser ()
                 function ( obj, args )
                 	-- classy:default values will load all the args into the object and any that are not passed over but in the default values table will be defaulted.
-                	classy:setDefaultValues ( obj, args, { supportedFunctions = { }, myLogger = _G.myLogger, mathParserParameters = { } } )
+                	classy:setDefaultValues ( obj, { supportedFunctions = { }, myLogger = _G.myLogger, mathParserParameters = { } } )
                 	-- check to see if the class is registerd by the logger, if not register it so we get the Log_ functions created
                 	-- we also only do this with the base class, any inherted classes will not be seen as modules as they are not loaded via require
                 	obj.logEntity = classy:getBaseClass ( getmetatable ( obj ) )

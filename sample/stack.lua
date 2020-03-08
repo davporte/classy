@@ -4,12 +4,12 @@
 -- @usage Stack = require ( 'stack' )
 -- @author David Porter
 -- @module stack
--- @release 1.0.8
+-- @release 1.0.9
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local stack = {
-   _VERSION = ... .. '.lua 1.0.8',
+   _VERSION = ... .. '.lua 1.0.9',
      _URL = '',
      _DESCRIPTION = [[
       ============================================================================
@@ -160,7 +160,7 @@ return classy:newClass(
                   -- @usage myStack = Stack ( { stack = { item1, ...., itemN } } )
                   function ( obj, args )
                     -- classy:default values will load all the args into the object and any that are not passed over but in the default values table will be defaulted.
-                    classy:setDefaultValues ( obj, args, { stack = {}, myLogger = _G.myLogger, myStackName = tostring ( obj ):gsub ('table: ','' ) } )
+                    classy:setDefaultValues ( obj, { stack = {}, myLogger = _G.myLogger, myStackName = tostring ( obj ):gsub ('table: ','' ) } )
                     obj.stackCount = #obj.stack -- you may have prepopulated the stack
                     obj.myStackName =  ' from stackID: ' .. obj.myStackName -- sets a string that logs output, defaults to the obj table name unless you preset it
                     -- check to see if the class is registerd by the logger, if not register it so we get the Log_ functions created

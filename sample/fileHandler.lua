@@ -4,12 +4,12 @@
 -- @usage FileHandler = require ( 'fileHandler' )
 -- @author David Porter
 -- @module fileHandler
--- @release 1.0.1
+-- @release 1.0.2
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local filer = {
-	 _VERSION = ... .. '.lua 1.0.1',
+   _VERSION = ... .. '.lua 1.0.2',
      _URL = '',
      _DESCRIPTION = [[
       ============================================================================
@@ -99,17 +99,17 @@ getDependancies = nil
 -- @return a file handler or nil
 local function openFileLocal ( obj, fileDetails, mode )
   fileDetails = obj [ CONSTANTS.METHODS.FILENAMEBUILDER ] ( obj, fileDetails )
-  obj.myLogger:Log_Info ( 'file open request ', fileDetails, ' mode:', mode, ' handler:', obj )
+  obj.myLogger:Log_Info_fileHandler ( 'file open request ', fileDetails, ' mode:', mode, ' handler:', obj )
   if fileDetails ~= nil then
     local fileDetailResult, errorString = io.open( fileDetails, mode )
     if fileDetailResult then
-      obj.myLogger:Log_Info ( 'succesfully opened "' , fileDetails , '" handler:', obj )
+      obj.myLogger:Log_Info_fileHandler ( 'succesfully opened "' , fileDetails , '" handler:', obj )
       return fileDetailResult
     else
-      obj.myLogger:Log_Error ( 'io error:' .. errorString, ' handler:', obj )
+      obj.myLogger:Log_Error_fileHandler ( 'io error:' .. errorString, ' handler:', obj )
     end
   else
-    obj.myLogger:Log_Warning ( 'no file details provided handler:', obj )
+    obj.myLogger:Log_Warning_fileHandler ( 'no file details provided handler:', obj )
   end 
 
   return nil
@@ -140,10 +140,10 @@ local function closeFileLocal ( obj, fhd )
   local warningMessage = fileState ( fhd )
   if not warningMessage then
     io.close ( fhd )
-    obj.myLogger:Log_Info ( 'succesfully closed file ', fhd, ' handler:', obj ) 
+    obj.myLogger:Log_Info_fileHandler ( 'succesfully closed file ', fhd, ' handler:', obj ) 
     return true  
   end
-  obj.myLogger:Log_Warning ( 'io:trying to close ', fhd, ', but encountered an ', warningMessage, ' handler:', obj )
+  obj.myLogger:Log_Warning_fileHandler ( 'io:trying to close ', fhd, ', but encountered an ', warningMessage, ' handler:', obj )
   return false
 end
 
@@ -163,11 +163,11 @@ local function readFileLocal ( obj, fhd, ... )
       readData =  fhd:read ( ... )
     end
     if obj.defaultReadBehavour.closeAfterRead then
-      closeFileLocal ( fhd )
+      closeFileLocal ( obj, fhd )
     end
     return readData
   else
-    obj.myLogger:Log_Warning ( 'io:trying to read an ', fhd, ', but encountered an ', warningMessage, ' handler:', obj )
+    obj.myLogger:Log_Warning_fileHandler ( 'io:trying to read an ', fhd, ', but encountered an ', warningMessage, ' handler:', obj )
   end
 end
 
@@ -182,7 +182,7 @@ local function writeFileLocal ( obj, fhd, ... )
   if not warningMessage then
     fhd:write ( ... )
   else
-    obj.myLogger:Log_Warning ( 'io:trying to read an ', fhd, ', but encountered an ', warningMessage, ' handler:', obj )
+    obj.myLogger:Log_Warning_fileHandler ( 'io:trying to read an ', fhd, ', but encountered an ', warningMessage, ' handler:', obj )
   end
 end
 
@@ -192,13 +192,14 @@ end
 -- @see fileExists
 -- @return true if file exists, false if it does not
 local function fileExistsLocal ( obj, fileName )
-  local fhd = openFileLocal ( fileName , 'r')
-  if fhd then
-    closeFileLocal ( obj, fhd )
-    return true
-  else
-    return false
+  if fileName then
+    local fhd = openFileLocal ( obj, fileName , 'r')
+    if fhd then
+      closeFileLocal ( obj, fhd )
+      return true
+    end
   end
+  return false
 end
 
 -- copies a file
@@ -219,19 +220,19 @@ local function copyFileLocal ( obj, fromFile, toFile )
           local data = fromFh:read( '*a' )
           toFh:write( data )
           closeFileLocal ( obj, toFh )
-          obj.myLogger:Log_Info ( 'file succesfully copied handler:', obj )
+          obj.myLogger:Log_Info_fileHandler ( 'file succesfully copied handler:', obj )
           result = true
         end
         closeFileLocal ( obj, fromFh )
       end
     else
-      obj.myLogger:Log_Warning ( 'can not copy file to itself handler:', obj )
+      obj.myLogger:Log_Warning_fileHandler ( 'can not copy file to itself handler:', obj )
     end
   else
     if not toFile then
-      obj.myLogger:Log_Info ( 'no copy to file specified handler:', obj )
+      obj.myLogger:Log_Info_fileHandler ( 'no copy to file specified handler:', obj )
     else
-      obj.myLogger:Log_Info ( 'no copy from and to file specified handler:', obj )
+      obj.myLogger:Log_Info_fileHandler ( 'no copy from and to file specified handler:', obj )
     end
   end
 
@@ -268,7 +269,8 @@ return classy:newClass(
                   -- @usage myFileHandler = FileHandler ()
                   function ( obj, args )
                     -- classy:default values will load all the args into the object and any that are not passed over but in the default values table will be defaulted.
-                    classy:setDefaultValues ( obj, args, { defaultReadBehavour = { adjusted = nil, closeAfterRead = false }, myLogger = _G.myLogger } )
+                    classy:setDefaultValues ( obj, { defaultReadBehavour = { adjusted = nil, closeAfterRead = false }, myLogger = _G.myLogger } )
+
                     -- check to see if the class is registerd by the logger, if not register it so we get the Log_ functions created
                     -- we also only do this with the base class, any inherted classes will not be seen as modules as they are not loaded via require
                     obj.logEntity = classy:getBaseClass ( getmetatable ( obj ) )
@@ -303,10 +305,10 @@ return classy:newClass(
                     elseif param2Type == _BOOLTYPE and param1Type == _STRINGTYPE then
                       obj.defaultReadBehavour = { adjusted = param2, closeAfterRead = param1}
                     else
-                      obj.myLogger:Log_Warning ( 'tried to adjust default read behavour with wrong parameters handler:', obj )
+                      obj.myLogger:Log_Warning_fileHandler ( 'tried to adjust default read behavour with wrong parameters handler:', obj )
                     end
                   else
-                    obj.myLogger:Log_Warning ( 'tried to adjust default read behavour with no parameters handler:', obj )
+                    obj.myLogger:Log_Warning_fileHandler ( 'tried to adjust default read behavour with no parameters handler:', obj )
                   end   
                 end 
                 ),
@@ -393,7 +395,7 @@ return classy:newClass(
                 -- @return returns true if empty or false if file does not exist or is not empty
                 -- @usage local result = fileHandler:fileIsEmpty ( { fileName = fileName [, path = pathToFile ] } )
                 function  ( obj, fileName )
-                  local fhd = openFileLocal ( fileName , 'r' )
+                  local fhd = openFileLocal ( obj, fileName , 'r' )
                   if fhd then
                     if fhd:read ( '*a' ) == '' then
                       fhd:close ()
