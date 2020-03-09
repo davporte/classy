@@ -4,12 +4,12 @@
 -- @usage Utils = require ( 'utils' )
 -- @author David Porter
 -- @module utils
--- @release 1.0.1
+-- @release 1.0.2
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local utils = {
-	 _VERSION = ... .. '.lua 1.0.1',
+	 _VERSION = ... .. '.lua 1.0.2',
      _URL = '',
      _DESCRIPTION = [[
       ============================================================================
@@ -86,6 +86,11 @@ end
 --- removes leading and trailing WS
 function string:removeLeadTrailWS() 
 	return self:match('^%s*(.-)%s*$') 
+end
+
+--- removes leading and trailing "
+function string:removeLeadTrailQuotes() 
+	return self:match('^\"*(.-)\"*$') 
 end
 
 --- tests a string for whitespace only or empty
@@ -743,7 +748,7 @@ function utils.breakAppart ( obj, iter, careAboutStrings, matchCounter, matchA, 
 		    		matchAOcurred = true
 		    		local result, newC
 		    		matchCounter = matchCounter + 1
-		    		result, newC, matchCounter, hasOccured, matchAOcurred = obj.breakAppart ( obj, iter:sub (c+1), careAboutStrings, matchCounter, matchA, matchB, hasOccured, matchAOcurred, level, items [#items + 1], stringsActive)
+		    		result, newC, matchCounter, hasOccured, matchAOcurred = utils.breakAppart ( obj, iter:sub (c+1), careAboutStrings, matchCounter, matchA, matchB, hasOccured, matchAOcurred, level, items [#items + 1], stringsActive)
 		    		if newC then
 			    		c = c + newC
 			    	else
