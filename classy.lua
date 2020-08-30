@@ -4,14 +4,14 @@
 -- such as Corona SDK
 -- @author David Porter
 -- @module classy
--- @release 1.4.0
+-- @release 1.4.1
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local classy = {
 
    --- version details
-   _VERSION = ... .. '.lua 1.4.0',
+   _VERSION = ... .. '.lua 1.4.1',
    _URL = 'https://github.com/davporte/classy',
    --- the current module description
    _DESCRIPTION = [[
@@ -58,7 +58,7 @@ local classy = {
                         _ATTRIBUTESGET = false, -- the getting of attributes
                         _BUILDING = false, -- the building of a class
                         _RUNNING = false,  -- the running of class methods
-                        _GARBAGECOLLECT = false  -- the garbage collection of class objects
+                        _GARBAGECOLLECT = true  -- the garbage collection of class objects
                      },
       --- a function you can set to do something with logs,
       -- if not set then the default logger is called.
@@ -74,7 +74,9 @@ local classy = {
       -- return true 
       -- end
       -- This does trigger the standard logger to log
-      myLogger = nil
+      myLogger = nil,
+      --
+      _GCEVENT = true -- a flag that is set to false stops GCC event, this also stops proper garbage collection. 
 }
 
 --- Internal Only
@@ -255,6 +257,7 @@ local function getInternalID ( c )
    local returnValue = INTERNALIDSTR
    if c and classTypes and classTypes [ c ] then
       local className, moduleName = '', 'None'
+      --print (c, c._notes, c._notes.moduleName)
       if c._notes and c._notes.moduleName then
          className = ', ' .. c._notes.moduleName
          moduleName = c._notes.moduleName
@@ -308,14 +311,24 @@ local function subclassLogger ( logType, ... )
 end
 
 -- @local this is the garbage collection routine that removes classy objects from classy when no longer referenced
+-- @param the object
+-- @param debugInfo any debug data
 -- called via system garbage collection using __gc on an object
 -- @return No return value
-local function garbageCollect ( obj )
+local function garbageCollect ( obj, debugInfo )
    local internalID = getInternalID ( getmetatable ( obj  ) )
    if internalID then
       -- if user has already programtically called removeSelf this object will already be removed
       if obj.removeSelf then
-         subclassLogger ( subLogging._GARBAGECOLLECT, 'collecting an object: ', obj , ' : ', internalID  [GETINTERNALID_CLASSNAME] or 'None' )
+         local debugString = ''
+         if debugInfo then
+            local line = debugInfo.currentline or 'Unknown'
+            local source = debugInfo.short_src or 'Unknown'
+            debugString = ': defined at line ' .. line .. ', in file ' .. source
+            if debugInfo.what and debugInfo.what == 'main' then
+            end
+         end
+         subclassLogger ( subLogging._GARBAGECOLLECT, 'collecting an object: ', obj , ' : ', internalID  [GETINTERNALID_CLASSNAME] or 'Unknown', debugString )
          obj:removeSelf ( )
       end
    end
@@ -1104,6 +1117,8 @@ local function attributesSetter ( argTable, superState )
                            end
                            validatedAttributes [k] = { whatType = whatTypeValue, immutable = bitOperation (checkImmutableValue, IMMUTABLEBIT, bitOperators.AND) ~= 0, 
                                  private = bitOperation (checkImmutableValue, PRIVATEBIT, bitOperators.AND) ~= 0  }
+                           -- we remove any object types created as part of this definition process, since we now have the type and no longer need the object in the classy store
+                           if not v._isABaseType then v:removeSelf () end
                         end 
 
                         subclassLogger ( subLogging._ATTRIBUTESSET, 'setting ', k, ' immutable:', validatedAttributes [k].immutable, ' private:', validatedAttributes [k].private, ' type:', whatTypeValue )    
@@ -1233,11 +1248,11 @@ local function getNewObject ( class_tbl, argValue, ... )
          local k, v
          for k, v in next, argValue, nil do
 
-            --errorLayer = errorLayer + 2
+            errorLayer = errorLayer + 2
 
             obj [k] = v
 
-            --errorLayer = errorLayer - 2
+            errorLayer = errorLayer - 2
          end
          -- only send ... to init method
          if class_tbl.init then
@@ -1260,8 +1275,16 @@ local function getNewObject ( class_tbl, argValue, ... )
    -- clear the current running class
    classRunTracker ( class_tbl, false )
 
+   -- get debugInfo if avaialble for the garbage collector
+   local debugInfo
+   if debug then
+      debugInfo = debug.getinfo ( 3 )
+   end
    -- allow garbage collection the ability to clean up classy objects
-   attachGCEvent ( obj, function () garbageCollect ( obj ) end ) 
+   -- this can be turned off for the purpuse of testing, by setting the GCevent to false
+   if classy._GCEVENT then
+      attachGCEvent ( obj, function () garbageCollect ( obj, debugInfo ) end ) 
+   end
 
    subclassLogger (subLogging._ATTRIBUTESGET, 'get new object success')
 
@@ -1290,7 +1313,7 @@ end
 --
 
 --- a unversal get dependancies routine for clasyy object
--- @usage classy:getDependancies ( klass )
+-- @uasage classy:getDependancies ( klass )
 -- @within  External Calls (Protected)
 -- @param klass the class object you want to check dependancies for
 -- @return No return value
@@ -1830,9 +1853,12 @@ function classy:newClass ( base )
    local mt = {}
 
    -- @local the object constructor getNewObject is called for an object under construction
+   -- we slso pull debug information if available that the garbage collector will display
    -- @param class_tbl the objects class
    -- @param ... the paramters passed in the constructor
-   mt.__call = function (class_tbl, ...)  return getNewObject (class_tbl, ...)  end
+   mt.__call = function (class_tbl, ...)
+                           return getNewObject (class_tbl, ...)  
+                        end
 
    -- set up super
    if base then

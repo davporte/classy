@@ -1,7 +1,7 @@
 ------------
 -- a test rig for classy.lua
 -- @author David Porter
--- @release 1.0.1
+-- @release 1.0.2
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
@@ -11,6 +11,9 @@ inspect = require ('inspect.inspect')
 
 -- load the classy module
 classy = require ('classy')
+
+-- turn off Garbage collection for these tests, some tests will fail as user objects are created in garbage collection
+classy._GCEVENT = false
 
 -- load up a sample class to test classy against
 Constants = require ('constants')
@@ -91,6 +94,7 @@ local b = Constants ()
 local bMeta = getmetatable ( b )
 
 -- run tests 
+
 callTest ( 'objects have the same metatable', assertEquals, aMeta, bMeta )
 
 callTest ( 'objects have the same attributes', assertEquals, aMeta._attributeStore, bMeta._attributeStore )
