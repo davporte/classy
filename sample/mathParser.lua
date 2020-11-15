@@ -4,12 +4,16 @@
 -- @usage Parser = require ( 'mathParser' )
 -- @author David Porter
 -- @module mathParser
--- @release 1.0.1
+-- @release 1.0.2
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
+-- fixed issues where was using # to get stack member counts, when :members () method is correct way
+-- fixed issue in _help where nil would return incorrectly is we performed a mathamtical expression after evaluating attribute []..[] in _helper
+-- re-enstated the tables can't be added error for +
+
 local mathParser = {
-	 _VERSION = ... .. '.lua 1.0.1',
+	 _VERSION = ... .. '.lua 1.0.2',
      _URL = '',
      _DESCRIPTION = [[
       ============================================================================
@@ -431,7 +435,7 @@ local function examineExpression ( obj, tableOfResults)
 			    		local x
 			    		local items = {}
 			    		local result = ''
-
+			    		obj.myLogger:Log_Debug_mathParser ( '_helper called on expression "', expr, '", with evalauted code \n', inspect (executeCode))
 			    		local _paramBuilder
 			    		_paramBuilder = function ( obj, result, n, executeCode, stringState )
 											local paramName = result:stripAllWS ()
@@ -546,7 +550,7 @@ local function examineExpression ( obj, tableOfResults)
 					    						items [#items + 1] = r
 					    						_paramBuilder ( obj, result, n, executeCode, stringState)
 					    					end
-					    					if multiBracketStack and #multiBracketStack ~= 0 then -- special close
+					    					if multiBracketStack and multiBracketStack:members () ~= 0 then -- special close
 								    			local lastPopped = multiBracketStack:pop ()
 								    			local addOneHere = lastPopped [#lastPopped]
 								    			addOneHere.expr = addOneHere.expr .. FORMULAFORMAT.oSBracket .. result .. FORMULAFORMAT.cSBracket
@@ -557,7 +561,7 @@ local function examineExpression ( obj, tableOfResults)
 						    					if poppedBracket.startBracketLevel == currentBracketCount then -- single [ ... ] wth no more inside, so resolvable
 						    						local adjustedCode = poppedBracket.leadingCode
 							    					bracketHistory = bracketHistory or Stack ( { myStackName = mathParser._MODULENAME .. ':bracketHistory' } )
-							    					if #bracketHistory == 0 then
+							    					if bracketHistory:members() == 0 then
 							    						adjustedCode [#adjustedCode].b = {executeCode}
 							    						bracketHistory:push ( adjustedCode )
 							    					else -- everything in this stack is in a code build
@@ -611,9 +615,9 @@ local function examineExpression ( obj, tableOfResults)
 							if not obj:tableIsEmpty (executeCode) then
 								obj:tableCopier (executeCode, modifiedCode)
 							end
-							executeCode = modifiedCode
+							-- if modified code returns a value use it other wise return execute code
+							executeCode = modifiedCode or executeCode
 						end
-
 
 						return executeCode, parametersConsumed, functionsConsumed
 		    	end
@@ -759,8 +763,8 @@ return classy:newClass(
 																			return a + b
 																		end 
 																	end
-												, multiType = true,-- warning = function (a, b) return type (a) == _TABLETYPE or type (b) == _TABLETYPE  end, 
-												--errorMessage = 'tables can\'t be added'
+												, multiType = true, warning = function (a, b) return type (a) == _TABLETYPE or type (b) == _TABLETYPE  end, 
+												errorMessage = 'tables can\'t be added'
 												}) -- multiType allows other types than number, we don't add tables so add a warning
 					obj:addFunction ({name = '-', code = function ( a, b ) return a - b end} )
 					obj:addFunction ({name = '*', code = function ( a, b ) return a * b end} )

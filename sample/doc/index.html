@@ -36,20 +36,20 @@
 
 <h2>Modules</h2>
 <ul class="nowrap">
-  <li><strong>fileHandler</strong></li>
+  <li><strong>mathParser</strong></li>
 </ul>
 
 </div>
 
 <div id="content">
 
-<h1>Module <code>fileHandler</code></h1>
-<p>creates a file handler class.</p>
+<h1>Module <code>mathParser</code></h1>
+<p>creates a math builder class.</p>
 <p>
  designed for use with the classy object creator</p>
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">FileHandler = require ( &apos;fileHandler&apos; )
+        <pre class="example">Parser = require ( &apos;mathParser&apos; )
 </pre>
     </ul>
     <h3>Info:</h3>
@@ -64,46 +64,45 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
+	<td class="name" nowrap><a href="#convertParameter">convertParameter (obj, name, parametersConsumed, logParameters)</a></td>
+	<td class="summary">convertParameter converts parameter name to value as stored in .parameters.</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#initMethod">initMethod (obj, args)</a></td>
 	<td class="summary">sets the default read behavour flags</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#setDefaultReadBehavour">setDefaultReadBehavour (obj, param1, param2)</a></td>
-	<td class="summary">setDefaultReadBehavour can adjust the default corona behavour of one line at a time for a read, it can also force a file close at the end
- takes to paramters param1, param2, they are not manditory but if there one must be boolean the other a string
- the boolean sets the closeAfterRead and the string the adjusted file default read method.</td>
+	<td class="name" nowrap><a href="#compile">compile (obj, ...)</a></td>
+	<td class="summary">calls the compiler, can send a list of strings or single string
+ Creates a list of tables table that can then be executed upon</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#openFile">openFile (obj, fileDetails, mode)</a></td>
-	<td class="summary">opens a file</td>
+	<td class="name" nowrap><a href="#addFunction">addFunction (obj, parameters)</a></td>
+	<td class="summary">adds a function to the parser, functions are single character, warnings are optional and will be tested prior to execiting the code</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#closeFile">closeFile (obj, fhd)</a></td>
-	<td class="summary">closes a file</td>
+	<td class="name" nowrap><a href="#setActiveParameters">setActiveParameters (obj, ...)</a></td>
+	<td class="summary">sets a list of paramters to the parser, its a key value pair table with key = typeOf ( key )</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#readFrom">readFrom (obj, fhd, ...)</a></td>
-	<td class="summary">reads from a file</td>
+	<td class="name" nowrap><a href="#getActiveParameters">getActiveParameters (obj)</a></td>
+	<td class="summary">gets a list of paramters to the parser, its a key value pair table</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#writeTo">writeTo (obj, fhd, ...)</a></td>
-	<td class="summary">writes to a file</td>
+	<td class="name" nowrap><a href="#runFunction">runFunction (obj, name, ...)</a></td>
+	<td class="summary">runs a specific parser function.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#fileExists">fileExists (obj, fileName)</a></td>
-	<td class="summary">tests if a file exists or not</td>
+	<td class="name" nowrap><a href="#isFunction">isFunction (obj, name)</a></td>
+	<td class="summary">returns true/false if it is/is not a known function name</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#copyFile">copyFile (obj, fromFile, toFile)</a></td>
-	<td class="summary">copies a file</td>
+	<td class="name" nowrap><a href="#execute">execute (obj, codeBlock, parameters, optionalParameters)</a></td>
+	<td class="summary">executes an actual compile table(s)</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#fileIsEmpty">fileIsEmpty (obj, fileName)</a></td>
-	<td class="summary">tests to see if a file is empty</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#fileNameBuilder">fileNameBuilder (obj, fileDetails)</a></td>
-	<td class="summary">builds file name if path table otherwise returns orgional value.</td>
+	<td class="name" nowrap><a href="#compileAndExecute">compileAndExecute (obj, ...)</a></td>
+	<td class="summary">compiles then executes an actual compile table(s)</td>
 	</tr>
 </table>
 <h2><a href="#Fields">Fields</a></h2>
@@ -121,6 +120,42 @@
     <h2 class="section-header "><a name="Functions"></a>Functions</h2>
 
     <dl class="function">
+    <dt>
+    <a name = "convertParameter"></a>
+    <strong>convertParameter (obj, name, parametersConsumed, logParameters)</strong>
+    </dt>
+    <dd>
+    convertParameter converts parameter name to value as stored in .parameters.
+ Note it strips white space. If 2nd paramter is true you sent the routine a number already.
+ bounded by " ... " is a string so return the origional value with all WS
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the mathParser object
+        </li>
+        <li><span class="parameter">name</span>
+         the item under test
+        </li>
+        <li><span class="parameter">parametersConsumed</span>
+         a table that lists all the parameters consumed
+        </li>
+        <li><span class="parameter">logParameters</span>
+         if true we bother logging, if false we do not
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        strippedname, is a number true or false, is a string true or false
+    </ol>
+
+
+
+
+</dd>
     <dt>
     <a name = "initMethod"></a>
     <strong>initMethod (obj, args)</strong>
@@ -149,30 +184,94 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">myFileHandler = FileHandler ()</pre>
+        <pre class="example">myParser = mathParser ()</pre>
     </ul>
 
 </dd>
     <dt>
-    <a name = "setDefaultReadBehavour"></a>
-    <strong>setDefaultReadBehavour (obj, param1, param2)</strong>
+    <a name = "compile"></a>
+    <strong>compile (obj, ...)</strong>
     </dt>
     <dd>
-    setDefaultReadBehavour can adjust the default corona behavour of one line at a time for a read, it can also force a file close at the end
- takes to paramters param1, param2, they are not manditory but if there one must be boolean the other a string
- the boolean sets the closeAfterRead and the string the adjusted file default read method.
+    calls the compiler, can send a list of strings or single string
+ Creates a list of tables table that can then be executed upon
 
 
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">obj</span>
-         the file hander object
+         the mathParser object
         </li>
-        <li><span class="parameter">param1</span>
-         the first parameter to check
+        <li><span class="parameter">...</span>
+         the tables you want compiled
         </li>
-        <li><span class="parameter">param2</span>
-         the second parameter to check
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        from one to many compile table results in a table or nil if error, also returns the key's used by the expressions
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="index.html#execute">execute</a>
+    </ul>
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">myParser:compile ( <span class="string">'math string 1 '</span> [, ..., <span class="string">'math string N'</span>] )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "addFunction"></a>
+    <strong>addFunction (obj, parameters)</strong>
+    </dt>
+    <dd>
+    adds a function to the parser, functions are single character, warnings are optional and will be tested prior to execiting the code
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the parser object
+        </li>
+        <li><span class="parameter">parameters</span>
+         a table containing the following code = Your Code, warnings = A warning Function (returns true to trigger warning), errorMessage = Your error if warning is triggered, mutiType if parameters to your code can be of different types ( default is must be same type ), name = 'Function Name' ( currently limited to single char)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        No return value, however your code must return your result and warnings must return true or false
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">myParser:addFunction ( { code = CODE, name = NAME [, warnings = CODE, errorMessage = STRING ] } )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "setActiveParameters"></a>
+    <strong>setActiveParameters (obj, ...)</strong>
+    </dt>
+    <dd>
+    sets a list of paramters to the parser, its a key value pair table with key = typeOf ( key )
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the mathParser object
+        </li>
+        <li><span class="parameter">...</span>
+         the tables you want the key value pairs from
         </li>
     </ul>
 
@@ -186,288 +285,183 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">fileHandler:setDefaultReadBehavour ( param1 [, param <span class="number">2</span> ] )</pre>
+        <pre class="example">myParser:setActiveParameters ( { Mandatory Parameters } [ , { Optional Parameters } ] )</pre>
     </ul>
 
 </dd>
     <dt>
-    <a name = "openFile"></a>
-    <strong>openFile (obj, fileDetails, mode)</strong>
+    <a name = "getActiveParameters"></a>
+    <strong>getActiveParameters (obj)</strong>
     </dt>
     <dd>
-    opens a file
+    gets a list of paramters to the parser, its a key value pair table
 
 
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">obj</span>
-         the file handler object
-        </li>
-        <li><span class="parameter">fileDetails</span>
-         is an actual path or a table containing filename/path
-        </li>
-        <li><span class="parameter">mode</span>
-         is the mode you want the file to open in, if not specified then this is the defaultReadBehavour "r"
+         the mathParser object
         </li>
     </ul>
 
     <h3>Returns:</h3>
     <ol>
 
-        a file handler or nil
+        key value pairs of known parameters
     </ol>
 
 
-    <h3>See also:</h3>
-    <ul>
-    </ul>
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> fhd = fileHandler:openFile ( { fileName = fileName [, path = pathToFile ] } [, mode ])</pre>
+        <pre class="example"><span class="keyword">local</span> names = myParser:getActiveParameters ()</pre>
     </ul>
 
 </dd>
     <dt>
-    <a name = "closeFile"></a>
-    <strong>closeFile (obj, fhd)</strong>
+    <a name = "runFunction"></a>
+    <strong>runFunction (obj, name, ...)</strong>
     </dt>
     <dd>
-    closes a file
+    runs a specific parser function.  Allows you to test your functions inside mathParser
 
 
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">obj</span>
-         the file handler object
+         the mathParser object
         </li>
-        <li><span class="parameter">fhd</span>
-         the file you wish to close
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        true if success false if failed
-    </ol>
-
-
-    <h3>See also:</h3>
-    <ul>
-    </ul>
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example"><span class="keyword">local</span> success = fileHandler:close ()</pre>
-    </ul>
-
-</dd>
-    <dt>
-    <a name = "readFrom"></a>
-    <strong>readFrom (obj, fhd, ...)</strong>
-    </dt>
-    <dd>
-    reads from a file
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">obj</span>
-         the file handler object
-        </li>
-        <li><span class="parameter">fhd</span>
-         the file you wish to read from
+        <li><span class="parameter">name</span>
+         the mathParser function
         </li>
         <li><span class="parameter">...</span>
-         optional mode settings
+         the parameters for that function
         </li>
     </ul>
 
     <h3>Returns:</h3>
     <ol>
 
-        readData if success nil if failed
+        nil if error or the result of the execution of that function
     </ol>
 
 
-    <h3>See also:</h3>
-    <ul>
-    </ul>
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> data = fileHandler:readFrom ( fileId [ , ... ] )</pre>
+        <pre class="example"><span class="keyword">local</span> result = myParser:runFunction ( FUNCTIONNAME [, ParamA, .. ParamN ] )</pre>
     </ul>
 
 </dd>
     <dt>
-    <a name = "writeTo"></a>
-    <strong>writeTo (obj, fhd, ...)</strong>
+    <a name = "isFunction"></a>
+    <strong>isFunction (obj, name)</strong>
     </dt>
     <dd>
-    writes to a file
+    returns true/false if it is/is not a known function name
 
 
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">obj</span>
-         the file handler object
+         the mathParser object
         </li>
-        <li><span class="parameter">fhd</span>
-         the file you wish to write from
+        <li><span class="parameter">name</span>
+         the mathParser function
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if function exists or false if not
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> doesExist = myParser:isFunction ( FUNCTIONNAME )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "execute"></a>
+    <strong>execute (obj, codeBlock, parameters, optionalParameters)</strong>
+    </dt>
+    <dd>
+    executes an actual compile table(s)
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the mathParser object
+        </li>
+        <li><span class="parameter">codeBlock</span>
+         table created by compile
+        </li>
+        <li><span class="parameter">parameters</span>
+         the manditory parameters as a key value pair, values are the values in the calculation. OptionalParameters	values can be set here also.
+        </li>
+        <li><span class="parameter">optionalParameters</span>
+         the optional parameters as a key value pair, values is ignored (just has to exist), this lets the executor know if it can't find this key then use a default value for that datatype.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a list of values from the calculations
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="index.html#compile">compile</a>
+    </ul>
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> result [, ... resultN ] = myParser:execute ( codeBlock, { parameter1 key = value1 [ ... , parameterN key = valueN ] } [ , { optional parameter1 = <span class="keyword">true</span>  [, ... optional parameterN = <span class="keyword">true</span> ]} ] )</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "compileAndExecute"></a>
+    <strong>compileAndExecute (obj, ...)</strong>
+    </dt>
+    <dd>
+    compiles then executes an actual compile table(s)
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the mathParser object
         </li>
         <li><span class="parameter">...</span>
-         optional data being writen
+         list of expressions to resolved followed by the paramters and optional parameter tables
         </li>
     </ul>
 
     <h3>Returns:</h3>
     <ol>
 
-        No return value
+        a list of values from the calculations
     </ol>
 
 
     <h3>See also:</h3>
     <ul>
+         <li><a href="index.html#compile">compile</a></li>
+         <li><a href="index.html#execute">execute</a></li>
     </ul>
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">fileHandler:writeTo ( fileId [ , ... ] )</pre>
+        <pre class="example"><span class="keyword">local</span> result [, ... resultN ] = myParser:compileAndExecute ( expression1 [, ... expressionN] [, { parameter1 key = value1 [ ... , parameterN key = valueN ] } [ , { optional parameter1 = <span class="keyword">true</span>  [, ... optional parameterN = <span class="keyword">true</span> ]} ] ] )</pre>
     </ul>
-
-</dd>
-    <dt>
-    <a name = "fileExists"></a>
-    <strong>fileExists (obj, fileName)</strong>
-    </dt>
-    <dd>
-    tests if a file exists or not
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">obj</span>
-         the file handler object
-        </li>
-        <li><span class="parameter">fileName</span>
-         the file name
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        true if file exists, false if it does not
-    </ol>
-
-
-    <h3>See also:</h3>
-    <ul>
-    </ul>
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example"><span class="keyword">local</span> result = fileHandler:fileExists ( { fileName = fileName [, path = pathToFile ] } )</pre>
-    </ul>
-
-</dd>
-    <dt>
-    <a name = "copyFile"></a>
-    <strong>copyFile (obj, fromFile, toFile)</strong>
-    </dt>
-    <dd>
-    copies a file
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">obj</span>
-         the file handler object
-        </li>
-        <li><span class="parameter">fromFile</span>
-         the file to copy from
-        </li>
-        <li><span class="parameter">toFile</span>
-         the file to copy to
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        returns true on success or false on error
-    </ol>
-
-
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example"><span class="keyword">local</span> result = fileHandler:copyFile ( fromFileId, toFileId )</pre>
-    </ul>
-
-</dd>
-    <dt>
-    <a name = "fileIsEmpty"></a>
-    <strong>fileIsEmpty (obj, fileName)</strong>
-    </dt>
-    <dd>
-    tests to see if a file is empty
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">obj</span>
-         the file handler object
-        </li>
-        <li><span class="parameter">fileName</span>
-         the file name
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        returns true if empty or false if file does not exist or is not empty
-    </ol>
-
-
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example"><span class="keyword">local</span> result = fileHandler:fileIsEmpty ( { fileName = fileName [, path = pathToFile ] } )</pre>
-    </ul>
-
-</dd>
-    <dt>
-    <a name = "fileNameBuilder"></a>
-    <strong>fileNameBuilder (obj, fileDetails)</strong>
-    </dt>
-    <dd>
-    builds file name if path table otherwise returns orgional value.
- You may have to overload this with your own method if not using Corona SDK
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">obj</span>
-         the file handler object
-        </li>
-        <li><span class="parameter">fileDetails</span>
-         either a path table or a fileName as a string
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        a filename format for Corona SDK
-    </ol>
-
-
-
 
 </dd>
 </dl>
@@ -495,7 +489,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2020-03-08 11:28:03 </i>
+<i style="float:right;">Last updated 2020-11-15 14:19:03 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

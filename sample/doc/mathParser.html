@@ -30,9 +30,7 @@
 <h2>Contents</h2>
 <ul>
 <li><a href="#Functions">Functions</a></li>
-<li><a href="#Tables">Tables</a></li>
 <li><a href="#Fields">Fields</a></li>
-<li><a href="#Local_Functions">Local Functions</a></li>
 </ul>
 
 
@@ -57,7 +55,7 @@
     <h3>Info:</h3>
     <ul>
         <li><strong>Copyright</strong>: (c) 2019 David Porter</li>
-        <li><strong>Release</strong>: 1.0.0</li>
+        <li><strong>Release</strong>: 1.0.2</li>
         <li><strong>License</strong>: MIT</li>
         <li><strong>Author</strong>: David Porter</li>
     </ul>
@@ -107,33 +105,11 @@
 	<td class="summary">compiles then executes an actual compile table(s)</td>
 	</tr>
 </table>
-<h2><a href="#Tables">Tables</a></h2>
-<table class="function_list">
-	<tr>
-	<td class="name" nowrap><a href="#CONSTANTS">CONSTANTS</a></td>
-	<td class="summary">constants used by the module</td>
-	</tr>
-</table>
 <h2><a href="#Fields">Fields</a></h2>
 <table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#_MODULENAME">_MODULENAME</a></td>
 	<td class="summary">the module name</td>
-	</tr>
-</table>
-<h2><a href="#Local_Functions">Local Functions</a></h2>
-<table class="function_list">
-	<tr>
-	<td class="name" nowrap><a href="#executeCode">executeCode (obj, expr, executionDetails, parameters, allParams, optional, resultTable)</a></td>
-	<td class="summary">the internal implementation that executes an actual compile table</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#resolveCode">resolveCode (obj, codeBlock, parameter, allParams, optional)</a></td>
-	<td class="summary">iterated through code blocks calling math parser to build a result</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#examineExpression">examineExpression (obj, tableOfResults)</a></td>
-	<td class="summary">the local implementation of the compiler that generates the execution tables</td>
 	</tr>
 </table>
 
@@ -489,51 +465,6 @@
 
 </dd>
 </dl>
-    <h2 class="section-header "><a name="Tables"></a>Tables</h2>
-
-    <dl class="function">
-    <dt>
-    <a name = "CONSTANTS"></a>
-    <strong>CONSTANTS</strong>
-    </dt>
-    <dd>
-    constants used by the module
-
-
-    <h3>Fields:</h3>
-    <ul>
-        <li><span class="parameter">METHODS</span>
-        the set default read behavour method name
-        </li>
-        <li><span class="parameter">ADDFUNCTION</span>
-        the open file  method name
-        </li>
-        <li><span class="parameter">GETACTIVEPARAMETERS</span>
-        the close file  method name
-        </li>
-        <li><span class="parameter">RUNFUNCTION</span>
-        the read file method name
-        </li>
-        <li><span class="parameter">ISFUNCTION</span>
-        the file exists method name
-        </li>
-        <li><span class="parameter">EXECUTECODE</span>
-        the code execute function
-        </li>
-        <li><span class="parameter">COMPILE</span>
-        the compile function
-        </li>
-        <li><span class="parameter">COMPILEANDEXECUTE</span>
-        compiles and executes in one operation
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-</dl>
     <h2 class="section-header "><a name="Fields"></a>Fields</h2>
 
     <dl class="function">
@@ -552,134 +483,13 @@
 
 </dd>
 </dl>
-    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
-
-    <dl class="function">
-    <dt>
-    <a name = "executeCode"></a>
-    <strong>executeCode (obj, expr, executionDetails, parameters, allParams, optional, resultTable)</strong>
-    </dt>
-    <dd>
-    the internal implementation that executes an actual compile table
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">obj</span>
-         the mathParser object
-        </li>
-        <li><span class="parameter">expr</span>
-         the current evaluated expression
-        </li>
-        <li><span class="parameter">executionDetails</span>
-         the compiled execution details
-        </li>
-        <li><span class="parameter">parameters</span>
-         the manditory parameters as a key value pair, values are the values in the calculation. OptionalParameters	values can be set here also.
-        </li>
-        <li><span class="parameter">allParams</span>
-         all known parameters
-        </li>
-        <li><span class="parameter">optional</span>
-         the optional parameters as a key value pair, values is ignored (just has to exist), this lets the executor know if it can't find this key then use a default value for that datatype.
-        </li>
-        <li><span class="parameter">resultTable</span>
-         we store results in this table
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        a list of values from the calculations
-    </ol>
-
-
-    <h3>See also:</h3>
-    <ul>
-         <li><a href="mathParser.html#compile">compile</a></li>
-         <li><a href="mathParser.html#execute">execute</a></li>
-    </ul>
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example"><span class="keyword">local</span> result [, ... resultN ] = myParser:execute ( codeBlock, { parameter1 key = value1 [ ... , parameterN key = valueN ] } [ , { optional parameter1 = <span class="keyword">true</span>  [, ... optional parameterN = <span class="keyword">true</span> ]} ] )</pre>
-    </ul>
-
-</dd>
-    <dt>
-    <a name = "resolveCode"></a>
-    <strong>resolveCode (obj, codeBlock, parameter, allParams, optional)</strong>
-    </dt>
-    <dd>
-    iterated through code blocks calling math parser to build a result
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">obj</span>
-         the mathParser object
-        </li>
-        <li><span class="parameter">codeBlock</span>
-         a sub codeBlock that needs compiled
-        </li>
-        <li><span class="parameter">parameter</span>
-         the manditory parameters
-        </li>
-        <li><span class="parameter">allParams</span>
-         all known parameter
-        </li>
-        <li><span class="parameter">optional</span>
-         the optional parameter
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        a sub section of a code table
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "examineExpression"></a>
-    <strong>examineExpression (obj, tableOfResults)</strong>
-    </dt>
-    <dd>
-    the local implementation of the compiler that generates the execution tables
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">obj</span>
-         the mathParser object
-        </li>
-        <li><span class="parameter">tableOfResults</span>
-         the string brocken down accounting for tables so that it can be evaluated bit by bit
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        the individual code tables
-    </ol>
-
-
-
-
-</dd>
-</dl>
 
 
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2020-01-05 16:58:38 </i>
+<i style="float:right;">Last updated 2020-11-15 14:22:41 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
