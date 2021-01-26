@@ -4,7 +4,7 @@
 -- @usage Parser = require ( 'mathParser' )
 -- @author David Porter
 -- @module mathParser
--- @release 1.0.2
+-- @release 1.0.3
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
@@ -13,7 +13,7 @@
 -- re-enstated the tables can't be added error for +
 
 local mathParser = {
-	 _VERSION = ... .. '.lua 1.0.2',
+	 _VERSION = ... .. '.lua 1.0.3',
      _URL = '',
      _DESCRIPTION = [[
       ============================================================================
@@ -733,7 +733,7 @@ local function examineExpression ( obj, tableOfResults)
 end
 
 return classy:newClass(
-            classy:attributes ( { mathBuilderParameters = Table ( Private ), supportedFunctions = Table ( Private ), mathParserParameters = Table ( Private ), myLogger = Logger ( Private ), logEntity = Table ( Private ) } ),
+            classy:attributes ( { mathBuilderParameters = Table ( Private ), supportedFunctions = Table ( Private ), mathParserParameters = Table ( Private ), myLogger = Logger ( Private ) } ),
             classy:initMethod (
                    --- sets the default read behavour flags
                   -- @function initMethod
@@ -744,14 +744,13 @@ return classy:newClass(
                 function ( obj, args )
                 	-- classy:default values will load all the args into the object and any that are not passed over but in the default values table will be defaulted.
                 	classy:setDefaultValues ( obj, { supportedFunctions = { }, myLogger = _G.myLogger, mathParserParameters = { } } )
-                	-- check to see if the class is registerd by the logger, if not register it so we get the Log_ functions created
-                	-- we also only do this with the base class, any inherted classes will not be seen as modules as they are not loaded via require
-                	obj.logEntity = classy:getBaseClass ( getmetatable ( obj ) )
-                	if not obj.myLogger:registerState ( obj.logEntity ) then
-                		obj.myLogger:registerModule ( obj.logEntity )
+                    -- check to see if the class is registerd by the logger, if not register it so we get the Log_ functions created
+                    obj.myLogger:registerSearch ( obj )
+                    -- we need a new log level so add it, but only once
+                    if not obj.myLogger:logLevelExists ( CONSTANTS.PARAMLOGLEVEL ) then
+                    	PARAMLOGLEVEL_NAME = obj.myLogger:getLogPrefix () .. CONSTANTS.PARAMLOGLEVEL .. '_' .. mathParser._MODULENAME
                 		obj.myLogger:addLogLevel ( CONSTANTS.PARAMLOGLEVEL )
-                		PARAMLOGLEVEL_NAME = obj.myLogger:getLogPrefix () .. CONSTANTS.PARAMLOGLEVEL .. '_' .. mathParser._MODULENAME
-                	end
+                    end
                 	-- give the object the utility functions it needs
                 	classy:assign ( obj, _G.myUtils:giveMeFunctions (  unpack ( CONSTANTS.TOASSIGNTOOBJECT ) ) )
 
