@@ -30,7 +30,6 @@
 <h2>Contents</h2>
 <ul>
 <li><a href="#Functions">Functions</a></li>
-<li><a href="#Tables">Tables</a></li>
 <li><a href="#Fields">Fields</a></li>
 </ul>
 
@@ -56,7 +55,7 @@
     <h3>Info:</h3>
     <ul>
         <li><strong>Copyright</strong>: (c) 2019 David Porter</li>
-        <li><strong>Release</strong>: 1.0.0</li>
+        <li><strong>Release</strong>: 1.0.4</li>
         <li><strong>License</strong>: MIT</li>
         <li><strong>Author</strong>: David Porter</li>
     </ul>
@@ -71,6 +70,10 @@
 	<tr>
 	<td class="name" nowrap><a href="#string:removeLeadTrailWS">string:removeLeadTrailWS ()</a></td>
 	<td class="summary">removes leading and trailing WS</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#string:removeLeadTrailQuotes">string:removeLeadTrailQuotes ()</a></td>
+	<td class="summary">removes leading and trailing "</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#string:isWhiteSpaceOnly">string:isWhiteSpaceOnly ()</a></td>
@@ -89,12 +92,28 @@
 	<td class="summary">returns directory, filename, extension</td>
 	</tr>
 	<tr>
+	<td class="name" nowrap><a href="#randomString">randomString (obj, length)</a></td>
+	<td class="summary">generates a random string</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#tableCopier">tableCopier (obj, from, to)</a></td>
 	<td class="summary">copies from one table to another</td>
 	</tr>
 	<tr>
+	<td class="name" nowrap><a href="#isInArray">isInArray (obj, what, array)</a></td>
+	<td class="summary">returns true id item what is in an array</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#matchesARule">matchesARule (obj, what, rules)</a></td>
+	<td class="summary">determines if an item what matches a rule in string rules</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#listToKVPair">listToKVPair (obj, list)</a></td>
 	<td class="summary">takes a list l1, l2 ...</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#subrange">subrange (obj, array, start, stop)</a></td>
+	<td class="summary">returns an array subrange</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#timeDiff">timeDiff (obj, t1)</a></td>
@@ -115,6 +134,10 @@
 	<tr>
 	<td class="name" nowrap><a href="#tableToString">tableToString (obj, tbl, specials)</a></td>
 	<td class="summary">transforms a table to a string, note we can force commas and " ..</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#tableToStringWithMeta">tableToStringWithMeta (obj, tbl, specials)</a></td>
+	<td class="summary">transforms a table to a string and displays metaTable, note we can force commas and " ..</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#defaultDataValue">defaultDataValue (obj, dataType)</a></td>
@@ -142,7 +165,7 @@
 	<td class="summary">unpack, unpacks a table or if already not a table just returns paramter stream</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#breakAppart">breakAppart (obj, iter, careAboutStrings, matchCounter, matchA, matchB, hasOccured, matchAOcurred, level, items, stringsActive)</a></td>
+	<td class="name" nowrap><a href="#breakAppart">breakAppart (obj, iter, careAboutStrings, matchCounter, matchA, matchB, hasOccured, matchAOcurred, level, items, stringsActive, stringChar)</a></td>
 	<td class="summary">returns a table corresponding to the items descovered between matchA, matchB; by default matchA = '(', matchB = ')'; iter is the string iterated across</td>
 	</tr>
 	<tr>
@@ -158,6 +181,14 @@
 	<td class="summary">attempt a table deep copy, there are senarios where this module fails</td>
 	</tr>
 	<tr>
+	<td class="name" nowrap><a href="#equalsTable">equalsTable (obj, o1, o2, ignore_mt)</a></td>
+	<td class="summary">checks if two tables are the same data</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#equals">equals (obj, o1, o2, ignore_mt)</a></td>
+	<td class="summary">checks if two objects are the same data</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#testForNumber">testForNumber (obj, testValue)</a></td>
 	<td class="summary">returns test if a parameter is a number or not</td>
 	</tr>
@@ -171,6 +202,10 @@
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#mergeTables">mergeTables (obj, ...)</a></td>
+	<td class="summary">merges ...</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#mergeTablesWithoutAdd">mergeTablesWithoutAdd (obj, ...)</a></td>
 	<td class="summary">merges ...</td>
 	</tr>
 	<tr>
@@ -242,6 +277,10 @@
 	<td class="summary">converts a string% from 0 to 100 to a percentage 0 to 1</td>
 	</tr>
 	<tr>
+	<td class="name" nowrap><a href="#englishNumber">englishNumber (obj, number, numberList, reverseNumberList, levelNames)</a></td>
+	<td class="summary">creates an English string for a number</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#initMethod">initMethod (obj, args)</a></td>
 	<td class="summary">loads the utils into the functions table so they can be consumed by giveMeFunctions</td>
 	</tr>
@@ -252,17 +291,6 @@
 	<tr>
 	<td class="name" nowrap><a href="#addAnotherFunction">addAnotherFunction (obj, ...)</a></td>
 	<td class="summary">returns a table that classy:assign can use, not if a function does not exist you just get a logger message</td>
-	</tr>
-</table>
-<h2><a href="#Tables">Tables</a></h2>
-<table class="function_list">
-	<tr>
-	<td class="name" nowrap><a href="#CONSTANTS">CONSTANTS</a></td>
-	<td class="summary">constants used by the module</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#dataDefaults">dataDefaults</a></td>
-	<td class="summary">sets the a default data type values</td>
 	</tr>
 </table>
 <h2><a href="#Fields">Fields</a></h2>
@@ -300,6 +328,20 @@
     </dt>
     <dd>
     removes leading and trailing WS
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "string:removeLeadTrailQuotes"></a>
+    <strong>string:removeLeadTrailQuotes ()</strong>
+    </dt>
+    <dd>
+    removes leading and trailing "
 
 
 
@@ -365,6 +407,38 @@
 
 </dd>
     <dt>
+    <a name = "randomString"></a>
+    <strong>randomString (obj, length)</strong>
+    </dt>
+    <dd>
+    generates a random string
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+        , the object making the call
+        </li>
+        <li><span class="parameter">length</span>
+        , how long the string must be, defaults to 10
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a randonm string of length length
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">obj:randomString ( [ length ] )</pre>
+    </ul>
+
+</dd>
+    <dt>
     <a name = "tableCopier"></a>
     <strong>tableCopier (obj, from, to)</strong>
     </dt>
@@ -401,6 +475,73 @@
 
 </dd>
     <dt>
+    <a name = "isInArray"></a>
+    <strong>isInArray (obj, what, array)</strong>
+    </dt>
+    <dd>
+    returns true id item what is in an array
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+        , the object making the call
+        </li>
+        <li><span class="parameter">what</span>
+         what are we looking for
+        </li>
+        <li><span class="parameter">array</span>
+         the array we are looking in
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        what position in the array if what is in array otherwise false
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:isInArray ( what, array )</pre></li>
+        <li><pre class="example">obj.isInArray ( obj, what, array )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "matchesARule"></a>
+    <strong>matchesARule (obj, what, rules)</strong>
+    </dt>
+    <dd>
+    determines if an item what matches a rule in string rules
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+        , the object making the call
+        </li>
+        <li><span class="parameter">what</span>
+         what are we looking for
+        </li>
+        <li><span class="parameter">rules</span>
+         the rules we are looking in, either a string or a rules table
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the rules table followed by true if what matches or false and an error message if it does not
+    </ol>
+
+
+
+
+</dd>
+    <dt>
     <a name = "listToKVPair"></a>
     <strong>listToKVPair (obj, list)</strong>
     </dt>
@@ -430,6 +571,45 @@
     <ul>
         <li><pre class="example">obj:listToKVPair ( item1 [, ... itemN ] )</pre></li>
         <li><pre class="example">obj.listToKVPair ( obj, item1 [, ... itemN ] )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "subrange"></a>
+    <strong>subrange (obj, array, start, stop)</strong>
+    </dt>
+    <dd>
+    returns an array subrange
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">array</span>
+         the array we would like the subrange from
+        </li>
+        <li><span class="parameter">start</span>
+         the start point in the array
+        </li>
+        <li><span class="parameter">stop</span>
+         the stop point in the array
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the array or nil
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:subrange ( [ array ], start, stop )</pre></li>
+        <li><pre class="example">obj.subrange ( [ array ], start, stop )</pre></li>
     </ul>
 
 </dd>
@@ -608,6 +788,42 @@
     <ul>
         <li><pre class="example">obj:tableToString ( Table [, { OptionalChangesToSpecialCharacters } ] )</pre></li>
         <li><pre class="example">obj.tableToString ( obj, Table [, { OptionalChangesToSpecialCharacters } ] )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "tableToStringWithMeta"></a>
+    <strong>tableToStringWithMeta (obj, tbl, specials)</strong>
+    </dt>
+    <dd>
+    transforms a table to a string and displays metaTable, note we can force commas and " ..  " away and change the bracket with specials table
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">tbl</span>
+         the table to convert
+        </li>
+        <li><span class="parameter">specials</span>
+         an optional list of controls that sets the values for quote ", comma , , open table bracket { and close table bracket }
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        table as string or nil if failed
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:tableToStringWithMeta ( Table [, { OptionalChangesToSpecialCharacters } ] )</pre></li>
+        <li><pre class="example">obj.tableToStringWithMeta ( obj, Table [, { OptionalChangesToSpecialCharacters } ] )</pre></li>
     </ul>
 
 </dd>
@@ -818,7 +1034,7 @@
 </dd>
     <dt>
     <a name = "breakAppart"></a>
-    <strong>breakAppart (obj, iter, careAboutStrings, matchCounter, matchA, matchB, hasOccured, matchAOcurred, level, items, stringsActive)</strong>
+    <strong>breakAppart (obj, iter, careAboutStrings, matchCounter, matchA, matchB, hasOccured, matchAOcurred, level, items, stringsActive, stringChar)</strong>
     </dt>
     <dd>
     returns a table corresponding to the items descovered between matchA, matchB; by default matchA = '(', matchB = ')'; iter is the string iterated across
@@ -858,6 +1074,9 @@
         </li>
         <li><span class="parameter">stringsActive</span>
          the current state of strings, are they active i.e. we are in a string, or inactive i.e. we are not in a string
+        </li>
+        <li><span class="parameter">stringChar</span>
+         what character identifies a string ? Typically ' or "
         </li>
     </ul>
 
@@ -985,6 +1204,84 @@
     <ul>
         <li><pre class="example">obj:deepCopy ( ObjectToCopy )</pre></li>
         <li><pre class="example">obj.deepCopy ( obj, ObjectToCopy )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "equalsTable"></a>
+    <strong>equalsTable (obj, o1, o2, ignore_mt)</strong>
+    </dt>
+    <dd>
+    checks if two tables are the same data
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">o1</span>
+         the first table we want to compare
+        </li>
+        <li><span class="parameter">o2</span>
+         the first table we want to compare
+        </li>
+        <li><span class="parameter">ignore_mt</span>
+         default is to ignore met tables, set to false if you don't want to ignore
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a true or false
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:equalsTable ( o1, o2 [, ignore_mt ] )</pre></li>
+        <li><pre class="example">obj.equalsTable  ( obj, o1, o2 [, ignore_mt ] )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "equals"></a>
+    <strong>equals (obj, o1, o2, ignore_mt)</strong>
+    </dt>
+    <dd>
+    checks if two objects are the same data
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">o1</span>
+         the first object we want to compare
+        </li>
+        <li><span class="parameter">o2</span>
+         the first object we want to compare
+        </li>
+        <li><span class="parameter">ignore_mt</span>
+         default is to ignore met tables, set to false if you don't want to ignore
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true or false
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:equals ( o1, o2 [, ignore_mt ] )</pre></li>
+        <li><pre class="example">obj.equals   obj, o1, o2 [, ignore_mt ] )</pre></li>
     </ul>
 
 </dd>
@@ -1119,6 +1416,39 @@
     <ul>
         <li><pre class="example">obj:mergeTables ( Table1 [, ... TableN ] )</pre></li>
         <li><pre class="example">obj.mergeTables ( obj, Table1 [, ... TableN ] )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "mergeTablesWithoutAdd"></a>
+    <strong>mergeTablesWithoutAdd (obj, ...)</strong>
+    </dt>
+    <dd>
+    merges ...  tables into one table but arrays get appended, the values do not add
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">...</span>
+         the arrays to merge
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the merged table
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:mergeTablesWithoutAdd ( Table1 [, ... TableN ] )</pre></li>
+        <li><pre class="example">obj.mergeTablesWithoutAdd ( obj, Table1 [, ... TableN ] )</pre></li>
     </ul>
 
 </dd>
@@ -1719,6 +2049,48 @@
 
 </dd>
     <dt>
+    <a name = "englishNumber"></a>
+    <strong>englishNumber (obj, number, numberList, reverseNumberList, levelNames)</strong>
+    </dt>
+    <dd>
+    creates an English string for a number
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         the object making the call
+        </li>
+        <li><span class="parameter">number</span>
+         the the value to convert
+        </li>
+        <li><span class="parameter">numberList</span>
+         an internal parameter DO NOT call with this
+        </li>
+        <li><span class="parameter">reverseNumberList</span>
+         an internal parameter DO NOT call with this
+        </li>
+        <li><span class="parameter">levelNames</span>
+         an internal parameter DO NOT call with this
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a string description for a number
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <li><pre class="example">obj:englishNumber ( Value )</pre></li>
+        <li><pre class="example">obj.englishNumber ( obj, Value )</pre></li>
+    </ul>
+
+</dd>
+    <dt>
     <a name = "initMethod"></a>
     <strong>initMethod (obj, args)</strong>
     </dt>
@@ -1815,59 +2187,6 @@
 
 </dd>
 </dl>
-    <h2 class="section-header "><a name="Tables"></a>Tables</h2>
-
-    <dl class="function">
-    <dt>
-    <a name = "CONSTANTS"></a>
-    <strong>CONSTANTS</strong>
-    </dt>
-    <dd>
-    constants used by the module
-
-
-    <h3>Fields:</h3>
-    <ul>
-        <li><span class="parameter">METHODS</span>
-        the giveMeFunctions method name
-        </li>
-        <li><span class="parameter">ADDANOTHERFUNCTION</span>
-        the addAnotherFunction method name
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "dataDefaults"></a>
-    <strong>dataDefaults</strong>
-    </dt>
-    <dd>
-    sets the a default data type values
-
-
-    <h3>Fields:</h3>
-    <ul>
-        <li><span class="parameter">[_STRINGTYPE]</span>
-        string defaults to ''
-        </li>
-        <li><span class="parameter">[_NUMTYPE]</span>
-        number defaults to 0
-        </li>
-        <li><span class="parameter">[_TABLETYPE]</span>
-
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-</dl>
     <h2 class="section-header "><a name="Fields"></a>Fields</h2>
 
     <dl class="function">
@@ -1892,7 +2211,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2020-01-05 19:48:51 </i>
+<i style="float:right;">Last updated 2021-01-26 10:21:49 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

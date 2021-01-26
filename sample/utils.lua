@@ -4,12 +4,12 @@
 -- @usage Utils = require ( 'utils' )
 -- @author David Porter
 -- @module utils
--- @release 1.0.2
+-- @release 1.0.4
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local utils = {
-	 _VERSION = ... .. '.lua 1.0.2',
+	 _VERSION = ... .. '.lua 1.0.4',
      _URL = '',
      _DESCRIPTION = [[
       ============================================================================
@@ -115,14 +115,95 @@ function string:stripFilename ()
 	return d
 end
 
+--- @local a function that tries to resolve an external module name
+-- @param obj the calling object
+-- @return the module name or an approriate error
+local function getModuleName ( obj )
+	local moduleName = obj or { _notes = { moduleName = 'Nil_Module' } }
+	local moduleName = moduleName._notes or { moduleName = 'Nil_Notes' }
+	return utils._MODULENAME .. ':' .. ( moduleName.moduleName or 'Undefined_Module' )
+end
+
 -- changes state of pcall flag
 function utils.pcallState ( obj, state )
 	if state and type ( state ) == _BOOLTYPE then
 		obj.pcallOn = state
-	    obj.myLogger:Log_Info ( 'pcall state changes to ', state  )
+	    obj.myLogger:Log_Info ( getModuleName ( obj ), 'pcall state changes to ', state  )
 	else
-	    obj.myLogger:Log_Info ( 'attempt to change pcall state failed, requires true/false, you sent ', state )
+	    obj.myLogger:Log_Info ( getModuleName ( obj ), 'attempt to change pcall state failed, requires true/false, you sent ', state )
 	end
+end
+
+-- an internal function to print memory
+-- @return no value
+-- @usage result = Runtime:removeEventListener( 'enterFrame', printMemUsage )
+-- @usage result = Runtime:addEventListener( 'enterFrame', printMemUsage )
+local printMemUsage = function(  )  
+	local memUsed = collectgarbage ('count')
+    local texUsed = system.getInfo( 'textureMemoryUsed' ) / 1048576 -- Reported in Bytes
+
+    print('\n---------MEMORY USAGE INFORMATION---------')
+    print('System Memory: ', string.format('%.00f', memUsed), 'KB')
+    print('Texture Memory:', string.format('%.03f', texUsed), 'MB')
+    print('------------------------------------------\n')
+end
+-- a store for a memory timer
+local memoryTimer
+-- turns on/off a memory logger for corona (now solar2D) SDK, only in simulator
+-- This calls the local printMemUsage function
+-- @param state, either true or false or nil. OIf nil then change state
+-- @return no value
+-- @usage obj:memoryMonitor ( [ state ] )
+function utils.memoryMonitor ( obj, state )
+	print ( inspect ( system ))
+	if system and system.getInfo then
+		if type ( state ) == _BOOLTYPE or not state then
+			if system.getInfo ('environment') == 'simulator' then
+				local currentState = memoryTimer ~= nil
+				local desiredState = state
+				if state == nil then 
+					desiredState = not currentState
+				end
+				if desiredState and not memoryTimer then
+					-- turn timer on
+					memoryTimer = timer.performWithDelay ( 1, printMemUsage, -1 )
+				elseif not desiredState and memoryTimer then
+					-- turn timer off
+					timer.cancel ( memoryTimer ) 
+					memoryTimer = nil
+				end
+			else
+			    obj.myLogger:Log_Error ( 'memory monitor is only supported by simulator' )
+			end
+		else
+		    obj.myLogger:Log_Error ( 'memory monitor state must be a ', _BOOLTYPE, ' or ', nil )
+		end
+	else
+	    obj.myLogger:Log_Error ( 'memory monitor is only supported by solar2D' )
+	end
+end
+
+
+--- generates a random string
+-- @param obj, the object making the call
+-- @param length, how long the string must be, defaults to 10
+-- @return a randonm string of length length
+-- @usage obj:randomString ( [ length ] )
+function utils.randomString ( obj, length )
+	length = length or 10
+	local chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-={}|[]`~'
+	local randomString = ''
+
+	charTable = {}
+	for c in chars:gmatch"." do
+	    table.insert(charTable, c)
+	end
+
+	for i = 1, length do
+	    randomString = randomString .. charTable[math.random(1, #charTable)]
+	end
+
+	return randomString
 end
 
 --- copies from one table to another
@@ -141,6 +222,129 @@ function utils.tableCopier ( obj, from, to )
 	else
 	    obj.myLogger:Log_Error ( 'can\'t copy from, to if from or to is not a table' )
 	end
+end
+
+--- returns true id item what is in an array
+-- @param obj, the object making the call
+-- @param what what are we looking for
+-- @param array the array we are looking in
+-- @return what position in the array if what is in array otherwise false
+-- @usage obj:isInArray ( what, array )
+-- @usage obj.isInArray ( obj, what, array )
+function utils.isInArray ( obj, what, array )
+	if what and array and type ( array ) == _TABLETYPE then
+		local key, value
+		local next = next
+		for key, value in next, array, nil do
+			if value == what then
+				return key
+			end
+		end
+	end
+	return false
+end
+
+--- determines if an item what matches a rule in string rules
+-- @param obj, the object making the call
+-- @param what what are we looking for
+-- @param rules the rules we are looking in, either a string or a rules table
+-- @return the rules table followed by true if what matches or false and an error message if it does not
+function utils.matchesARule ( obj, what, rules )
+	local callingModule = getModuleName ( obj )
+	if what and rules then
+		-- test if what is a possibly a number
+		local isNum = type ( what ) == _NUMTYPE
+		local rulesTable
+		if type ( rules ) == _TABLETYPE then
+			rulesTable = rules
+		else
+			local splitResult = utils.splitStringAccountingForStrings ( obj, rules, ',' )
+			local ruleCount
+			for ruleCount = 1, #splitResult do
+				local currentRule = splitResult [ ruleCount ]
+				obj.myLogger:Log_Info ( callingModule, 'Running rule "', currentRule, '"')
+				local rangeSplit = utils.splitStringAccountingForStrings ( obj, currentRule, '-' )
+				if #rangeSplit > 2 then
+					obj.myLogger:Log_Error ( callingModule, 'Bad rule "', currentRule, '", ranges must have a start and an end')
+					return nil, false, 'Bad rules table'
+				end
+				rulesTable = rulesTable or {}
+				if #rangeSplit == 1 then
+					local value = rangeSplit [1]
+					if isNum then
+						_, value = utils.testForNumber ( obj, currentRule )
+						if not value then
+							obj.myLogger:Log_Error ( callingModule, 'Bad rule "', currentRule, '", value should be a number')
+							return nil, false, 'Bad rules table'
+						end
+					end
+					rulesTable.values = rulesTable.values or {}
+					rulesTable.values [ tostring ( currentRule ) ] = { rule = currentRule, value = value }
+				else
+					local min, max = rangeSplit [1], rangeSplit [2]
+					if isNum then
+						_, min = utils.testForNumber ( obj, min )
+						_, max = utils.testForNumber ( obj, max )
+						if not min then
+							obj.myLogger:Log_Error ( callingModule, 'Bad rule "', currentRule, '", min should be a number')
+							return nil, false, 'Bad rules table'
+						end
+						if not max then
+							obj.myLogger:Log_Error ( callingModule, 'Bad rule "', currentRule, '", max should be a number')
+							return nil, false, 'Bad rules table'
+						end
+					end
+					rulesTable.ranges = rulesTable.ranges or {}
+					rulesTable.ranges [ #rulesTable + 1 ] = { min = min, max = max, rule = currentRule }
+				end
+			end
+		end
+
+		local value
+		local next = next
+		-- default to it matches
+		local answer = true
+		-- place to store rule
+		local failRule
+		if rules.ranges then
+			for _, value in next, rulesTable.ranges, nil do
+				-- if we have a min value then test if it falls outside
+				if value.min then
+					if what < value.min then
+						failRule = 'min value < ' .. value.min .. ', in rule ' .. value.rule
+						answer = false
+						break
+					end
+				end
+				-- if we have a min value then test if it falls outside
+				if value.max then
+					if what > value.max then
+						failRule = 'max value > ' .. value.max .. ', in rule ' .. value.rule
+						answer = false
+						break
+					end
+				end			
+			end
+		end
+		-- if it failed range checks it may still be a valid value check
+		if rulesTable then
+			if not answer and rulesTable.values and rulesTable.values [ tostring ( what ) ] then
+				answer = true
+			-- if there were no range checks
+			elseif not rulesTable.ranges and rulesTable.values and not rulesTable.values [ tostring ( what ) ] then
+				answer = false
+				failRule = 'not a valid item and not in range'
+			end
+
+			if answer then
+				return rulesTable, true
+			else
+				return rulesTable, false, failRule
+			end
+		end
+	end
+
+	return nil, false, 'no what or rules'
 end
 
 --- takes a list l1, l2 ... ln and returns a k,v table based on that list l1 = l1, l2 = l2 ... ln = ln
@@ -163,6 +367,35 @@ function utils.listToKVPair ( obj, list )
 	return r
 end
 
+--- returns an array subrange 
+-- @param obj the object making the call
+-- @param array the array we would like the subrange from
+-- @param start the start point in the array
+-- @param stop the stop point in the array
+-- @return the array or nil
+-- @usage obj:subrange ( [ array ], start, stop )
+-- @usage obj.subrange ( [ array ], start, stop )
+function utils.subrange ( obj, array, start, stop )
+	if array and type ( array ) == _TABLETYPE then
+		stop = stop or #array
+		if start <= stop then
+			local result, count
+			for count = start, stop do
+				if count > #array then
+					break
+				end
+				result = result or {}
+				result [ #result + 1 ] = array [ count ]
+			end
+			return result
+		else
+		    obj.myLogger:Log_Warning ( getModuleName ( obj ), 'subrange requested but start ', start, ' is greater than end ', stop )
+		end
+	else
+	    obj.myLogger:Log_Warning ( getModuleName ( obj ), 'subrange requested but empty array' )
+	end		
+end
+
 -- call pcal but can control if its on/off
 function utils.pcall ( obj, ... )
 	if obj.pcallOn then
@@ -170,7 +403,7 @@ function utils.pcall ( obj, ... )
 	else
 		-- fake a pcall return, if the call crashes then code will stop
 		local args = { ... }
-	    obj.myLogger:Log_Debug ( 'pcall bypassed: ', utils.appendListWithComma ( obj, {select (2, ...)} ) , debug.getinfo(2).name )
+	    obj.myLogger:Log_Debug ( getModuleName ( obj ), 'pcall bypassed: ', utils.appendListWithComma ( obj, {select (2, ...)} ) , debug.getinfo(2).name )
 		return true, args [1] ( select (2, ...) )
 	end
 end
@@ -182,7 +415,7 @@ end
 -- @usage obj:timeDiff ( oldTime )
 -- @usage obj.timeDiff ( obj, oldTime )
 function utils.timeDiff ( obj, t1 )
-    obj.myLogger:Log_Info ( 'Time elasped = ' , os.difftime( os.time(), t1 ) )
+    obj.myLogger:Log_Info ( getModuleName ( obj ), 'Time elasped = ' , os.difftime( os.time(), t1 ) )
 end
 
 
@@ -274,15 +507,15 @@ function utils.replaceDataReferences ( obj, dataKey, tbl, data )
 											end
 											last_was_table = true
 										end
-										obj.myLogger:Log_Debug ('attempt to replace data key "' , entry.v , '" success' , newV)
+										obj.myLogger:Log_Debug (getModuleName ( obj ), 'attempt to replace data key "' , entry.v , '" success' , newV)
 										replacement = replacement .. newV
 										recursionTest [entry.v] = true
 									else
-										obj.myLogger:Log_Error ('attempt to replace data key "' , str , '" failed, recursion detected from "' ,  inspect (data [entry.v]), '"')
+										obj.myLogger:Log_Error (getModuleName ( obj ), 'attempt to replace data key "' , str , '" failed, recursion detected from "' ,  inspect (data [entry.v]), '"')
 										return nil
 									end
 								else
-									obj.myLogger:Log_Warning ('attempt to replace data key "' , entry.v , '" failed, no such data key: in value "' ,str , '"')
+									obj.myLogger:Log_Warning (getModuleName ( obj ), 'attempt to replace data key "' , entry.v , '" failed, no such data key: in value "' ,str , '"')
 									replacement = replacement .. entry.s
 									failed_to_find = true
 								end
@@ -331,6 +564,7 @@ end
 -- @usage obj:stringToTable ( String [, true ] )
 -- @usage obj.stringToTable ( obj, String [, true ] )
 function utils.stringToTable ( obj, str, loggingOff )
+	if loggingOff == nil then loggingOff = true end
 	if str and type (str) == _STRINGTYPE then
 		local subString = str:removeLeadTrailWS ()
 		if subString:removeLeadTrailWS():sub (1,1) == '{' and subString:sub (subString:len()) == '}' then -- it is a possible table, as starts with { and ends with }
@@ -340,9 +574,9 @@ function utils.stringToTable ( obj, str, loggingOff )
 			if not split or matchCounter ~= 0 then
 				if not loggingOff then
 					if type (str) == _STRINGTYPE then
-						obj.myLogger:Log_Warning ('Not a valid table for stringToTable, "' , str , '", please check { ... } match')
+						obj.myLogger:Log_Warning (getModuleName ( obj ), 'Not a valid table for stringToTable, "' , str , '", please check { ... } match')
 					else
-						obj.myLogger:Log_Warning ('Not a valid string for stringToTable, "' , type (str), '", please send string type')
+						obj.myLogger:Log_Warning (getModuleName ( obj ), 'Not a valid string for stringToTable, "' , type (str), '", please send string type')
 					end
 				end
 				return nil
@@ -442,7 +676,9 @@ function utils.stringToTable ( obj, str, loggingOff )
 										local commaFound = newCommasStructure[x]:removeLeadTrailWS() == ''
 										-- we may have key = {table}, as _constructor broke appart based on { .. }, we will have to assign the table later once we have resolved they key 
 										local lastCharIsEquals = trimmedStructure:sub(trimmedStructure:len(),trimmedStructure:len()) == '='
-										local key, value
+										local key, value, moveBackToNumber
+										-- sometimes we have a value that is a string and not a number
+										moveBackToNumber = true
 										if lastCharIsEquals or commaFound then
 											-- lets test the next item
 											local reanalize = _analizer ( obj, tbl [lastTbl], {} )
@@ -465,25 +701,34 @@ function utils.stringToTable ( obj, str, loggingOff )
 												lastTbl = lastTbl + 1
 											end
 										else
+											-- test for an equals sign in the string as this could be a parmater assign
+											local checkedForEquals = utils.splitStringAccountingForStrings ( obj, structure, '=' )
 											-- get the value as it is a pure item
 											value = newCommasStructure[x]:removeLeadTrailWS()
 											-- test to see if it was a number
 											local isDataNumber = tonumber (value) ~= nil
 											-- as it was a string we may have key = item so resolve that
 											if not isDataNumber then
-												local equalsData = utils.splitStringAccountingForStrings (value, '=')
+												local equalsData = utils.splitStringAccountingForStrings ( obj, value, '=')
 												if #equalsData == 1 and value:sub (value:len(),value:len()) ~= '=' then
 													value = value--:sub(2,value:len())
 												elseif #equalsData == 2 then
 													key = _stringScruber (equalsData [1])
 													value = _stringScruber (equalsData [2])
+													local checkToNotMoveBackToNumber = equalsData [2]:removeLeadTrailWS()
+													if checkToNotMoveBackToNumber:sub( 1, 1 ) == '"' then
+														moveBackToNumber = false
+													end
 												end
 											end
 
 										end
 										-- if value is number move it back to a number as process evaluated using strings
-										value = utils.dataIsNumber ( obj, value )
+										if moveBackToNumber then
+											value = utils.dataIsNumber ( obj, value )
+										end
 										-- store key value pair
+
 										if key then
 											store [key] = value
 										else
@@ -491,7 +736,7 @@ function utils.stringToTable ( obj, str, loggingOff )
 										end
 									end
 									if lastTbl ~= #tbl then
-										obj.myLogger:Log_Warning ('table resolve error between entry: "', newCommasStructure [#newCommasStructure], '" and open table {' )
+										obj.myLogger:Log_Warning (getModuleName ( obj ), 'table resolve error between entry: "', newCommasStructure [#newCommasStructure], '" and open table {' )
 										return nil
 									end
 									return store
@@ -510,10 +755,12 @@ function utils.stringToTable ( obj, str, loggingOff )
 				return _analizer ( obj, constructed[1], {})
 			end
 		else
-			if not str then
-				obj.myLogger:Log_Warning ('Not a valid string stringToTable, nil' )
-			else
-				obj.myLogger:Log_Warning ('Not a valid table for stringToTable, "' .. str .. '", please check { ... } match')
+			if not loggingOff then
+				if not str then
+					obj.myLogger:Log_Warning (getModuleName ( obj ), 'Not a valid string stringToTable, nil' )
+				else
+					obj.myLogger:Log_Warning (getModuleName ( obj ), 'Not a valid table for stringToTable, "' .. str .. '", please check { ... } match')
+				end
 			end
 		end
 	end
@@ -529,42 +776,64 @@ end
 -- @usage obj:tableToString ( Table [, { OptionalChangesToSpecialCharacters } ] )
 -- @usage obj.tableToString ( obj, Table [, { OptionalChangesToSpecialCharacters } ] )
 function utils.tableToString ( obj, tbl, specials )
-	if not specials or type (specials) ~= _TABLETYPE then
-		specials = {}
-	end
-	specials.quote = specials.quote or '"'
-	specials.comma = specials.comma or ','
-	specials.oBracket = specials.oBracket or '{'
-	specials.cBracket = specials.cBracket or '}'
-	if specials.keys == nil then specials.keys = true end
-		
-	if not utils.tableIsEmpty ( obj, tbl ) then
-		str = specials.oBracket
-	else
-		str = specials.oBracket .. specials.cBracket
-	end
-	local next = next
-	local k, v
-	for k, v in next, tbl, nil do
-		if not tonumber (k) and specials.keys then 
-			str = str .. k .. '='
+	if tbl then
+		if not specials or type (specials) ~= _TABLETYPE then
+			specials = {}
 		end
-		if type (v) == _TABLETYPE then
-			if utils.tableIsEmpty ( obj, v ) then
-				str = str .. specials.oBracket .. specials.cBracket
-			else
-				str = str .. utils.tableToString ( obj, v, specials ) 
-			end
+		specials.quote = specials.quote or '"'
+		specials.comma = specials.comma or ','
+		specials.oBracket = specials.oBracket or '{'
+		specials.cBracket = specials.cBracket or '}'
+		if specials.displayMetaTable == nil then specials.displayMetaTable = false end
+		if specials.keys == nil then specials.keys = true end
+			
+		if not utils.tableIsEmpty ( obj, tbl ) then
+			str = specials.oBracket
 		else
-			if type (v) == _STRINGTYPE then
-				str = str .. specials.quote .. tostring (v) .. specials.quote
-			else
-				str = str .. tostring (v)
-			end
+			str = specials.oBracket .. specials.cBracket
 		end
-		str = str .. specials.comma
+		local next = next
+		local k, v
+		for k, v in next, tbl, nil do
+			if not tonumber (k) and specials.keys then 
+				str = str .. k .. '='
+			end
+			if type (v) == _TABLETYPE then
+				if utils.tableIsEmpty ( obj, v ) then
+					str = str .. specials.oBracket .. specials.cBracket
+				else
+					str = str .. utils.tableToString ( obj, v, specials ) 
+				end
+			else
+				if type (v) == _STRINGTYPE then
+					str = str .. specials.quote .. tostring (v) .. specials.quote
+				else
+					str = str .. tostring (v)
+				end
+			end
+			str = str .. specials.comma
+		end
+		local returnValue = str:sub (1,str:len() - 1).. specials.cBracket
+		if specials.displayMetaTable and getmetatable ( tbl ) then
+			returnValue = returnValue .. ' _METATABLE_ = ' .. utils.tableToString ( obj, getmetatable ( tbl ) , specials ) 
+		end
+		return returnValue
+	else
+		return nil
 	end
-	return str:sub (1,str:len() - 1).. specials.cBracket
+end
+
+--- transforms a table to a string and displays metaTable, note we can force commas and " .. " away and change the bracket with specials table 
+-- @param obj the object making the call
+-- @param tbl the table to convert
+-- @param specials an optional list of controls that sets the values for quote ", comma , , open table bracket { and close table bracket }
+-- @return table as string or nil if failed
+-- @usage obj:tableToStringWithMeta ( Table [, { OptionalChangesToSpecialCharacters } ] )
+-- @usage obj.tableToStringWithMeta ( obj, Table [, { OptionalChangesToSpecialCharacters } ] )
+function utils.tableToStringWithMeta ( obj, tbl, specials )
+	specials = specials or {}
+	specials.displayMetaTable = true
+	return utils.tableToString ( obj, tbl, specials )
 end
 
 --- sets the a default data type values
@@ -695,18 +964,18 @@ end
 function utils.unpack ( obj, ... )
 	if arg ~= nil then -- arguments exist
 		if arg.n == 1 and type ( arg [ 1 ] ) == _TABLETYPE then -- more than one argument and a table so a list, therefore unpack
-			obj.myLogger:Log_Debug ( _TABLETYPE , ' sent, unpacking')
+			obj.myLogger:Log_Debug (getModuleName ( obj ),  _TABLETYPE , ' sent, unpacking')
 			if Utils:isVersionFivePointTwoOrAbove () then
 				return table.unpack ( arg [ 1 ] )
 			else
 				return unpack ( arg [ 1 ] )
 			end
 		end
-		obj.myLogger:Log_Debug ( 'args sent, not unpacking' )
+		obj.myLogger:Log_Debug ( getModuleName ( obj ), 'args sent, not unpacking' )
 		return ...
 	end
 
-	obj.myLogger:Log_Info ( 'sent no parameters to unpack' )
+	obj.myLogger:Log_Info ( getModuleName ( obj ), 'sent no parameters to unpack' )
 	return nil
 end
 
@@ -722,11 +991,12 @@ end
 -- @param level how deep are we in the recursion
 -- @param items a table of the items found
 -- @param stringsActive the current state of strings, are they active i.e. we are in a string, or inactive i.e. we are not in a string
+-- @param stringChar what character identifies a string ? Typically ' or "
 -- @return the items brocken appart in a table, c ( an internal counter ), the matchCounter ( should be 0, i.e. complete closure ), has occured true or false
 -- @usage obj:breakAppart ( String, true, 0, '{', '}' ) -- breaks appart tables
 -- @usage obj.breakAppart ( Obj, String, true, 0, '(', ')' ) -- breaks appart parenthesis
 -- @see stringToTable
-function utils.breakAppart ( obj, iter, careAboutStrings, matchCounter, matchA, matchB, hasOccured, matchAOcurred, level, items, stringsActive)
+function utils.breakAppart ( obj, iter, careAboutStrings, matchCounter, matchA, matchB, hasOccured, matchAOcurred, level, items, stringsActive, stringChar )
 	if iter and type (iter) == _STRINGTYPE then
 		matchCounter = matchCounter or 0
 		hasOcuured = hasOccured or false -- marks if a pair was found:true
@@ -741,14 +1011,22 @@ function utils.breakAppart ( obj, iter, careAboutStrings, matchCounter, matchA, 
 	    while c <= iter:len() do
 	    	local item = iter:sub (c,c)
 	    	if careAboutStrings and (item == '"' or item == "'") then
-	    		stringsActive = not stringsActive
+	    		if stringChar then
+	    			if item == stringChar then -- string ended
+	    				stringsActive = false
+	    				stringChar = nil
+	    			end
+	    		else
+	    			stringChar = item
+	    			stringsActive = true
+	    		end
 	    	end
 	    	if not stringsActive then
 		    	if item == matchA and not stringsActive then
 		    		matchAOcurred = true
 		    		local result, newC
 		    		matchCounter = matchCounter + 1
-		    		result, newC, matchCounter, hasOccured, matchAOcurred = utils.breakAppart ( obj, iter:sub (c+1), careAboutStrings, matchCounter, matchA, matchB, hasOccured, matchAOcurred, level, items [#items + 1], stringsActive)
+		    		result, newC, matchCounter, hasOccured, matchAOcurred = utils.breakAppart ( obj, iter:sub (c+1), careAboutStrings, matchCounter, matchA, matchB, hasOccured, matchAOcurred, level, items [#items + 1], stringsActive, stringChar )
 		    		if newC then
 			    		c = c + newC
 			    	else
@@ -847,6 +1125,66 @@ function utils.deepCopy( obj, onObj, seen)
   return res
 end
 
+--- checks if two tables are the same data
+-- @param obj the object making the call
+-- @param o1 the first table we want to compare
+-- @param o2 the first table we want to compare
+-- @param ignore_mt default is to ignore met tables, set to false if you don't want to ignore
+-- @return a true or false
+-- @usage obj:equalsTable ( o1, o2 [, ignore_mt ] )
+-- @usage obj.equalsTable  ( obj, o1, o2 [, ignore_mt ] )
+function utils.equalsTable (obj, o1, o2, ignore_mt)
+	if ignore_mt == nil then ignore_mt = true end
+    if o1 == o2 then return true end
+    local o1Type = type(o1)
+    local o2Type = type(o2)
+    if o1Type ~= o2Type then return false end
+    if o1Type ~= _TABLETYPE then return false end
+
+    if not ignore_mt then
+        local mt1 = getmetatable(o1)
+        if mt1 and mt1.__eq then
+            --compare using built in method
+            return o1 == o2
+        end
+    end
+
+    local keySet = {}
+
+    for key1, value1 in pairs(o1) do
+        local value2 = o2[key1]
+        if value2 == nil or utils.equalsTable (obj, value1, value2, ignore_mt) == false then
+            return false
+        end
+        keySet[key1] = true
+    end
+
+    for key2, _ in pairs(o2) do
+        if not keySet[key2] then return false end
+    end
+    return true
+end
+
+--- checks if two objects are the same data
+-- @param obj the object making the call
+-- @param o1 the first object we want to compare
+-- @param o2 the first object we want to compare
+-- @param ignore_mt default is to ignore met tables, set to false if you don't want to ignore
+-- @return true or false
+-- @usage obj:equals ( o1, o2 [, ignore_mt ] )
+-- @usage obj.equals   obj, o1, o2 [, ignore_mt ] )
+function utils.equals ( obj, o1, o2, ignore_mt )
+	if type ( o1 ) == type ( o2 ) then
+		if type ( o1 ) == _TABLETYPE then
+			return utils.equalsTable ( obj, o1, o2, ignore_mt )
+		else
+			return o1 == o2 
+		end
+	else
+		return false
+	end
+end
+
 -- tests if all passed paramters are of a specific type and returns true or false. First paramter must be a type in the global constants table.
 -- @param obj the object making the call
 -- @param lookFor the data type we need to match
@@ -871,12 +1209,15 @@ end
 -- @usage obj:testForNumber ( TestItem )
 -- @usage obj.testForNumber ( obj, TestItem )
 function utils.testForNumber ( obj, testValue )
-	local numberConvertion = tonumber( testValue )
-	if numberConvertion then
-		return true, numberConvertion
-	else
-		return false, testValue
+	if testValue then
+		local numberConvertion = tonumber( testValue )
+		if numberConvertion then
+			return true, numberConvertion
+		else
+			return false, testValue
+		end
 	end
+	return false
 end
 
 --- tests to see if a table is empty or not
@@ -887,7 +1228,7 @@ end
 -- @usage obj.tableIsEmpty ( obj, TableToTest )
 function utils.tableIsEmpty ( obj, value )
 	if type (value) ~= _TABLETYPE then
-		obj.myLogger:Log_Warning ('Not a valid table for tableIsEmpty, "' , type (value), '", please send ', _TABLETYPE, ' type')
+		obj.myLogger:Log_Warning (getModuleName ( obj ), 'Not a valid table for tableIsEmpty, "' , type (value), '", please send ', _TABLETYPE, ' type')
 		return nil
 	else
 		local next = next
@@ -940,14 +1281,43 @@ function utils.mergeTables ( obj, ... )
 	local result = {}
 	for x = 1, #arg do
 		local tableToMerge = arg [x]
-		local k, v
-		for k, v in next, tableToMerge, nil do
-			if result [k] then -- exists already, so add numbers, concantonate tables, run functions after each other or merge tables
-				if type (result [k]) == _NUMTYPE and type (v) == _NUMTYPE then
-					result [k] = result [k] + v
+		if tableToMerge then
+			local k, v
+			for k, v in next, tableToMerge, nil do
+				if result [k] then -- exists already, so add numbers, concantonate tables, run functions after each other or merge tables
+					if type (result [k]) == _NUMTYPE and type (v) == _NUMTYPE then
+						result [k] = result [k] + v
+					end
+				else
+					result [k] = v
 				end
-			else
-				result [k] = v
+			end
+		end
+	end
+	return result
+end
+
+--- merges ... tables into one table but arrays get appended, the values do not add
+-- @param obj the object making the call
+-- @param ... the arrays to merge
+-- @return the merged table
+-- @usage obj:mergeTablesWithoutAdd ( Table1 [, ... TableN ] )
+-- @usage obj.mergeTablesWithoutAdd ( obj, Table1 [, ... TableN ] )
+function utils.mergeTablesWithoutAdd ( obj, ... )
+	local x
+	local result = {}
+	for x = 1, #arg do
+		local tableToMerge = arg [x]
+		if tableToMerge then
+			local k, v
+			for k, v in next, tableToMerge, nil do
+				if result [k] then -- exists already, so don't append them numbers, concantonate tables, run functions after each other or merge tables
+					if type ( k ) == _NUMTYPE  then
+						result [ #result + 1 ] = v
+					end
+				else
+					result [k] = v
+				end
 			end
 		end
 	end
@@ -1130,7 +1500,7 @@ function utils.printKeyValues ( obj, table )
 	if table and type ( table ) == _TABLETYPE then
 		local k, v
 		for k, v in next, table, nil do
-			obj.myLogger:Log_Info ( 'k = ', k, 'v = ', v )
+			obj.myLogger:Log_Info ( getModuleName ( obj ), 'k = ', k, 'v = ', v )
 		end
 	end
 end
@@ -1187,112 +1557,115 @@ end
 -- @usage obj:splitStringAccountingForStrings ( StringToSplit [, PatternThatSplits ] )
 -- @usage obj.splitStringAccountingForStrings ( obj, StringToSplit [, PatternThatSplits ] )
 function utils.splitStringAccountingForStrings ( obj, str, pat )
-	-- first break appart and rebuild
-    local c = 1
-    local stringTable
-    local currentString = ''
-    local stringsActive = false
-    local justFinishedStrings = false
-    while c <= str:len() do
-    	local item = str:sub (c,c)
-    	if item == '"' or item == "'" then
-    		stringTable = stringTable or {}
-    		stringsActive = not stringsActive
-    		if stringsActive then
-    			if not (currentString == '' and #stringTable == 0) then
-	    			local resultTable = {str = currentString, search = true}
-	    			stringTable [#stringTable + 1] = resultTable
+	if str then
+		-- first break appart and rebuild
+	    local c = 1
+	    local stringTable
+	    local currentString = ''
+	    local stringsActive = false
+	    local justFinishedStrings = false
+	    while c <= str:len() do
+	    	local item = str:sub (c,c)
+	    	if item == '"' or item == "'" then
+	    		stringTable = stringTable or {}
+	    		stringsActive = not stringsActive
+	    		if stringsActive then
+	    			if not (currentString == '' and #stringTable == 0) then
+		    			local resultTable = {str = currentString, search = true}
+		    			stringTable [#stringTable + 1] = resultTable
+		    			currentString = ''
+		    		end
+	    		else
+	    			local resultTable = {str = currentString .. item, search = false}
+	    			stringTable [#stringTable + 1] = resultTable 
 	    			currentString = ''
+	    			--c = c + 1
+	    			item = ''
 	    		end
-    		else
-    			local resultTable = {str = currentString .. item, search = false}
-    			stringTable [#stringTable + 1] = resultTable 
-    			currentString = ''
-    			--c = c + 1
-    			item = ''
-    		end
-    	end
-    	currentString = currentString .. item
-    	c = c + 1
-    end
+	    	end
+	    	currentString = currentString .. item
+	    	c = c + 1
+	    end
 
-    if stringTable then
-	    stringTable [#stringTable + 1] = {str = currentString, search = not stringsActive}
-	end
+	    if stringTable then
+		    stringTable [#stringTable + 1] = {str = currentString, search = not stringsActive}
+		end
 
 
-	-- now reconstruct or just call splitString if no strings detected
-    if not stringTable then
-		return utils.splitString ( obj, str, pat )
-	else
-		local appendFlag = false
-		local lastWasEmpty = false
-		local endsWithMatch = false
-		local resultTable = {}
-		local x
-		for x = 1, #stringTable do
-			-- if we need to search for the pattern
-			if stringTable[x].search then
-				-- note if the pattern is at start of the string
-				local startsWithMatch = not (stringTable[x].str:find ('^' .. pat) == nil)
+		-- now reconstruct or just call splitString if no strings detected
+	    if not stringTable then
+			return utils.splitString ( obj, str, pat )
+		else
+			local appendFlag = false
+			local lastWasEmpty = false
+			local endsWithMatch = false
+			local resultTable = {}
+			local x
+			for x = 1, #stringTable do
+				-- if we need to search for the pattern
+				if stringTable[x].search then
+					-- note if the pattern is at start of the string
+					local startsWithMatch = not (stringTable[x].str:find ('^' .. pat) == nil)
 
-				--print ('starts = ', startsWithMatch, endsWithMatch)
-				-- split the string based on the pattern
-				local r = utils.splitString ( obj, stringTable[x].str, pat )
-				-- if the result is not empty, empty means it was just a 'pat' in the string
-				--print ('r:','\n'..inspect (r))
-				if not utils.tableIsEmpty ( obj, r ) then
-					local y
-					-- start at first entry in r by default
-					local c = 1
-					--if endsWithMatch then print ('ewm',stringTable[x].str) end
-					--print ('append', appendFlag, 'startsWithMatch', startsWithMatch)
-					if appendFlag and not startsWithMatch then
-						-- append to previoius result, except if we started with 'pat' 
-						--print ('so appending', lastWasEmpty, endsWithMatch)
-						if not lastWasEmpty and not endsWithMatch then
-							-- append last entry
-							resultTable [#resultTable] = resultTable [#resultTable] .. r [1]
-							-- start from 2 onwards in r as we consumed 1
-							c = 2
-						else
-							lastWasEmpty = false
+					--print ('starts = ', startsWithMatch, endsWithMatch)
+					-- split the string based on the pattern
+					local r = utils.splitString ( obj, stringTable[x].str, pat )
+					-- if the result is not empty, empty means it was just a 'pat' in the string
+					--print ('r:','\n'..inspect (r))
+					if not utils.tableIsEmpty ( obj, r ) then
+						local y
+						-- start at first entry in r by default
+						local c = 1
+						--if endsWithMatch then print ('ewm',stringTable[x].str) end
+						--print ('append', appendFlag, 'startsWithMatch', startsWithMatch)
+						if appendFlag and not startsWithMatch then
+							-- append to previoius result, except if we started with 'pat' 
+							--print ('so appending', lastWasEmpty, endsWithMatch)
+							if not lastWasEmpty and not endsWithMatch then
+								-- append last entry
+								resultTable [#resultTable] = resultTable [#resultTable] .. r [1]
+								-- start from 2 onwards in r as we consumed 1
+								c = 2
+							else
+								lastWasEmpty = false
+							end
+							appendFlag = false
 						end
-						appendFlag = false
-					end
 
-					for y = c, #r do
-						resultTable[#resultTable + 1] = r[y]
+						for y = c, #r do
+							resultTable[#resultTable + 1] = r[y]
+						end
+						lastWasEmpty = false
+					-- it was empty so note it
+					else
+						lastWasEmpty = true
 					end
-					lastWasEmpty = false
-				-- it was empty so note it
+					-- note if the pattern is at end of the string
+					--endsWithMatch = not (stringTable[x].str:find ( pat .. '$') == nil)
+					--print ('ewm = ', stringTable[x].str, endsWithMatch) 
 				else
-					lastWasEmpty = true
+					--print ('no search')
+					--if #resultTable == 0 then
+					--	resultTable [#resultTable + 1] = '' -- incase starts with string
+					--end
+					if not endsWithMatch then
+						if #resultTable == 0 then resultTable [#resultTable + 1] = '' end
+						resultTable [#resultTable] = resultTable [#resultTable] .. stringTable[x].str
+					else
+						resultTable [#resultTable + 1] =  stringTable[x].str
+					end
+					appendFlag = true
 				end
 				-- note if the pattern is at end of the string
-				--endsWithMatch = not (stringTable[x].str:find ( pat .. '$') == nil)
-				--print ('ewm = ', stringTable[x].str, endsWithMatch) 
-			else
-				--print ('no search')
-				--if #resultTable == 0 then
-				--	resultTable [#resultTable + 1] = '' -- incase starts with string
-				--end
-				if not endsWithMatch then
-					if #resultTable == 0 then resultTable [#resultTable + 1] = '' end
-					resultTable [#resultTable] = resultTable [#resultTable] .. stringTable[x].str
-				else
-					resultTable [#resultTable + 1] =  stringTable[x].str
+				endsWithMatch = not (stringTable[x].str:find ( pat .. '$') == nil)
+				if endsWithMatch then
+					appendFlag = false
 				end
-				appendFlag = true
+				--print ('endsWithMatch', stringTable[x].str, endsWithMatch)
 			end
-			-- note if the pattern is at end of the string
-			endsWithMatch = not (stringTable[x].str:find ( pat .. '$') == nil)
-			if endsWithMatch then
-				appendFlag = false
-			end
-			--print ('endsWithMatch', stringTable[x].str, endsWithMatch)
+
+			return resultTable
 		end
-		return resultTable
 	end
 end
 
@@ -1413,6 +1786,95 @@ function utils.getPercentage ( obj, v )
 	end
 end
 
+--- creates an English string for a number 
+-- @param obj the object making the call
+-- @param number the the value to convert
+-- @param numberList an internal parameter DO NOT call with this
+-- @param reverseNumberList an internal parameter DO NOT call with this
+-- @param levelNames an internal parameter DO NOT call with this
+-- @return a string description for a number
+-- @usage obj:englishNumber ( Value )
+-- @usage obj.englishNumber ( obj, Value )
+function utils.englishNumber ( obj, number, numberList, reverseNumberList, levelNames )
+	local answer 
+	local leadText = ''
+	-- initial seed values
+	number = number or 0
+	if number < 0 then
+		number = math.abs ( number )
+		leadText = 'negative '
+	end
+	-- these values get set up once and passed if recursion used, as we don't want to waste time recalculating
+	local levelNames = levelNames or { nil, nil, 'hundred', 'thousand', nil, nil, 'million', nil, nil, 'billion', nil, nil, 'trillion', nil, nil, 'quadrillion', nil, nil, 'quintillion' }
+	if not numberList then
+		reverseNumberList = {}
+		numberList = { zero = 0, one = 1, two = 2, three = 3, four = 4 , five = 5, six = 6, seven = 7, eight = 8, nine = 9, ten = 10, eleven = 11 , twelve = 12, thirteen = 13, fifteen = 15, eighteen = 18, twenty = 20, thirty = 30, forty = 40, fifty = 50,
+							sixty = 60, seventy = 70, eighty = 80, ninety = 90 }
+		local next = next
+		local k, v
+		for k, v in next, numberList, nil do
+			reverseNumberList [ tostring (v) ] = k
+		end
+	end
+	-- determine how many levels of 10 we are, where 0-9 is 1, 10-99 is 2 etc
+	local level = 1
+	local newNumber = number 
+	while newNumber/10 >= 1 do
+		newNumber = newNumber / 10
+		level = level + 1
+	end
+	-- if its over 99 it will have some sort of name to resolve
+	if level > 2 then
+		local levelCopy = level
+		while not levelNames [ levelCopy ] do
+			levelCopy = levelCopy - 1
+		end
+		local factor = math.pow ( 10, levelCopy - 1 )
+		answer = utils.englishNumber ( obj, math.floor ( number / factor ), numberList, reverseNumberList, levelNames  ) .. ' ' .. levelNames [ levelCopy ]
+		-- now remove that from the number to the next named level
+		number = number - math.floor ( number / factor ) * factor
+		-- ends in zero needs nothing added
+		if number ~= 0 then
+			-- if 99 or under you need to add an and
+			if number <= 99 then
+				return leadText .. answer .. ' and ' .. utils.englishNumber  ( obj, number , numberList, reverseNumberList, levelNames )
+			else
+				return leadText .. answer .. ', ' .. utils.englishNumber  ( obj, number , numberList, reverseNumberList, levelNames )
+			end
+		end
+	end
+
+
+	local newNumber = number - math.floor(number/100)*100
+	if reverseNumberList [ tostring ( newNumber ) ]  then
+		if answer then			
+			if newNumber ~= 0 then
+				answer =  answer .. ' and ' .. reverseNumberList [ tostring ( newNumber ) ]
+			end
+		else
+			answer =  reverseNumberList [ tostring ( newNumber ) ]
+		end
+	else
+		local unitMatch = newNumber - math.floor(newNumber/10)*10
+		local unitText = reverseNumberList [ tostring ( unitMatch ) ]
+		local tenMatch = newNumber - unitMatch
+		local tenText = reverseNumberList [ tostring ( tenMatch ) ]
+		local extraAnswer
+		if tenMatch == 10 then 
+			extraAnswer = unitText .. 'teen'  
+		else
+			extraAnswer =  tenText .. ' ' .. unitText 
+		end
+		if answer then 
+			answer = answer .. ' and ' .. extraAnswer
+		else
+			answer = extraAnswer
+		end
+	end
+
+	return leadText .. answer 
+end
+
 -- tests to see if object is a display object, it returns the display object or false
 function utils.isObjectDisplayObject ( obj, callingModule, object )
 	if utils.isKnownModule ( obj, callingModule ) and object then
@@ -1476,7 +1938,7 @@ Utils = classy:newClass(
 								missingTable [ # missingTable + 1 ] = nextFunc
 							end
 						else
-							obj.myLogger:Log_Warning ( 'requested a function: ', nextFunc, ', this is not a valid function name: handler:' , obj )
+							obj.myLogger:Log_Warning ( getModuleName ( obj ), 'requested a function: ', nextFunc, ', this is not a valid function name: handler:' , obj )
 						end
 					end
 					local errorMessage
@@ -1501,17 +1963,17 @@ Utils = classy:newClass(
 						if type ( nextFunc ) == _TABLETYPE then
 							local key, value = nextFunc.name, nextFunc.func
 							if type ( key ) ~= _STRINGTYPE then
-								obj.myLogger:Log_Warning ( 'requested a function: ', nextFunc, ', this is not a valid function ->', key, '<- key = name, value = function: handler:' , obj )
+								obj.myLogger:Log_Warning ( getModuleName ( obj ), 'requested a function: ', nextFunc, ', this is not a valid function ->', key, '<- key = name, value = function: handler:' , obj )
 								key = nil
 							end
 							if type ( value ) ~= _FUNCTYPE then
-								obj.myLogger:Log_Warning ( 'requested a function: ', nextFunc, ', this is not a valid function key = name, ->', value, '<- = function: handler:' , obj )
+								obj.myLogger:Log_Warning ( getModuleName ( obj ), 'requested a function: ', nextFunc, ', this is not a valid function key = name, ->', value, '<- = function: handler:' , obj )
 								value = nil
 							end
 							if key and value then
 								if obj.functionTable [ key ] then
 									if nextFunc.overload == nil or type ( nextFunc.overload ) ~= _BOOLTYPE or ( type ( nextFunc.overload ) == _BOOLTYPE and not nextFunc.overload ) then
-										obj.myLogger:Log_Warning ( 'requested a function: ', nextFunc, ', is overloading an existing function, you must set overload = true to force this: handler:' , obj )
+										obj.myLogger:Log_Warning ( getModuleName ( obj ), 'requested a function: ', nextFunc, ', is overloading an existing function, you must set overload = true to force this: handler:' , obj )
 									else
 										obj.functionTable [ key ] = value
 									end
@@ -1520,7 +1982,7 @@ Utils = classy:newClass(
 								end
 							end
 						else
-							obj.myLogger:Log_Warning ( 'requested a function: ', nextFunc, ', this is not a valid function key = name, value = function: handler:' , obj )
+							obj.myLogger:Log_Warning ( getModuleName ( obj ), 'requested a function: ', nextFunc, ', this is not a valid function key = name, value = function: handler:' , obj )
 						end
 					end
 				end
