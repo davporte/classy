@@ -5,13 +5,13 @@
 -- @usage Logger = require ( 'logger ' )
 -- @author David Porter
 -- @module logger
--- @release 1.0.8
+-- @release 1.0.10
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local logger = {
    --- version details
-   _VERSION = ... .. '.lua 1.0.8',
+   _VERSION = ... .. '.lua 1.0.10',
      --- Git Hub Location of the master branch
      _URL = '',
       --- the current module description
@@ -58,7 +58,8 @@ local _STRINGTYPE, _NUMTYPE, _TABLETYPE, _BOOLTYPE , _FUNCTYPE = type ( '' ), ty
 local CONSTANTS = {
   LOGLEVELS = { ERROR = 'Error', WARNING = 'Warning', INFO = 'Info', DEBUG = 'Debug'}, -- the default log levels 
   METHODS = { ADDLOGLEVEL = 'addLogLevel', LOG = 'log' , SETLOGSTATE = 'setLogState', SETMYOUTPUT = 'setMyOutput', REMOVELOGLEVEL = 'removeLogLevel', REGISTERMODULE = 'registerModule',
-              LOGFROMMODULE = 'logFromModule', DEREGISTERMODULE = 'deregisterModule', DESCRIBE = 'describe', SETMODULELOGSTATE = 'setModuleLogState', REGISTERSTATE = 'registerState', GETLOGPREFIX = 'getLogPrefix', SETMASTERLOGSTATE = 'setMasterLogState' }, -- the default methods
+              LOGFROMMODULE = 'logFromModule', DEREGISTERMODULE = 'deregisterModule', DESCRIBE = 'describe', SETMODULELOGSTATE = 'setModuleLogState', REGISTERSTATE = 'registerState',
+              GETLOGPREFIX = 'getLogPrefix', SETMASTERLOGSTATE = 'setMasterLogState', REGISTERSEARCH = 'registerSearch', LOGLEVELEXISTS = 'logLevelExists' }, -- the default methods
   LOGPREFIX = 'Log_', -- a value placed in _G so the user can call the logger directly Log_LOGLEVEL ( ... )
   GLOBALID = '_G' -- a value to mark a function pusged to _G that it is global and not module local
 }
@@ -67,7 +68,6 @@ local CONSTANTS = {
 local globalLogUsers
 
 -- @section  internal functions
-
 --- this is the defualt output method for logging
 -- the user can override this with a call to logger:setMyOutput
 -- @param output the text to be outputed
@@ -517,6 +517,18 @@ return classy:newClass(
                     return addOrRemoveLogLevel ( obj, logLevel, false )
                   end
                 ),
+                classy:addMethod ( CONSTANTS.METHODS.LOGLEVELEXISTS,
+                    --- logLevelExists, returns true or false depending if the log level exists or not
+                    -- @function logLevelExits
+                    -- @param obj the calling object OR class itself
+                    -- @param logLevel the level you want to check
+                    -- @return true if exists, false if fit does not
+                    -- @usage logger:logLevelExists ( 'LOG_LEVEL_NAME' )
+                  function ( obj, logLevel )
+                      local knownLogLevels = obj.currentLogLevels or {}
+                    return knownLogLevels [ logLevel ] ~= nil
+                  end
+                ),
               classy:addMethod ( CONSTANTS.METHODS.REGISTERMODULE,
                     --- registerModule, registers a module from the logger.
                     -- This adds the calls to module.Log_LOGLEVEL from the module
@@ -747,7 +759,27 @@ return classy:newClass(
                   return CONSTANTS.LOGPREFIX
                 end
                 ),
+              classy:addMethod ( CONSTANTS.METHODS.REGISTERSEARCH, 
+                --- searches down through a class to ensure the module and all its parents are registered
+                -- @function registerSearch
+                -- @param obj the calling object
+                -- @param who the classy object we want to examine
+                -- @return No return value
+                -- @usage logger:registerSearch ()
+                function ( obj, who )  
+                  -- from who get its classTree
+                  local classTree = who:describeClassTree ()
+                  local classCount
+                  -- iterate through and register any modules that require registration
+                  for classCount = 1, #classTree do
+                    local classToTest = classTree [ classCount ]
+                    if not obj:registerState ( classToTest ) then
+                      obj:registerModule ( classToTest )
+                    end
+                  end
+                end
+                ),
 
-              classy:addNotes (logger._VERSION .. '\n\n' .. logger._DESCRIPTION .. '\n' .. logger._LICENSE)
+              classy:addNotes (logger._VERSION .. '\n\n' .. logger._DESCRIPTION .. '\n' .. logger._LICENSE, ... )
 
         )
