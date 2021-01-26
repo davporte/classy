@@ -4,12 +4,12 @@
 -- @usage FileHandler = require ( 'fileHandler' )
 -- @author David Porter
 -- @module fileHandler
--- @release 1.0.2
+-- @release 1.0.3
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local filer = {
-   _VERSION = ... .. '.lua 1.0.2',
+	 _VERSION = ... .. '.lua 1.0.3',
      _URL = '',
      _DESCRIPTION = [[
       ============================================================================
@@ -259,7 +259,7 @@ end
 
 
 return classy:newClass(
-              classy:attributes ( { defaultReadBehavour = Table ( Private ), myLogger = Logger ( Private ), logEntity = Table ( Private ) } ),
+              classy:attributes ( { defaultReadBehavour = Table ( Private ), myLogger = Logger ( Private )} ),
               classy:initMethod (
                    --- sets the default read behavour flags
                   -- @function initMethod
@@ -272,11 +272,8 @@ return classy:newClass(
                     classy:setDefaultValues ( obj, { defaultReadBehavour = { adjusted = nil, closeAfterRead = false }, myLogger = _G.myLogger } )
 
                     -- check to see if the class is registerd by the logger, if not register it so we get the Log_ functions created
-                    -- we also only do this with the base class, any inherted classes will not be seen as modules as they are not loaded via require
-                    obj.logEntity = classy:getBaseClass ( getmetatable ( obj ) )
-                    if not obj.myLogger:registerState ( obj.logEntity ) then
-                      obj.myLogger:registerModule ( obj.logEntity )
-                    end
+                    obj.myLogger:registerSearch ( obj )
+
                   end       
                   ),       
               classy:addMethod ( CONSTANTS.METHODS.SETDEFAULTREADBEHAVOUR, 

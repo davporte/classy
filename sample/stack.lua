@@ -4,12 +4,12 @@
 -- @usage Stack = require ( 'stack' )
 -- @author David Porter
 -- @module stack
--- @release 1.0.9
+-- @release 1.0.10
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local stack = {
-   _VERSION = ... .. '.lua 1.0.9',
+   _VERSION = ... .. '.lua 1.0.10',
      _URL = '',
      _DESCRIPTION = [[
       ============================================================================
@@ -148,7 +148,7 @@ local function stackGet ( obj, howMany, dontRemove )
 end
 
 return classy:newClass(
-              classy:attributes ( { stack = Table ( Private ), stackCount = Number ( Private ), myLogger = Logger ( Private ), logEntity = Table ( Private ), myStackName = String ( Private ) } ),
+              classy:attributes ( { stack = Table ( Private ), stackCount = Number ( Private ), myLogger = Logger ( Private ), myStackName = String ( Private ) } ),
               classy:initMethod (
                    --- adds the default log levels Error, Warning, Info and Debug and sets their associated default values ON (true), ON (true), OFF (false), OFF (false).
                   -- also sets the logger to the default output.
@@ -164,11 +164,8 @@ return classy:newClass(
                     obj.stackCount = #obj.stack -- you may have prepopulated the stack
                     obj.myStackName =  ' from stackID: ' .. obj.myStackName -- sets a string that logs output, defaults to the obj table name unless you preset it
                     -- check to see if the class is registerd by the logger, if not register it so we get the Log_ functions created
-                    -- ensure we do with this base class, any future classes build on this we want to use the base class as it is the registerd module
-                    obj.logEntity = classy:getBaseClass ( getmetatable ( obj ) )
-                    if not obj.myLogger:registerState ( obj.logEntity ) then
-                      obj.myLogger:registerModule ( obj.logEntity )
-                    end
+                    obj.myLogger:registerSearch ( obj )
+
                   end       
                   ),       
               classy:addMethod ( CONSTANTS.METHODS.POP, 
