@@ -4,14 +4,14 @@
 -- such as Corona SDK
 -- @author David Porter
 -- @module classy
--- @release 1.4.1
+-- @release 1.4.2
 -- @license MIT
 -- @copyright (c) 2019 David Porter
 
 local classy = {
 
    --- version details
-   _VERSION = ... .. '.lua 1.4.1',
+   _VERSION = ... .. '.lua 1.4.2',
    _URL = 'https://github.com/davporte/classy',
    --- the current module description
    _DESCRIPTION = [[
@@ -475,6 +475,29 @@ local function describeClass ( c )
    return description
 end
 
+-- @local describes a class c tree structure from the class to its root
+-- @param c a class
+-- @param classTree the class tree array
+-- @return a table containing the tree or nil if none
+local function describeClassTree ( c, classTree )
+   if c then 
+      -- create classTree is we need to
+      classTree = classTree or {}
+      local internalID = getInternalID ( c )
+      -- if it is an object the class is its meta table
+      if not internalID [ GETINTERNALID_RSLT ] then
+         internalID = getInternalID ( getmetatable ( c ) )
+      end
+
+      classTree [ #classTree + 1 ] =  internalID [GETINTERNALID_CLASSNAME]  
+
+      if c._base then
+
+         classTree = describeClassTree ( c._base, classTree )
+      end
+   end
+   return classTree
+end
 
 -- @local A function that calls a method bound with the currentRunningClass
 -- This is used to detect access to private attributes outside of a class 
@@ -902,6 +925,13 @@ local reservedClassFunctions = {
    -- @usage obj:describeClass (  )
    -- @usage class:describeClass(  )
    describeClass = function ( self ) return describeClass ( self ) end,
+   --- a protected function to describe a class tree for a class or object type, you CANNOT overload this
+   -- @within  External Calls (Protected)
+   -- @param self the object or class you are testing
+   -- @return a table with the describe details, list of class names in the table to root
+   -- @usage obj:describeClassTree (  )
+   -- @usage class:describeClassTree (  )
+   describeClassTree = function ( self ) return describeClassTree ( self ) end,
    --- a protected function to remove a class or object type, you CANNOT overload this
    -- if the type is a class then ALL objects of that class will be deleted, this could have some unexpected consequences
    -- you must explicitly set objects to nil to remove them after
@@ -1313,7 +1343,7 @@ end
 --
 
 --- a unversal get dependancies routine for clasyy object
--- @uasage classy:getDependancies ( klass )
+-- @usage classy:getDependancies ( klass )
 -- @within  External Calls (Protected)
 -- @param klass the class object you want to check dependancies for
 -- @return No return value
@@ -1678,6 +1708,16 @@ function classy:getBaseClass ( klass )
          return klass
       end
    end
+end
+
+--- gets the class of a class type klass or internalID
+-- @within  External Calls (Protected)
+-- @param klass a table value: a current class value, or a number that is a valid class internalID
+-- @return the root class at the bottom of the inhertance tree, this may be itself. If klass is not a class type it returns nil
+-- @usage classy:getMyClass ( classType | internalID )
+function classy:getMyClass ( klass )
+   klass = klassClean ( klass )
+   return klass
 end
 
 --- gets the parent class of a class type klass   
